@@ -1,3 +1,5 @@
+"use client";
+
 import { BackButton } from '@/shared/components/BackButton';
 import {
   AlertDialog,

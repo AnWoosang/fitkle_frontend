@@ -1,3 +1,5 @@
+"use client";
+
 import { Home, Search, Users, MessageCircle, User, Plus } from 'lucide-react';
 import { AppLogo } from '@/shared/components/AppLogo';
 

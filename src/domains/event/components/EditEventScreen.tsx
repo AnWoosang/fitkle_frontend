@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Image as ImageIcon, Tag, FileText } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';

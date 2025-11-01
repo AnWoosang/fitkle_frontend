@@ -1,3 +1,5 @@
+"use client";
+
 import { Search, Users, Calendar, User, Star, SlidersHorizontal, X, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { groups } from '@/data/groups';

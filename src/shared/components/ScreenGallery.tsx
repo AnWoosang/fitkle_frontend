@@ -1,5 +1,7 @@
-import { 
-  Home, Search, Users, MessageCircle, User, 
+"use client";
+
+import {
+  Home, Search, Users, MessageCircle, User,
   FileText, UserCircle, Building2, LogIn, UserPlus,
   Plus, MessagesSquare, Newspaper, Calendar, UsersRound,
   Edit, X, Grid3x3, UserCog, ShieldCheck

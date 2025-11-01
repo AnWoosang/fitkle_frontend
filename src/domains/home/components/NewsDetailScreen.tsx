@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowLeft, Calendar, User, Tag, Share2 } from 'lucide-react';
 import { newsPosts } from '@/data/news';
 import { Badge } from '@/shared/components/ui/badge';

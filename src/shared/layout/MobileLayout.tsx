@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { AppLogo } from '@/shared/components/AppLogo';

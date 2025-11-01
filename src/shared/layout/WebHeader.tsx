@@ -1,6 +1,8 @@
+"use client";
+
 import { Search, MessageCircle, User, LogIn, ChevronDown, Calendar, Users, UserCircle, Settings, Flag, LogOut, Plus, ChevronRight, Bookmark, UserPlus, Edit, MapPin, X } from 'lucide-react';
 import { AppLogo } from '@/shared/components/AppLogo';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,13 +12,13 @@ import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-} from '../ui/dropdown-menu';
+} from '../components/ui/dropdown-menu';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../ui/tooltip';
+} from '../components/ui/tooltip';
 import { useState } from 'react';
 
 interface WebHeaderProps {

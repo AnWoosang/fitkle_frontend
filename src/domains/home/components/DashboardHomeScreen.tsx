@@ -1,3 +1,5 @@
+"use client";
+
 import { newsPosts } from '@/data/news';
 import { AppLogo } from '@/shared/components/AppLogo';
 import { Button } from '@/shared/components/ui/button';

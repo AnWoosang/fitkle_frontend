@@ -1,3 +1,5 @@
+"use client";
+
 import { BackButton } from '@/shared/components/BackButton';
 import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@/shared/components/ui/textarea';

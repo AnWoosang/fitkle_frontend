@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { MessageCircle, Search, ChevronRight, Send, MoreVertical, LogOut, Flag } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';

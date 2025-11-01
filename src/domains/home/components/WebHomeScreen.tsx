@@ -1,3 +1,5 @@
+"use client";
+
 import { ExploreScreen } from './ExploreScreen';
 
 interface WebHomeScreenProps {

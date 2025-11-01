@@ -1,3 +1,5 @@
+"use client";
+
 import { Calendar, MapPin, Users } from 'lucide-react';
 import { groups } from '@/data/groups';
 

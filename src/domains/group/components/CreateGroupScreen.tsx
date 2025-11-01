@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { Users, MapPin, Image as ImageIcon, FileText, Globe, Lock, Tag, Sparkles, Search } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';

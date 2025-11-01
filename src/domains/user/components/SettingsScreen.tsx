@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowLeft, User, FileText, Settings, Mail, Lock, Share2, Heart, Bell, Edit2, MapPin, Info, Calendar, Plus, X, Search, ChevronDown, UserX, Facebook, Instagram, Twitter, Linkedin } from 'lucide-react';
 import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';

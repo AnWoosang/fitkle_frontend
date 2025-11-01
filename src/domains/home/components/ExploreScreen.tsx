@@ -1,3 +1,5 @@
+"use client";
+
 import { events } from '@/data/events';
 import { groups } from '@/data/groups';
 import { LocationFilter } from '@/shared/components/LocationFilter';

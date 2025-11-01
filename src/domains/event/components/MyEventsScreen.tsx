@@ -112,7 +112,6 @@ export function MyEventsScreen({ onEventClick }: MyEventsScreenProps) {
             ))}
           </div>
         </div>
-      </div>
-    </div>
+    </MobileLayout>
   );
 }

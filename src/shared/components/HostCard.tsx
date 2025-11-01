@@ -1,6 +1,8 @@
+"use client";
+
 import { Star, CheckCircle2 } from 'lucide-react';
-import { Avatar, AvatarFallback } from '../ui/avatar';
-import { Badge } from '../ui/badge';
+import { Avatar, AvatarFallback } from '../components/ui/avatar';
+import { Badge } from '../components/ui/badge';
 
 interface HostCardProps {
   name: string;

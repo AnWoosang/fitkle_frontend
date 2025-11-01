@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowLeft } from 'lucide-react';
 
 interface BackButtonProps {

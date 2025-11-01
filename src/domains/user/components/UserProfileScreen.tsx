@@ -1,3 +1,5 @@
+"use client";
+
 import { Star, Calendar, Users, MessageCircle, Shield, CheckCircle, Mail } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';

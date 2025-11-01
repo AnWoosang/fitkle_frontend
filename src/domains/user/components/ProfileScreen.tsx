@@ -1,3 +1,5 @@
+"use client";
+
 import { Edit2, MapPin, Calendar, Globe, Mail, Sparkles, Users, Heart, Shield, TrendingUp, Award, HelpCircle, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 import { ProfileEditScreen } from './ProfileEditScreen';

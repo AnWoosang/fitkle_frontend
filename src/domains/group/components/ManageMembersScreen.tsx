@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { BackButton } from '@/shared/components/BackButton';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
