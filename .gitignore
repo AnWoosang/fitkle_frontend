@@ -26,8 +26,23 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
 .env
+.env.*
+.env*.local
+.env.local
+.env.*.local
+env.local
+
+# Allow .env.example
+!.env.example
+
+# Supabase
+.supabase
+
+# 민감한 설정 파일
+*secret*
+*credentials*
+*.key
 
 # vercel
 .vercel
