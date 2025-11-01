@@ -39,6 +39,12 @@ env.local
 # Supabase
 .supabase
 
+# MCP 설정 (민감한 토큰 포함)
+mcp.json
+
+# Allow mcp.json.example
+!mcp.json.example
+
 # 민감한 설정 파일
 *secret*
 *credentials*
