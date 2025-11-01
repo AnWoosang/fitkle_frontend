@@ -10,7 +10,8 @@
       "Bash(git push:*)",
       "Bash(curl:*)",
       "Bash(git fetch:*)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch mcp.json' --prune-empty --tag-name-filter cat -- --all)"
     ],
     "deny": [],
     "ask": []
