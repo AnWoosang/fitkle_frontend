@@ -6,7 +6,11 @@
       "Bash(npm install:*)",
       "Bash(git log:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(git fetch:*)",
+      "Read(//private/tmp/**)"
     ],
     "deny": [],
     "ask": []
