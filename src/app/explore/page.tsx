@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ExploreScreen } from '@/domains/home/components/ExploreScreen';
 import { ResponsiveLayout } from '@/shared/layout';
 
-export default function ExplorePage() {
+function ExploreContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -50,5 +51,13 @@ export default function ExplorePage() {
         />
       }
     />
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ExploreContent />
+    </Suspense>
   );
 }

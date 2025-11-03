@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, Calendar, User, Tag, Share2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import { newsPosts } from '@/data/news';
 import { Badge } from '@/shared/components/ui/badge';
 

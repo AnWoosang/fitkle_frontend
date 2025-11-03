@@ -8,7 +8,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet';
 import { ArrowLeft, Calendar, Clock, MapPin, Search, SlidersHorizontal, Star, User, Users as UsersIcon, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import { useState } from 'react';
 
 interface ExploreScreenProps {

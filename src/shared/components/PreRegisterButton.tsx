@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import { Button } from './ui/button';
 import { PreRegisterModal } from './PreRegisterModal';
 

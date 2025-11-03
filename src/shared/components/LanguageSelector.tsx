@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale } from '@/lib/useTranslations';
 import { Globe } from 'lucide-react';
 import {
   DropdownMenu,

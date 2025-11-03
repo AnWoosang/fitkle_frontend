@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, Users, TrendingUp, Zap, CheckCircle2, Clock, MapPin } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import { Button } from '@/shared/components/ui/button';
 import { newsPosts } from '@/data/news';
 import { AppLogo } from '@/shared/components/AppLogo';

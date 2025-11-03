@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import { Calendar, Clock, CheckCircle, History } from 'lucide-react';
 import { events } from '@/data/events';
 import { EventCard } from '@/domains/event/components/EventCard';

@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, MessageCircle, LogIn, ChevronDown, Calendar, Users, UserCircle, Settings, Flag, LogOut, Bookmark, UserPlus, Edit, MapPin, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import { AppLogo } from '@/shared/components/AppLogo';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { LanguageSelector } from '@/shared/components/LanguageSelector';

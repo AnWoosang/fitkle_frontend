@@ -2,7 +2,7 @@
 
 import { Home, Search, Users, MessageCircle, User } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import { ROUTES } from '@/app/router/routes';
 
 interface BottomNavigationProps {

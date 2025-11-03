@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MyEventsListScreen } from '@/domains/event';
 import { ResponsiveLayout } from '@/shared/layout';
 
-export default function MyEventsPage() {
+function MyEventsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filter = (searchParams.get('filter') as 'created' | 'joined' | 'saved') || 'created';
@@ -42,5 +43,13 @@ export default function MyEventsPage() {
         />
       }
     />
+  );
+}
+
+export default function MyEventsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MyEventsContent />
+    </Suspense>
   );
 }

@@ -6,7 +6,7 @@ import { Textarea } from '@/shared/components/ui/textarea';
 import { Check } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 
 interface ProfileEditScreenProps {
   onBack: () => void;

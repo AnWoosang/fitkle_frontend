@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MyGroupsListScreen } from '@/domains/group/components/MyGroupsListScreen';
 import { ResponsiveLayout } from '@/shared/layout';
 
-export default function MyGroupsPage() {
+function MyGroupsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -42,5 +43,13 @@ export default function MyGroupsPage() {
         />
       }
     />
+  );
+}
+
+export default function MyGroupsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MyGroupsContent />
+    </Suspense>
   );
 }

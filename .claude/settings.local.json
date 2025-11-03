@@ -137,7 +137,11 @@
       "Bash(git commit:*)",
       "Bash(git log:*)",
       "Bash(do echo -n \"$icon: \")",
-      "Bash(NEXT_TELEMETRY_DISABLED=1 npm run build:*)"
+      "Bash(NEXT_TELEMETRY_DISABLED=1 npm run build:*)",
+      "Bash(NEXT_SKIP_PRERE)",
+      "Bash(NDERING_ERRORS=1 npm run build:*)",
+      "Bash(do echo \"export const dynamic = ''''force-dynamic'''';\")",
+      "Bash(\"$file\")"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

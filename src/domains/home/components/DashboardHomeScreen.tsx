@@ -4,7 +4,7 @@ import { newsPosts } from '@/data/news';
 import { AppLogo } from '@/shared/components/AppLogo';
 import { Button } from '@/shared/components/ui/button';
 import { ArrowRight, ChevronLeft, ChevronRight, Clock, Sparkles, Users } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import Slider from 'react-slick';
 
 interface DashboardHomeScreenProps {

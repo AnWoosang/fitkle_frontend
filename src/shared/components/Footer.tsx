@@ -7,7 +7,7 @@ import {
   Twitter,
   MessageCircle,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/useTranslations';
 import { AppLogo } from './AppLogo';
 
 export function Footer() {
