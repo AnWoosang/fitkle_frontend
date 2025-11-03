@@ -8,7 +8,6 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { EventCard } from '@/domains/event/components/EventCard';
 import { BackButton } from '@/shared/components/BackButton';
-import { HostCard } from '@/shared/components/HostCard';
 import { PhotoGallery } from '@/domains/event/components/PhotoGallery';
 import { useState, useRef } from 'react';
 import {
