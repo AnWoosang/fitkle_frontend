@@ -1,3 +1,5 @@
+'use client';
+
 import { events } from '@/data/events';
 import { HostCard } from '@/shared/components/HostCard';
 import { InfoCard } from '@/shared/components/InfoCard';

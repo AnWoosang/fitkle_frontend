@@ -1,3 +1,5 @@
+'use client';
+
 import { Users, Calendar, MapPin, Star, Award, Edit } from 'lucide-react';
 import { BackButton } from '@/shared/components/BackButton';
 import { groups } from '@/data/groups';

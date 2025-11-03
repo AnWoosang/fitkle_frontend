@@ -17,8 +17,6 @@ export const metadata: Metadata = {
   description: 'Connect with people and join exciting events',
 };
 
-export const dynamic = 'force-dynamic';
-
 export default function RootLayout({
   children,
 }: {

@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   images: {
     remotePatterns: [
       {
@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Skip static error pages during build
+  skipTrailingSlashRedirect: true,
   experimental: {
     optimizePackageImports: ['@supabase/supabase-js'],
   },
