@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, Calendar, User, Tag, Share2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { newsPosts } from '@/data/news';
 import { Badge } from '@/shared/components/ui/badge';
 
@@ -10,8 +11,10 @@ interface NewsDetailScreenProps {
 }
 
 export function NewsDetailScreen({ newsId, onBack }: NewsDetailScreenProps) {
+  const t = useTranslations('home');
+  const tCommon = useTranslations('common');
   const post = newsPosts.find(p => p.id === newsId);
-  
+
   if (!post) {
     return (
       <div className="flex flex-col h-full bg-background">
@@ -21,11 +24,11 @@ export function NewsDetailScreen({ newsId, onBack }: NewsDetailScreenProps) {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>뒤로</span>
+            <span>{tCommon('back')}</span>
           </button>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">뉴스를 찾을 수 없습니다</p>
+          <p className="text-muted-foreground">{t('newsNotFound')}</p>
         </div>
       </div>
     );
@@ -44,7 +47,7 @@ export function NewsDetailScreen({ newsId, onBack }: NewsDetailScreenProps) {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Fitkle News</span>
+            <span>{t('fitkleNews')}</span>
           </button>
         </div>
       </div>
@@ -54,10 +57,10 @@ export function NewsDetailScreen({ newsId, onBack }: NewsDetailScreenProps) {
         {/* Category Badge */}
         <div className="mb-4">
           <Badge className="bg-primary/10 text-primary border-0">
-            {post.category === 'announcement' ? '공지' :
-             post.category === 'update' ? '업데이트' :
-             post.category === 'event' ? '이벤트' :
-             post.category === 'community' ? '커뮤니티' : post.category}
+            {post.category === 'announcement' ? t('categoryAnnouncement') :
+             post.category === 'update' ? t('categoryUpdate') :
+             post.category === 'event' ? t('categoryEvent') :
+             post.category === 'community' ? t('categoryCommunity') : post.category}
           </Badge>
         </div>
 
@@ -118,13 +121,13 @@ export function NewsDetailScreen({ newsId, onBack }: NewsDetailScreenProps) {
         <div className="mt-6">
           <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-card border border-border/50 rounded-xl hover:bg-accent transition-colors">
             <Share2 className="w-4 h-4" />
-            <span>공유하기</span>
+            <span>{tCommon('share')}</span>
           </button>
         </div>
 
         {/* Related News */}
         <div className="mt-8">
-          <h3 className="mb-4">관련 뉴스</h3>
+          <h3 className="mb-4">{t('relatedNews')}</h3>
           <div className="space-y-3">
             {newsPosts
               .filter(p => p.id !== newsId && p.category === post.category)

@@ -1,8 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { WebHomeScreen } from '@/domains/home';
-import { HomeScreen } from '@/domains/home';
+import { ExploreScreen } from '@/domains/home';
 import { ResponsiveLayout } from '@/shared/layout';
 
 export default function EventsPage() {
@@ -20,33 +19,27 @@ export default function EventsPage() {
     router.push('/');
   };
 
-  const handleNewsClick = (newsId: string) => {
-    console.log('News clicked:', newsId);
-    // TODO: Create news detail page
-  };
-
   return (
     <ResponsiveLayout
       mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
-        title: 'Events',
+        showLogo: true,
+        stickyHeader: true,
       }}
       webLayoutProps={{
         maxWidth: 'wide',
       }}
       mobileContent={
-        <HomeScreen
+        <ExploreScreen
           onEventClick={handleEventClick}
           onGroupClick={handleGroupClick}
-          onNewsClick={handleNewsClick}
           onBack={handleBack}
         />
       }
       webContent={
-        <WebHomeScreen
+        <ExploreScreen
           onEventClick={handleEventClick}
           onGroupClick={handleGroupClick}
+          onBack={handleBack}
         />
       }
     />

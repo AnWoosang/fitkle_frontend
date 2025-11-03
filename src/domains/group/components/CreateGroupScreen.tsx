@@ -79,23 +79,19 @@ export function CreateGroupScreen({ onBack, onCreate }: CreateGroupScreenProps) 
   };
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain">
-      {/* Header */}
-      <div className="sticky top-0 left-0 right-0 z-20 bg-gradient-to-b from-background via-background to-transparent backdrop-blur-sm border-b border-border/50">
-        <div className="max-w-[1600px] mx-auto px-8 lg:px-24 xl:px-32 2xl:px-40 pt-4 pb-3">
-          <div className="flex items-center gap-3">
-            <BackButton onClick={onBack} className="bg-card" />
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">👥</span>
-              <h1>그룹 만들기</h1>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-24 lg:pb-6">
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex-1">
-        <div className="max-w-[1600px] mx-auto px-8 lg:px-24 xl:px-32 2xl:px-40 py-6 space-y-5">
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-24 xl:px-32 2xl:px-40 py-4 lg:py-6 space-y-5">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-2">
+            <BackButton onClick={onBack} />
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">👥</span>
+              <h1 className="text-xl lg:text-2xl">그룹 만들기</h1>
+            </div>
+          </div>
+
         {/* Basic Information */}
         <div className="relative bg-gradient-to-br from-card via-card to-accent-rose/5 rounded-2xl p-5 border border-border/50 shadow-sm space-y-4 overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-accent-rose/10 rounded-full blur-3xl -z-0"></div>

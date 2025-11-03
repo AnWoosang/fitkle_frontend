@@ -4,6 +4,7 @@ import { newsPosts } from '@/data/news';
 import { AppLogo } from '@/shared/components/AppLogo';
 import { Button } from '@/shared/components/ui/button';
 import { ArrowRight, ChevronLeft, ChevronRight, Clock, Sparkles, Users } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Slider from 'react-slick';
 
 interface DashboardHomeScreenProps {
@@ -15,14 +16,15 @@ interface DashboardHomeScreenProps {
   onNewsClick?: (newsId: string) => void;
 }
 
-export function DashboardHomeScreen({ 
-  onEventClick, 
+export function DashboardHomeScreen({
+  onEventClick,
   onGroupClick,
   onBrowseAllClick,
   onFindEventsClick,
   onExploreGroupsClick,
   onNewsClick
 }: DashboardHomeScreenProps) {
+  const t = useTranslations('home');
   // Mock top picks events
   const topPicksEvents = [
     {
@@ -164,14 +166,14 @@ export function DashboardHomeScreen({
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="flex items-center gap-2">
-                    Top picks for you
+                    {t('topPicks')}
                     <Sparkles className="w-6 h-6 text-primary" />
                   </h2>
                   <button
                     onClick={onBrowseAllClick}
                     className="text-sm text-primary hover:underline flex items-center gap-1"
                   >
-                    Browse all
+                    {t('browseAll')}
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -229,13 +231,13 @@ export function DashboardHomeScreen({
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="flex items-center gap-2">
-                    From groups you're part of
+                    {t('fromGroups')}
                     <span className="text-2xl">🎉</span>
                   </h2>
                   <select className="px-3 py-1.5 border border-border rounded-lg text-sm bg-background">
-                    <option>Today</option>
-                    <option>This week</option>
-                    <option>This month</option>
+                    <option>{t('today')}</option>
+                    <option>{t('thisWeek')}</option>
+                    <option>{t('thisMonth')}</option>
                   </select>
                 </div>
 
@@ -249,14 +251,14 @@ export function DashboardHomeScreen({
                     />
                   </div>
                   <p className="text-muted-foreground mb-4">
-                    Join groups to see events from communities you're part of
+                    {t('joinGroupsMessage')}
                   </p>
                   <Button
                     onClick={onExploreGroupsClick}
                     variant="outline"
                     className="mx-auto"
                   >
-                    Explore groups
+                    {t('exploreGroups')}
                   </Button>
                 </div>
               </div>
@@ -265,7 +267,7 @@ export function DashboardHomeScreen({
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="flex items-center gap-2">
-                    Fitkle news
+                    {t('fitkleNews')}
                     <span className="text-2xl">📰</span>
                   </h2>
                 </div>
@@ -297,11 +299,11 @@ export function DashboardHomeScreen({
                             <div className="flex items-center gap-2 mb-2">
                               {news.isPinned && (
                                 <span className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-                                  📌 Pinned
+                                  📌 {t('pinned')}
                                 </span>
                               )}
                               <span className="px-2 py-1 bg-accent text-accent-foreground rounded-md text-xs capitalize">
-                                {news.category}
+                                {t('announcement')}
                               </span>
                             </div>
                             <h3 className="text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
@@ -346,14 +348,14 @@ export function DashboardHomeScreen({
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="flex items-center gap-2">
-              Top picks for you
+              {t('topPicks')}
               <Sparkles className="w-5 h-5 text-primary" />
             </h2>
             <button
               onClick={onBrowseAllClick}
               className="text-sm text-primary hover:underline"
             >
-              Browse all
+              {t('browseAll')}
             </button>
           </div>
 
@@ -405,7 +407,7 @@ export function DashboardHomeScreen({
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="flex items-center gap-2">
-              From groups you're part of
+              {t('fromGroups')}
               <span className="text-xl">🎉</span>
             </h2>
           </div>
@@ -420,13 +422,13 @@ export function DashboardHomeScreen({
               />
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Join groups to see events from your communities
+              {t('joinGroupsMessage')}
             </p>
             <Button
               onClick={onExploreGroupsClick}
               variant="outline"
             >
-              Explore groups
+              {t('exploreGroups')}
             </Button>
           </div>
         </div>
@@ -435,7 +437,7 @@ export function DashboardHomeScreen({
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="flex items-center gap-2">
-              Fitkle news
+              {t('fitkleNews')}
               <span className="text-xl">📰</span>
             </h2>
           </div>
@@ -465,11 +467,11 @@ export function DashboardHomeScreen({
                   <div className="flex items-center gap-2 mb-2">
                     {news.isPinned && (
                       <span className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
-                        📌 Pinned
+                        📌 {t('pinned')}
                       </span>
                     )}
                     <span className="px-2 py-1 bg-accent text-accent-foreground rounded-md text-xs capitalize">
-                      {news.category}
+                      {t('announcement')}
                     </span>
                   </div>
                   <h3 className="text-base mb-2 line-clamp-2">

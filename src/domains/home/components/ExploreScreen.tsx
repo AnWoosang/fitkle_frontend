@@ -2,36 +2,43 @@
 
 import { events } from '@/data/events';
 import { groups } from '@/data/groups';
+import { Footer } from '@/shared/components';
 import { LocationFilter } from '@/shared/components/LocationFilter';
 import { Button } from '@/shared/components/ui/button';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet';
-import { MobileLayout } from '@/shared/layout';
 import { ArrowLeft, Calendar, Clock, MapPin, Search, SlidersHorizontal, Star, User, Users as UsersIcon, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 interface ExploreScreenProps {
   onEventClick: (eventId: string) => void;
   onGroupClick?: (groupId: string) => void;
   initialSearchQuery?: string;
+  initialLocation?: string;
   onBack?: () => void;
 }
 
-export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery = '', onBack }: ExploreScreenProps) {
+export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery = '', initialLocation = '모든 지역', onBack }: ExploreScreenProps) {
+  const t = useTranslations('explore');
+  const tCommon = useTranslations('common');
+  const tEvent = useTranslations('event');
+  const tGroup = useTranslations('group');
+
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedTab, setSelectedTab] = useState('group-events');
-  
+
   // Filter states for events
-  const [selectedLocation, setSelectedLocation] = useState('모든 지역');
+  const [selectedLocation, setSelectedLocation] = useState(initialLocation);
   const [selectedDate, setSelectedDate] = useState('all');
   
   // Filter states for groups
   const [memberSize, setMemberSize] = useState('all');
   const [activityLevel, setActivityLevel] = useState('all');
-  
+
   // Temp filter states for modal
-  const [tempLocation, setTempLocation] = useState('모든 지역');
+  const [tempLocation, setTempLocation] = useState(initialLocation);
   const [tempDate, setTempDate] = useState('all');
   const [tempMemberSize, setTempMemberSize] = useState('all');
   const [tempActivityLevel, setTempActivityLevel] = useState('all');
@@ -43,13 +50,13 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
   };
 
   const categories = [
-    { label: '전체', key: 'all' },
-    { label: '카페', key: 'cafe' },
-    { label: '맛집', key: 'food' },
-    { label: '야외', key: 'outdoor' },
-    { label: '문화/예술', key: 'art' },
-    { label: '운동', key: 'fitness' },
-    { label: '언어교환', key: 'language' },
+    { label: t('categoryAll'), key: 'all' },
+    { label: t('categoryCafe'), key: 'cafe' },
+    { label: t('categoryFood'), key: 'food' },
+    { label: t('categoryOutdoor'), key: 'outdoor' },
+    { label: t('categoryCulture'), key: 'art' },
+    { label: t('categorySports'), key: 'fitness' },
+    { label: t('categoryLanguage'), key: 'language' },
   ];
 
   const applyFilters = () => {
@@ -132,13 +139,9 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
   });
 
   return (
-    <div className="lg:min-h-screen lg:bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Mobile Layout */}
-      <div className="lg:hidden">
-        <MobileLayout 
-          subtitle="새로운 발견"
-          stickyHeader={false}
-        >
+      <div className="lg:hidden flex-1">
           {/* Search Bar and Filter - Mobile */}
           <div className="px-4 pt-4 pb-3 bg-background sticky top-0 z-10 border-b border-border/30">
         <div className="flex items-center gap-2">
@@ -146,7 +149,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="이벤트 검색"
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-10 py-3 rounded-xl bg-card border border-border/50 focus:bg-background focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
@@ -177,8 +180,8 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[70vh]">
               <SheetHeader>
-                <SheetTitle>필터</SheetTitle>
-                <SheetDescription>원하는 이벤트를 찾아보세요</SheetDescription>
+                <SheetTitle>{tCommon('filters')}</SheetTitle>
+                <SheetDescription>{t('findEventsDescription')}</SheetDescription>
               </SheetHeader>
               
               <div className="mt-6 space-y-6 overflow-y-auto max-h-[calc(70vh-200px)] px-4">
@@ -186,9 +189,9 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <MapPin className="w-4 h-4 text-primary" />
-                    <h3>위치</h3>
+                    <h3>{tCommon('location')}</h3>
                   </div>
-                  <LocationFilter 
+                  <LocationFilter
                     selectedLocation={tempLocation}
                     onLocationChange={setTempLocation}
                   />
@@ -199,14 +202,14 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <Calendar className="w-4 h-4 text-primary" />
-                      <h3>날짜</h3>
+                      <h3>{tCommon('date')}</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
                       {[
-                        { value: 'all', label: '모든 날짜' },
-                        { value: 'today', label: '오늘' },
-                        { value: 'thisWeek', label: '이번 주' },
-                        { value: 'thisMonth', label: '이번 달' },
+                        { value: 'all', label: t('allDates') },
+                        { value: 'today', label: t('today') },
+                        { value: 'thisWeek', label: t('thisWeek') },
+                        { value: 'thisMonth', label: t('thisMonth') },
                       ].map((option) => (
                         <button
                           key={option.value}
@@ -229,14 +232,14 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <UsersIcon className="w-4 h-4 text-primary" />
-                      <h3>멤버 수</h3>
+                      <h3>{t('memberSize')}</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
                       {[
-                        { value: 'all', label: '전체' },
-                        { value: 'small', label: '소규모 (<50)' },
-                        { value: 'medium', label: '중규모 (50-150)' },
-                        { value: 'large', label: '대규모 (150+)' },
+                        { value: 'all', label: t('memberAll') },
+                        { value: 'small', label: t('memberSmall') },
+                        { value: 'medium', label: t('memberMedium') },
+                        { value: 'large', label: t('memberLarge') },
                       ].map((option) => (
                         <button
                           key={option.value}
@@ -259,14 +262,14 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <Calendar className="w-4 h-4 text-primary" />
-                      <h3>활동 수준</h3>
+                      <h3>{t('activityLevel')}</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
                       {[
-                        { value: 'all', label: '전체' },
-                        { value: 'active', label: '매우 활발 (10+)' },
-                        { value: 'moderate', label: '보통 (5-10)' },
-                        { value: 'new', label: '신규 (<5)' },
+                        { value: 'all', label: t('activityAll') },
+                        { value: 'active', label: t('activityActive') },
+                        { value: 'moderate', label: t('activityModerate') },
+                        { value: 'new', label: t('activityNew') },
                       ].map((option) => (
                         <button
                           key={option.value}
@@ -290,13 +293,13 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                 {activeFilterCount > 0 && (
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm text-muted-foreground">
-                      적용된 필터: {activeFilterCount}
+                      {tCommon('filters')}: {activeFilterCount}
                     </p>
                     <button
                       onClick={resetFilters}
                       className="text-sm text-primary hover:underline"
                     >
-                      전체 초기화
+                      {tCommon('reset')}
                     </button>
                   </div>
                 )}
@@ -307,7 +310,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                       onClick={resetFilters}
                       className="flex-1"
                     >
-                      초기화
+                      {tCommon('reset')}
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
@@ -315,7 +318,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                       onClick={applyFilters}
                       className="flex-1"
                     >
-                      결과 보기 ({selectedTab === 'groups' ? filteredGroups.length : filteredEvents.length})
+                      {tCommon('showing')} ({selectedTab === 'groups' ? filteredGroups.length : filteredEvents.length})
                     </Button>
                   </SheetClose>
                 </div>
@@ -336,7 +339,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                     : 'bg-card text-foreground hover:bg-secondary/80 border border-border/50'
                 }`}
               >
-                그룹 이벤트
+                {t('groupEvents')}
               </button>
               <button
                 onClick={() => setSelectedTab('personal-events')}
@@ -346,7 +349,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                     : 'bg-card text-foreground hover:bg-secondary/80 border border-border/50'
                 }`}
               >
-                개인 이벤트
+                {t('personalEvents')}
               </button>
               <button
                 onClick={() => setSelectedTab('groups')}
@@ -356,7 +359,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                     : 'bg-card text-foreground hover:bg-secondary/80 border border-border/50'
                 }`}
               >
-                그룹
+                {tCommon('groups')}
               </button>
             </div>
 
@@ -382,11 +385,11 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
           <div className="px-4 py-4">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {selectedTab === 'groups' ? `${filteredGroups.length}개 그룹` : `${filteredEvents.length}개 이벤트`}
+            {selectedTab === 'groups' ? `${filteredGroups.length} ${t('groupCount')}` : `${filteredEvents.length} ${t('eventCount')}`}
           </p>
           {activeFilterCount > 0 && (
             <span className="text-xs text-primary">
-              {activeFilterCount}개 필터 적용
+              {activeFilterCount} {tCommon('filters')}
             </span>
           )}
         </div>
@@ -411,7 +414,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                     {group.isVerified && (
                       <div className="absolute top-3 right-3 px-2.5 py-1 bg-primary text-white text-xs rounded-full flex items-center gap-1">
                         <span>✓</span>
-                        <span>인증됨</span>
+                        <span>{tCommon('verified')}</span>
                       </div>
                     )}
                   </div>
@@ -425,12 +428,12 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1.5">
                         <UsersIcon className="w-4 h-4 text-primary flex-shrink-0" />
-                        <span>{group.members.toLocaleString()}명</span>
+                        <span>{group.members.toLocaleString()}</span>
                       </div>
                       <span className="text-muted-foreground/50">•</span>
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
-                        <span>{group.eventCount}개 이벤트</span>
+                        <span>{group.eventCount} {tCommon('events')}</span>
                       </div>
                     </div>
 
@@ -455,8 +458,8 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Search className="w-16 h-16 text-muted-foreground/30 mb-4" />
-              <p className="text-muted-foreground mb-2">그룹을 찾을 수 없습니다</p>
-              <p className="text-sm text-muted-foreground">다른 검색어를 시도해보세요</p>
+              <p className="text-muted-foreground mb-2">{t('noGroups')}</p>
+              <p className="text-sm text-muted-foreground">{t('tryDifferentSearch')}</p>
             </div>
           )
         ) : (
@@ -478,7 +481,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                   />
                   {event.attendees >= event.maxAttendees - 5 && (
                     <div className="absolute top-3 right-3 px-2.5 py-1 bg-red-500 text-white text-xs rounded-full">
-                      마감 임박
+                      {t('closingSoon')}
                     </div>
                   )}
                   
@@ -571,17 +574,16 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Search className="w-16 h-16 text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground mb-2">이벤트를 찾을 수 없습니다</p>
-            <p className="text-sm text-muted-foreground">다른 검색어를 시도해보세요</p>
+            <p className="text-muted-foreground mb-2">{t('noEvents')}</p>
+            <p className="text-sm text-muted-foreground">{t('tryDifferentSearch')}</p>
           </div>
         )
         )}
           </div>
-        </MobileLayout>
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block flex-1">
         {/* Tabs and Filter Bar */}
         <div className="sticky top-0 z-30 bg-white border-b border-border/50 shadow-sm">
           <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 max-w-[1600px] mx-auto">
@@ -606,7 +608,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                     : 'text-muted-foreground border-transparent hover:text-foreground hover:border-border'
                 }`}
               >
-                그룹 이벤트
+                {t('groupEvents')}
               </button>
               <button
                 onClick={() => setSelectedTab('personal-events')}
@@ -616,7 +618,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                     : 'text-muted-foreground border-transparent hover:text-foreground hover:border-border'
                 }`}
               >
-                개인 이벤트
+                {t('personalEvents')}
               </button>
               <button
                 onClick={() => setSelectedTab('groups')}
@@ -626,7 +628,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                     : 'text-muted-foreground border-transparent hover:text-foreground hover:border-border'
                 }`}
               >
-                그룹
+                {tCommon('groups')}
               </button>
             </div>
 
@@ -654,7 +656,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                   <PopoverTrigger asChild>
                     <button className="relative flex items-center gap-2 px-4 py-2 bg-white border border-border/50 rounded-full hover:bg-secondary/50 transition-colors">
                       <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">필터</span>
+                      <span className="text-sm">{tCommon('filters')}</span>
                       {activeFilterCount > 0 && (
                         <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                           <span className="text-[10px] text-white font-semibold">
@@ -666,8 +668,8 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                   </PopoverTrigger>
                   <PopoverContent className="w-80 p-0" align="end">
                     <div className="p-4 border-b border-border">
-                      <h3 className="font-semibold">필터</h3>
-                      <p className="text-xs text-muted-foreground mt-1">원하는 이벤트를 찾아보세요</p>
+                      <h3 className="font-semibold">{tCommon('filters')}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">{t('findEventsDescription')}</p>
                     </div>
                     
                     <div className="p-4 space-y-4 max-h-[400px] overflow-y-auto">
@@ -675,9 +677,9 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <MapPin className="w-3.5 h-3.5 text-primary" />
-                          <label className="text-sm font-medium">위치</label>
+                          <label className="text-sm font-medium">{tCommon('location')}</label>
                         </div>
-                        <LocationFilter 
+                        <LocationFilter
                           selectedLocation={tempLocation}
                           onLocationChange={setTempLocation}
                         />
@@ -688,14 +690,14 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                         <div>
                           <div className="flex items-center gap-2 mb-2">
                             <Calendar className="w-3.5 h-3.5 text-primary" />
-                            <label className="text-sm font-medium">날짜</label>
+                            <label className="text-sm font-medium">{tCommon('date')}</label>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {[
-                              { value: 'all', label: '모든 날짜' },
-                              { value: 'today', label: '오늘' },
-                              { value: 'thisWeek', label: '이번 주' },
-                              { value: 'thisMonth', label: '이번 달' },
+                              { value: 'all', label: t('allDates') },
+                              { value: 'today', label: t('today') },
+                              { value: 'thisWeek', label: t('thisWeek') },
+                              { value: 'thisMonth', label: t('thisMonth') },
                             ].map((option) => (
                               <button
                                 key={option.value}
@@ -718,14 +720,14 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                         <div>
                           <div className="flex items-center gap-2 mb-2">
                             <UsersIcon className="w-3.5 h-3.5 text-primary" />
-                            <label className="text-sm font-medium">멤버 수</label>
+                            <label className="text-sm font-medium">{t('memberSize')}</label>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {[
-                              { value: 'all', label: '전체' },
-                              { value: 'small', label: '소규모 (<50)' },
-                              { value: 'medium', label: '중규모 (50-150)' },
-                              { value: 'large', label: '대규모 (150+)' },
+                              { value: 'all', label: t('memberAll') },
+                              { value: 'small', label: t('memberSmall') },
+                              { value: 'medium', label: t('memberMedium') },
+                              { value: 'large', label: t('memberLarge') },
                             ].map((option) => (
                               <button
                                 key={option.value}
@@ -748,14 +750,14 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                         <div>
                           <div className="flex items-center gap-2 mb-2">
                             <Calendar className="w-3.5 h-3.5 text-primary" />
-                            <label className="text-sm font-medium">활동 수준</label>
+                            <label className="text-sm font-medium">{t('activityLevel')}</label>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             {[
-                              { value: 'all', label: '전체' },
-                              { value: 'active', label: '매우 활발 (10+)' },
-                              { value: 'moderate', label: '보통 (5-10)' },
-                              { value: 'new', label: '신규 (<5)' },
+                              { value: 'all', label: t('activityAll') },
+                              { value: 'active', label: t('activityActive') },
+                              { value: 'moderate', label: t('activityModerate') },
+                              { value: 'new', label: t('activityNew') },
                             ].map((option) => (
                               <button
                                 key={option.value}
@@ -778,12 +780,12 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                       <div className="flex gap-2">
                         <PopoverClose asChild>
                           <Button variant="outline" onClick={resetFilters} className="flex-1 h-9 text-xs">
-                            초기화
+                            {tCommon('reset')}
                           </Button>
                         </PopoverClose>
                         <PopoverClose asChild>
                           <Button onClick={applyFilters} className="flex-1 h-9 text-xs">
-                            적용
+                            {tCommon('apply')}
                           </Button>
                         </PopoverClose>
                       </div>
@@ -798,7 +800,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
         <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 py-6">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {selectedTab === 'groups' ? `${filteredGroups.length}개 그룹` : `${filteredEvents.length}개 이벤트`}
+              {selectedTab === 'groups' ? `${filteredGroups.length} ${t('groupCount')}` : `${filteredEvents.length} ${t('eventCount')}`}
             </p>
           </div>
 
@@ -838,7 +840,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <div className="flex items-center gap-0.5">
                           <Calendar className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                          <span className="whitespace-nowrap">{group.eventCount}개 이벤트</span>
+                          <span className="whitespace-nowrap">{group.eventCount} {tCommon('events')}</span>
                         </div>
                         <span className="text-muted-foreground/50 mx-0.5">•</span>
                         <div className="flex items-center gap-0.5 min-w-0">
@@ -853,7 +855,7 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <UsersIcon className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                <p className="text-muted-foreground mb-2">그룹을 찾을 수 없습니다</p>
+                <p className="text-muted-foreground mb-2">{t('noGroups')}</p>
               </div>
             )
           ) : (
@@ -906,12 +908,14 @@ export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery =
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <Search className="w-16 h-16 text-muted-foreground/30 mb-4" />
-                <p className="text-muted-foreground mb-2">이벤트를 찾을 수 없습니다</p>
+                <p className="text-muted-foreground mb-2">{t('noEvents')}</p>
               </div>
             )
           )}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

@@ -19,23 +19,20 @@ export default function CreateEventPage() {
   return (
     <ResponsiveLayout
       mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
-        title: 'Create Event',
+        showBottomNav: true,
       }}
       webLayoutProps={{
-        maxWidth: 'default',
-        title: 'Create Event',
+        maxWidth: 'wide',
       }}
       mobileContent={
         <CreateEventScreen
-          onSubmit={handleCreateEvent}
+          onCreate={handleCreateEvent}
           onBack={handleBack}
         />
       }
       webContent={
         <CreateEventScreen
-          onSubmit={handleCreateEvent}
+          onCreate={handleCreateEvent}
           onBack={handleBack}
         />
       }

@@ -1,14 +1,9 @@
-import { Calendar, MapPin, Users, Heart, Share2, Clock, Star, CheckCircle2, Gift, User, Flag, MoreVertical, Edit, UserCog, Trash2 } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
-import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/badge';
 import { events } from '@/data/events';
-import { EventMap } from './EventMap';
-import { BackButton } from '@/shared/components/BackButton';
 import { HostCard } from '@/shared/components/HostCard';
 import { InfoCard } from '@/shared/components/InfoCard';
-import { PhotoGallery } from './PhotoGallery';
-import { useState, useRef } from 'react';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
+import { Calendar, CheckCircle2, Edit, Flag, Heart, MapPin, MoreVertical, Share2, Star, Trash2, User, UserCog, Users } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { EventMap } from './EventMap';
+import { PhotoGallery } from './PhotoGallery';
 
 interface EventDetailScreenProps {
   eventId: string;
@@ -106,23 +105,38 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
 
   // Mobile Layout
   const MobileView = () => (
-    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-24">
-      {/* Back Button - Fixed at top */}
-      <div className="sticky top-0 left-0 right-0 z-20 p-4 bg-gradient-to-b from-background/80 to-transparent backdrop-blur-sm">
-        <BackButton onClick={onBack} className="shadow-lg" />
-      </div>
-
+    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain">
       {/* Header Image */}
-      <div className="relative -mt-14 h-72">
+      <div className="relative h-72">
         <img
           src={event.image}
           alt={event.title}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        
+
+        {/* Back Button */}
+        <button
+          onClick={onBack}
+          className="absolute top-4 left-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-border/50"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+
         {/* Action buttons */}
-        <div className="absolute top-20 right-4 flex gap-2">
+        <div className="absolute top-4 right-4 flex gap-2">
           {isOwner && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -363,7 +377,7 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
       </div>
 
       {/* Bottom Join Button */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-background/95 backdrop-blur-lg border-t border-border/50 z-10">
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-white border-t border-border/50 z-10">
         <Button 
           className={`w-full h-12 ${
             event.attendees >= event.maxAttendees 
@@ -385,11 +399,6 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
   // Desktop Layout - Meetup Style with Tabs
   const DesktopView = () => (
     <div className="min-h-screen bg-background pb-12">
-      {/* Back Button */}
-      <div className="max-w-[1600px] mx-auto px-8 lg:px-24 xl:px-32 2xl:px-40 pt-6 pb-4">
-        <BackButton onClick={onBack} />
-      </div>
-
       {/* Main Content - 2 Column Layout */}
       <div className="max-w-[1600px] mx-auto px-8 lg:px-24 xl:px-32 2xl:px-40">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_480px] gap-8 xl:gap-12">
@@ -467,9 +476,9 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
                   <div className="flex items-start gap-4">
                     {/* Group Logo/Icon */}
                     <div className="w-16 h-16 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl">YNA</span>
+                      <span className="text-2xl">Group</span>
                       <div className="absolute -top-1 -right-1 text-xs">
-                        <span className="text-sm">You're Not Alone</span>
+                        <span className="text-sm">example</span>
                       </div>
                     </div>
                     

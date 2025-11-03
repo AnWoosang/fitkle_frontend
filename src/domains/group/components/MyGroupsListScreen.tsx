@@ -2,6 +2,7 @@ import { Users, Calendar, MapPin, Star, TrendingUp, Heart, Award, Edit } from 'l
 import { BackButton } from '@/shared/components/BackButton';
 import { groups } from '@/data/groups';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { useState } from 'react';
 
 interface MyGroupsListScreenProps {
   onBack: () => void;
@@ -10,6 +11,8 @@ interface MyGroupsListScreenProps {
 }
 
 export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'created' }: MyGroupsListScreenProps) {
+  const [activeTab, setActiveTab] = useState<'created' | 'joined'>(initialFilter);
+
   // Mock data - 실제로는 사용자가 참여한 그룹만 필터링
   const createdGroups = groups.slice(0, 4);
   const joinedGroups = groups.slice(4, 12);
@@ -165,7 +168,7 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden lg:block bg-white border-b border-border/50">
+      <div className="hidden lg:block bg-white">
         <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 py-5 max-w-[1600px] mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -201,7 +204,7 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
 
       {/* Tabs & Groups Grid */}
       <div className="flex-1">
-        <Tabs defaultValue={initialFilter}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'created' | 'joined')}>
           {/* Mobile Tabs */}
           <div className="lg:hidden px-4 pt-2">
             <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -215,16 +218,16 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
           </div>
 
           {/* Desktop Tabs */}
-          <div className="hidden lg:block bg-background border-b border-border/30">
+          <div className="hidden lg:block bg-background">
             <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 max-w-[1600px] mx-auto">
               <TabsList className="bg-transparent border-0 p-0 h-auto">
-                <TabsTrigger 
-                  value="created" 
+                <TabsTrigger
+                  value="created"
                   className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
                 >
                   내가 만든 그룹 ({createdGroups.length})
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="joined"
                   className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
                 >

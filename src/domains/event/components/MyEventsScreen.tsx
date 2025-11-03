@@ -1,7 +1,6 @@
 import { Calendar, Clock, CheckCircle, History } from 'lucide-react';
 import { events } from '@/data/events';
 import { EventCard } from '@/domains/event/components/EventCard';
-import { MobileLayout } from '@/shared/layout';
 
 interface MyEventsScreenProps {
   onEventClick: (eventId: string) => void;
@@ -12,7 +11,7 @@ export function MyEventsScreen({ onEventClick }: MyEventsScreenProps) {
   const pastEvents = events.slice(10, 13);
 
   return (
-    <MobileLayout contentClassName="px-4 py-4">
+    <div className="min-h-screen bg-background px-4 py-4">
       {/* Stats Section */}
       <div className="mb-6 p-5 rounded-2xl bg-card border border-border/50 shadow-sm">
           <div className="grid grid-cols-3 gap-3">
@@ -112,6 +111,6 @@ export function MyEventsScreen({ onEventClick }: MyEventsScreenProps) {
             ))}
           </div>
         </div>
-    </MobileLayout>
+    </div>
   );
 }

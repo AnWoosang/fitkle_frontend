@@ -5,7 +5,6 @@ import { MessageCircle, Search, ChevronRight, Send, MoreVertical, LogOut, Flag }
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
-import { AppLogo } from '@/shared/components/AppLogo';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +43,7 @@ interface ChatMessage {
 
 interface MessagesScreenProps {
   onChatClick: (userId: string, userName: string) => void;
+  onBack?: () => void;
 }
 
 export function MessagesScreen({ onChatClick }: MessagesScreenProps) {
@@ -157,14 +157,9 @@ export function MessagesScreen({ onChatClick }: MessagesScreenProps) {
   };
 
   return (
-    <div className="h-full bg-background">
+    <div className="flex-1 flex flex-col bg-background">
       {/* Mobile Layout */}
       <div className="lg:hidden flex flex-col h-full">
-        {/* Mobile Header with Logo */}
-        <div className="px-4 pt-4 pb-2">
-          <AppLogo />
-        </div>
-        
         <div className="px-4 py-4 bg-background border-b border-border/30">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -236,7 +231,7 @@ export function MessagesScreen({ onChatClick }: MessagesScreenProps) {
       </div>
 
       {/* Desktop Layout - Split View */}
-      <div className="hidden lg:flex h-full">
+      <div className="hidden lg:flex flex-1">
         {/* Left: Messages List */}
         <div className="w-96 border-r border-border/50 flex flex-col bg-background">
           {/* Search Bar */}

@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from 'react';
-import { Calendar, MapPin, Users, Image as ImageIcon, Tag, FileText, Repeat, User, UsersRound, Clock, Sparkles, Wifi, MapPinned, Search } from 'lucide-react';
+import { groups } from '@/data/groups';
+import { BackButton } from '@/shared/components/BackButton';
 import { Button } from '@/shared/components/ui/button';
+import { Checkbox } from '@/shared/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { BackButton } from '@/shared/components/BackButton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { Checkbox } from '@/shared/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/shared/components/ui/dialog';
-import { groups } from '@/data/groups';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Calendar, Clock, Search, Users, Wifi } from 'lucide-react';
+import { useState } from 'react';
 
 interface CreateEventScreenProps {
   onBack: () => void;
@@ -81,23 +81,18 @@ export function CreateEventScreen({ onBack, onCreate }: CreateEventScreenProps) 
   };
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain">
-      {/* Header */}
-      <div className="sticky top-0 left-0 right-0 z-20 bg-gradient-to-b from-background via-background to-transparent backdrop-blur-sm border-b border-border/50">
-        <div className="max-w-[1600px] mx-auto px-8 lg:px-24 xl:px-32 2xl:px-40 pt-4 pb-3">
-          <div className="flex items-center gap-3">
-            <BackButton onClick={onBack} className="bg-card" />
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">✨</span>
-              <h1>이벤트 만들기</h1>
-            </div>
+    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-24 lg:pb-6">
+      <form onSubmit={handleSubmit} className="flex-1">
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-24 xl:px-32 2xl:px-40 py-4 lg:py-6 space-y-5">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-2">
+          <BackButton onClick={onBack} />
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">✨</span>
+            <h1 className="text-xl lg:text-2xl">이벤트 만들기</h1>
           </div>
         </div>
-      </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="flex-1">
-        <div className="max-w-[1600px] mx-auto px-8 lg:px-24 xl:px-32 2xl:px-40 py-6 space-y-5">
         {/* Event Type Selection */}
         <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-2xl p-5 border border-border/50 shadow-sm space-y-3 overflow-hidden">
           {/* Decorative elements */}

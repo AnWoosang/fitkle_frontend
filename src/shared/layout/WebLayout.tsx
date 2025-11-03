@@ -28,7 +28,7 @@ export function WebLayout({
   }[maxWidth];
 
   return (
-    <div className="flex flex-col min-h-full bg-background">
+    <div className="flex flex-col h-[calc(100vh-81px)] bg-background overflow-hidden">
       {/* Header */}
       {(title || subtitle || headerContent) && (
         <div className={`bg-background border-b border-border/30 ${headerClassName}`}>
@@ -36,18 +36,18 @@ export function WebLayout({
             {title && (
               <h1 className="mb-2">{title}</h1>
             )}
-            
+
             {subtitle && (
               <p className="text-sm text-muted-foreground mb-4">{subtitle}</p>
             )}
-            
+
             {headerContent}
           </div>
         </div>
       )}
 
       {/* Content */}
-      <div className={`flex-1 ${contentClassName}`}>
+      <div className={`flex-1 flex flex-col overflow-y-auto ${contentClassName}`}>
         {children}
       </div>
     </div>

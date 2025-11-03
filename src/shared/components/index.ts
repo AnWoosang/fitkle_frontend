@@ -1,7 +1,12 @@
 export { AppLogo } from './AppLogo';
 export { BackButton } from './BackButton';
+export { BottomNavigation } from './BottomNavigation';
+export { Footer } from './Footer';
 export { HostCard } from './HostCard';
 export { InfoCard } from './InfoCard';
+export { LanguageSelector } from './LanguageSelector';
 export { MainLayout } from './MainLayout';
 export { LocationFilter } from './LocationFilter';
+export { PreRegisterButton } from './PreRegisterButton';
+export { PreRegisterModal } from './PreRegisterModal';
 export { ScreenGallery } from './ScreenGallery';

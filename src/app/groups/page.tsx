@@ -18,9 +18,8 @@ export default function GroupsPage() {
   return (
     <ResponsiveLayout
       mobileLayoutProps={{
-        showBackButton: true,
-        onBack: () => router.push('/'),
-        title: 'Groups',
+        showLogo: true,
+        stickyHeader: true,
       }}
       webLayoutProps={{
         maxWidth: 'wide',

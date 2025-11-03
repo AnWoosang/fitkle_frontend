@@ -17,6 +17,10 @@ export default function GroupDetailPage({
     router.push('/groups');
   };
 
+  const handleEventClick = (eventId: string) => {
+    router.push(`/events/${eventId}`);
+  };
+
   const handleUserClick = (userId: string) => {
     router.push(`/users/${userId}`);
   };
@@ -43,8 +47,9 @@ export default function GroupDetailPage({
   return (
     <ResponsiveLayout
       mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
+        showLogo: false,
+        showBottomNav: true,
+        contentClassName: 'h-full',
       }}
       webLayoutProps={{
         maxWidth: 'default',
@@ -53,6 +58,7 @@ export default function GroupDetailPage({
         <GroupDetailScreen
           groupId={id}
           onBack={handleBack}
+          onEventClick={handleEventClick}
           onUserClick={handleUserClick}
           onChatClick={handleChatClick}
           isOwner={false}
@@ -65,6 +71,7 @@ export default function GroupDetailPage({
         <GroupDetailScreen
           groupId={id}
           onBack={handleBack}
+          onEventClick={handleEventClick}
           onUserClick={handleUserClick}
           onChatClick={handleChatClick}
           isOwner={false}

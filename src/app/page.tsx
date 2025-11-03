@@ -19,16 +19,28 @@ export default function HomePage() {
     router.push('/events');
   };
 
+  const handleFindEventsClick = () => {
+    router.push('/events');
+  };
+
+  const handleExploreGroupsClick = () => {
+    router.push('/groups');
+  };
+
+  const handleMyEventsClick = () => {
+    router.push('/events');
+  };
+
   const handleNewsClick = (newsId: string) => {
-    console.log('News clicked:', newsId);
-    // TODO: Create news detail page
+    router.push(`/news/${newsId}`);
   };
 
   return (
     <ResponsiveLayout
       mobileLayoutProps={{
-        showLogo: true,
-        stickyHeader: true,
+        showBottomNav: true,
+        showLogo: false,
+        contentClassName: 'h-full',
       }}
       webLayoutProps={{
         maxWidth: 'wide',
@@ -37,6 +49,8 @@ export default function HomePage() {
         <HomeScreen
           onEventClick={handleEventClick}
           onGroupClick={handleGroupClick}
+          onExploreGroupsClick={handleExploreGroupsClick}
+          onMyEventsClick={handleMyEventsClick}
           onNewsClick={handleNewsClick}
         />
       }
@@ -44,6 +58,10 @@ export default function HomePage() {
         <WebHomeScreen
           onEventClick={handleEventClick}
           onGroupClick={handleGroupClick}
+          onBrowseAllClick={handleBrowseAllClick}
+          onFindEventsClick={handleFindEventsClick}
+          onExploreGroupsClick={handleExploreGroupsClick}
+          onNewsClick={handleNewsClick}
         />
       }
     />

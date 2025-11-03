@@ -3,6 +3,7 @@ import { BackButton } from '@/shared/components/BackButton';
 import { events } from '@/data/events';
 import { groups } from '@/data/groups';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { useState } from 'react';
 
 interface MyEventsListScreenProps {
   onBack: () => void;
@@ -11,6 +12,8 @@ interface MyEventsListScreenProps {
 }
 
 export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'created' }: MyEventsListScreenProps) {
+  const [activeTab, setActiveTab] = useState<'created' | 'joined' | 'saved'>(initialFilter);
+
   // Mock data - 실제로는 사용자가 참여한 이벤트만 필터링
   const upcomingEvents = events.slice(0, 8);
   const pastEvents = events.slice(8, 16);
@@ -168,7 +171,7 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden lg:block bg-white border-b border-border/50">
+      <div className="hidden lg:block bg-white">
         <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 py-5 max-w-[1600px] mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -204,7 +207,7 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
 
       {/* Tabs & Events List */}
       <div className="flex-1">
-        <Tabs defaultValue={initialFilter}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'created' | 'joined' | 'saved')}>
           {/* Mobile Tabs */}
           <div className="lg:hidden px-4 pt-2">
             <TabsList className="grid w-full grid-cols-3 mb-4">
@@ -221,7 +224,7 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
           </div>
 
           {/* Desktop Tabs */}
-          <div className="hidden lg:block bg-background border-b border-border/30">
+          <div className="hidden lg:block bg-background">
             <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 max-w-[1600px] mx-auto">
               <TabsList className="bg-transparent border-0 p-0 h-auto">
                 <TabsTrigger 

@@ -3,6 +3,10 @@ import localFont from 'next/font/local';
 import './globals.css';
 import { QueryProvider } from '@/app/providers/QueryProvider';
 import { WebHeaderWrapper } from '@/shared/layout';
+import { PreRegisterButton } from '@/shared/components';
+import { Toaster } from 'sonner';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 
 const pretendard = localFont({
   src: '../fonts/PretendardVariable.woff2',
@@ -15,18 +19,24 @@ export const metadata: Metadata = {
   description: 'Connect with people and join exciting events',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const messages = await getMessages();
+
   return (
     <html lang="ko" className={pretendard.variable}>
       <body>
-        <QueryProvider>
-          <WebHeaderWrapper />
-          {children}
-        </QueryProvider>
+        <NextIntlClientProvider messages={messages}>
+          <QueryProvider>
+            <WebHeaderWrapper />
+            {children}
+            <PreRegisterButton />
+            <Toaster position="top-center" richColors />
+          </QueryProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

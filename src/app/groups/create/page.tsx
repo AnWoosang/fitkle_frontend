@@ -19,23 +19,20 @@ export default function CreateGroupPage() {
   return (
     <ResponsiveLayout
       mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
-        title: 'Create Group',
+        showBottomNav: true,
       }}
       webLayoutProps={{
-        maxWidth: 'default',
-        title: 'Create Group',
+        maxWidth: 'wide',
       }}
       mobileContent={
         <CreateGroupScreen
-          onSubmit={handleCreateGroup}
+          onCreate={handleCreateGroup}
           onBack={handleBack}
         />
       }
       webContent={
         <CreateGroupScreen
-          onSubmit={handleCreateGroup}
+          onCreate={handleCreateGroup}
           onBack={handleBack}
         />
       }

@@ -3,7 +3,6 @@
 import { Search, Users, Calendar, User, Star, SlidersHorizontal, X, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { groups } from '@/data/groups';
-import { MobileLayout } from '@/shared/layout';
 import { WebLayout } from '@/shared/layout';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/shared/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
@@ -89,13 +88,9 @@ export function GroupsScreen({ onGroupClick, initialSearchQuery = '' }: GroupsSc
   });
 
   return (
-    <div className="lg:min-h-screen lg:bg-background">
+    <div className="min-h-screen bg-background">
       {/* Mobile Layout */}
       <div className="lg:hidden">
-        <MobileLayout 
-          subtitle="그룹 탐색"
-          stickyHeader={false}
-        >
           {/* Search Bar and Filter - Mobile */}
           <div className="px-4 pt-4 pb-3 bg-background sticky top-0 z-10 border-b border-border/30">
         <div className="flex items-center gap-2">
@@ -343,7 +338,6 @@ export function GroupsScreen({ onGroupClick, initialSearchQuery = '' }: GroupsSc
           </div>
         )}
           </div>
-        </MobileLayout>
       </div>
 
       {/* Desktop Layout - Similar to ExploreScreen */}

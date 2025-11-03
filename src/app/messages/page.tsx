@@ -18,12 +18,13 @@ export default function MessagesPage() {
   return (
     <ResponsiveLayout
       mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
-        title: 'Messages',
+        showBottomNav: true,
+        showLogo: false,
+        contentClassName: 'h-full',
       }}
       webLayoutProps={{
-        maxWidth: 'default',
+        maxWidth: 'full',
+        noPadding: true,
       }}
       mobileContent={
         <MessagesScreen onBack={handleBack} onChatClick={handleChatClick} />

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { WebHeader } from './WebHeader';
 import { useMediaQuery } from '@/shared/hooks';
@@ -7,6 +8,15 @@ import { useMediaQuery } from '@/shared/hooks';
 export function WebHeaderWrapper() {
   const router = useRouter();
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   if (isMobile) {
     return null;
@@ -29,8 +39,11 @@ export function WebHeaderWrapper() {
   };
 
   const handleSearch = (query: string, location: string) => {
-    console.log('Search:', query, location);
-    // TODO: Implement search functionality
+    const params = new URLSearchParams();
+    if (query) params.set('query', query);
+    if (location !== '모든 지역') params.set('location', location);
+
+    router.push(`/explore?${params.toString()}`);
   };
 
   const handleMyEventsClick = () => {

@@ -1,8 +1,10 @@
 "use client";
 
 import { Search, MessageCircle, User, LogIn, ChevronDown, Calendar, Users, UserCircle, Settings, Flag, LogOut, Plus, ChevronRight, Bookmark, UserPlus, Edit, MapPin, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { AppLogo } from '@/shared/components/AppLogo';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
+import { LanguageSelector } from '@/shared/components/LanguageSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,9 +63,9 @@ const locations = {
   '광주': ['전체'],
 };
 
-export function WebHeader({ 
-  onProfileClick, 
-  onMessagesClick, 
+export function WebHeader({
+  onProfileClick,
+  onMessagesClick,
   onLoginClick,
   onLogoClick,
   onSearch,
@@ -79,10 +81,11 @@ export function WebHeader({
   onSettingsClick,
   onReportClick,
   onLogoutClick,
-  isLoggedIn = false 
+  isLoggedIn = false
 }: WebHeaderProps) {
+  const t = useTranslations('header');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('모든 지역');
+  const [selectedLocation, setSelectedLocation] = useState(t('allRegions'));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +114,7 @@ export function WebHeader({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="이벤트, 그룹 검색..."
+                  placeholder={t('searchPlaceholder')}
                   className="w-full pl-5 pr-10 py-1.5 bg-transparent border-0 focus:outline-none"
                 />
                 {searchQuery && (
@@ -138,26 +141,26 @@ export function WebHeader({
                     >
                       <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <span className="text-sm truncate">{selectedLocation}</span>
-                      {selectedLocation !== '모든 지역' && (
+                      {selectedLocation !== t('allRegions') && (
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedLocation('모든 지역');
+                            setSelectedLocation(t('allRegions'));
                           }}
                           className="p-0.5 hover:bg-secondary/50 rounded-full transition-colors flex-shrink-0"
                         >
                           <X className="w-3 h-3 text-muted-foreground" />
                         </button>
                       )}
-                      {selectedLocation === '모든 지역' && (
+                      {selectedLocation === t('allRegions') && (
                         <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       )}
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 max-h-[400px] overflow-y-auto">
-                    <DropdownMenuItem onClick={() => handleLocationChange('모든 지역')}>
-                      모든 지역
+                    <DropdownMenuItem onClick={() => handleLocationChange(t('allRegions'))}>
+                      {t('allRegions')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {Object.entries(locations).map(([city, districts]) => (
@@ -170,7 +173,7 @@ export function WebHeader({
                           <DropdownMenuSubTrigger>{city}</DropdownMenuSubTrigger>
                           <DropdownMenuSubContent className="max-h-96 overflow-y-auto">
                             <DropdownMenuItem onClick={() => handleLocationChange(city)}>
-                              {city} 전체
+                              {city} {t('allCity')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {districts.map((district) => (
@@ -214,7 +217,7 @@ export function WebHeader({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>이벤트 만들기</p>
+                    <p>{t('createEvent')}</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -231,10 +234,13 @@ export function WebHeader({
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>그룹 만들기</p>
+                    <p>{t('createGroup')}</p>
                   </TooltipContent>
                 </Tooltip>
               )}
+              {/* Language Selector */}
+              <LanguageSelector />
+
               {/* Messages Icon */}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -248,7 +254,7 @@ export function WebHeader({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>메시지</p>
+                  <p>{t('messages')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -271,58 +277,58 @@ export function WebHeader({
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="cursor-pointer">
                       <Calendar className="w-4 h-4 mr-3 text-primary" />
-                      <span>My events</span>
+                      <span>{t('myEvents')}</span>
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-48">
                       <DropdownMenuItem onClick={onMyCreatedEventsClick} className="cursor-pointer">
                         <Edit className="w-4 h-4 mr-3 text-muted-foreground" />
-                        <span>내가 만든 이벤트</span>
+                        <span>{t('myCreatedEvents')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={onMyJoinedEventsClick} className="cursor-pointer">
                         <UserPlus className="w-4 h-4 mr-3 text-muted-foreground" />
-                        <span>참여한 이벤트</span>
+                        <span>{t('myJoinedEvents')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={onMySavedEventsClick} className="cursor-pointer">
                         <Bookmark className="w-4 h-4 mr-3 text-muted-foreground" />
-                        <span>찜한 이벤트</span>
+                        <span>{t('mySavedEvents')}</span>
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-                  
+
                   {/* My Groups - with submenu */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="cursor-pointer">
                       <Users className="w-4 h-4 mr-3 text-primary" />
-                      <span>My groups</span>
+                      <span>{t('myGroups')}</span>
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-48">
                       <DropdownMenuItem onClick={onMyCreatedGroupsClick} className="cursor-pointer">
                         <Edit className="w-4 h-4 mr-3 text-muted-foreground" />
-                        <span>내가 만든 그룹</span>
+                        <span>{t('myCreatedGroups')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={onMyJoinedGroupsClick} className="cursor-pointer">
                         <UserPlus className="w-4 h-4 mr-3 text-muted-foreground" />
-                        <span>가입한 그룹</span>
+                        <span>{t('myJoinedGroups')}</span>
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-                  
+
                   <DropdownMenuItem onClick={onProfileClick} className="cursor-pointer">
                     <UserCircle className="w-4 h-4 mr-3 text-primary" />
-                    <span>My profile</span>
+                    <span>{t('myProfile')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={onSettingsClick} className="cursor-pointer">
                     <Settings className="w-4 h-4 mr-3 text-muted-foreground" />
-                    <span>설정</span>
+                    <span>{t('settings')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={onReportClick} className="cursor-pointer">
                     <Flag className="w-4 h-4 mr-3 text-muted-foreground" />
-                    <span>신고하기</span>
+                    <span>{t('report')}</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={onLogoutClick} className="cursor-pointer text-destructive focus:text-destructive">
                     <LogOut className="w-4 h-4 mr-3" />
-                    <span>로그아웃</span>
+                    <span>{t('logout')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -333,7 +339,7 @@ export function WebHeader({
                 className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-all shadow-sm"
               >
                 <LogIn className="w-4 h-4" />
-                <span className="text-sm font-medium">로그인</span>
+                <span className="text-sm font-medium">{t('login')}</span>
               </button>
             )}
           </div>

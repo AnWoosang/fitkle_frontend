@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { EventCard } from '@/domains/event/components/EventCard';
 import { BackButton } from '@/shared/components/BackButton';
 import { HostCard } from '@/shared/components/HostCard';
-import { PhotoGallery } from './PhotoGallery';
+import { PhotoGallery } from '@/domains/event/components/PhotoGallery';
 import { useState, useRef } from 'react';
 import {
   DropdownMenu,
@@ -23,14 +23,14 @@ interface GroupDetailScreenProps {
   groupId: string;
   onBack: () => void;
   onEventClick: (eventId: string) => void;
-  onHostClick: (hostId: string) => void;
+  onUserClick: (userId: string) => void;
   isOwner?: boolean;
   onEditGroup?: () => void;
   onManageMembers?: () => void;
   onDeleteGroup?: () => void;
 }
 
-export function GroupDetailScreen({ groupId, onBack, onEventClick, onHostClick, isOwner = false, onEditGroup, onManageMembers, onDeleteGroup }: GroupDetailScreenProps) {
+export function GroupDetailScreen({ groupId, onBack, onEventClick, onUserClick, isOwner = false, onEditGroup, onManageMembers, onDeleteGroup }: GroupDetailScreenProps) {
   const [activeTab, setActiveTab] = useState<'about' | 'events' | 'members' | 'photos'>('about');
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
@@ -111,7 +111,7 @@ export function GroupDetailScreen({ groupId, onBack, onEventClick, onHostClick, 
 
   // Mobile Layout
   const MobileView = () => (
-    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-6">
+    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-24">
       {/* Header with Back Button */}
       <div className="sticky top-0 left-0 right-0 z-20 px-4 pt-4 pb-3 bg-gradient-to-b from-background/80 to-transparent backdrop-blur-sm">
         <BackButton onClick={onBack} className="shadow-lg" />
@@ -209,7 +209,7 @@ export function GroupDetailScreen({ groupId, onBack, onEventClick, onHostClick, 
         <div>
           <h3 className="mb-3">주최자</h3>
           <button
-            onClick={() => onHostClick('1')}
+            onClick={() => onUserClick('1')}
             className="w-full flex items-center gap-3 p-4 bg-card rounded-xl border border-border hover:bg-accent/50 hover:border-primary/30 transition-all text-left"
           >
             <Avatar className="w-12 h-12">
@@ -273,8 +273,8 @@ export function GroupDetailScreen({ groupId, onBack, onEventClick, onHostClick, 
                 {/* Group Logo */}
                 <div className="w-48 h-48 bg-yellow-400 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
                   <div className="text-center">
-                    <div className="text-6xl text-red-600 tracking-tight" style={{ fontFamily: 'Arial Black, sans-serif' }}>YNA</div>
-                    <div className="text-red-600 text-sm mt-1" style={{ fontFamily: 'Arial, sans-serif' }}>You're Not Alone</div>
+                    <div className="text-6xl text-red-600 tracking-tight" style={{ fontFamily: 'Arial Black, sans-serif' }}>Group</div>
+                    <div className="text-red-600 text-sm mt-1" style={{ fontFamily: 'Arial, sans-serif' }}>example</div>
                   </div>
                 </div>
 
@@ -394,31 +394,22 @@ export function GroupDetailScreen({ groupId, onBack, onEventClick, onHostClick, 
                     <div className="prose prose-sm max-w-none space-y-4 text-muted-foreground">
                       <p className="flex items-start gap-2">
                         <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span>✅ The meet-up will be held on the 5th floor❗</span>
+                        <span>✅ All meetups are held at cozy cafes in Seoul!</span>
                       </p>
                       <p>
-                        Hello guys👋 This is Tyler from YNA Language Exchange in Hongdae👍
+                        Welcome to Seoul Coffee & Culture! ☕ We're a community of coffee enthusiasts and culture lovers who explore Seoul's vibrant cafe scene together.
                       </p>
                       <p>
-                        Our YNA Language Exchange group is a conversational platform where people from around
-                        the world can exchange languages and cultures.
+                        Our group meets weekly to discover unique cafes across Seoul, from hidden roastery gems in Seongsu-dong to charming themed cafes in Yeonnam-dong. Each meetup focuses on a different neighborhood and cafe style.
                       </p>
                       <p>
-                        We use themed conversation cards to pick topics with members and discuss them in
-                        English🔥Every 40 minutes, participants change seats to ensure everyone gets the
-                        opportunity to talk with each other🎉We are an international group where people from all
-                        over the world gather to practice language skills, make new friends, and learn about 
-                        different cultures in a fun and relaxed environment.
+                        We enjoy trying specialty coffees, sharing stories, and experiencing the unique atmosphere of each cafe. Whether you're a coffee connoisseur or just love discovering new places, you'll find great company here! Our group is a mix of locals and internationals, creating a welcoming environment for everyone.
                       </p>
                       <p>
-                        Whether you're a beginner or fluent, everyone is welcome! Our events are designed to be 
-                        inclusive and supportive, creating a space where you can improve your English while meeting 
-                        amazing people from diverse backgrounds.
+                        No coffee expertise required - just bring your curiosity and love for good coffee! Our meetups are relaxed and social, perfect for making new friends while exploring Seoul's cafe culture.
                       </p>
                       <p>
-                        Join us for weekly meetups where we discuss everything from travel and food to movies and 
-                        life experiences. Each session is carefully structured to maximize interaction and ensure 
-                        everyone has a chance to participate.
+                        Join us for our weekly cafe tours where we explore different neighborhoods and coffee styles. From traditional Korean coffee culture to modern specialty roasteries, we cover it all. Each session is a new adventure!
                       </p>
                       <button className="text-primary text-sm hover:underline">Read more</button>
                     </div>
@@ -829,7 +820,7 @@ export function GroupDetailScreen({ groupId, onBack, onEventClick, onHostClick, 
                 <div className="bg-card border border-border rounded-2xl p-5 mb-6">
                   <h3 className="mb-4">Organizers</h3>
                   <button
-                    onClick={() => onHostClick('1')}
+                    onClick={() => onUserClick('1')}
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full"
                   >
                     <Avatar className="w-12 h-12">
@@ -844,7 +835,7 @@ export function GroupDetailScreen({ groupId, onBack, onEventClick, onHostClick, 
                   <Button
                     variant="outline"
                     className="w-full mt-3 gap-2"
-                    onClick={() => onHostClick('1')}
+                    onClick={() => onUserClick('1')}
                   >
                     <MessageCircle className="w-4 h-4" />
                     Message

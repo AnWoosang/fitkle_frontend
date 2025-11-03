@@ -39,8 +39,9 @@ export default function EventDetailPage({
   return (
     <ResponsiveLayout
       mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
+        showLogo: false,
+        showBottomNav: false,
+        contentClassName: 'h-full',
       }}
       webLayoutProps={{
         maxWidth: 'default',
