@@ -10,8 +10,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Skip generation of error pages
-  generateBuildId: async () => 'build',
+  experimental: {
+    optimizePackageImports: ['@supabase/supabase-js'],
+  },
 };
 
 export default nextConfig;
