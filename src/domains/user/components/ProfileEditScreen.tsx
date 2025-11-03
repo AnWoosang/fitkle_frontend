@@ -6,6 +6,7 @@ import { Textarea } from '@/shared/components/ui/textarea';
 import { Check } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface ProfileEditScreenProps {
   onBack: () => void;
@@ -18,6 +19,7 @@ interface ProfileEditScreenProps {
 }
 
 export function ProfileEditScreen({ onBack, currentProfile, onSave }: ProfileEditScreenProps) {
+  const t = useTranslations('profile');
   const [bio, setBio] = useState(currentProfile.bio);
   const [lookingFor, setLookingFor] = useState<string[]>(currentProfile.lookingFor);
   const [selectedTags, setSelectedTags] = useState<string[]>(currentProfile.tags);

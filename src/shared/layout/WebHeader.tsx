@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, MessageCircle, User, LogIn, ChevronDown, Calendar, Users, UserCircle, Settings, Flag, LogOut, Plus, ChevronRight, Bookmark, UserPlus, Edit, MapPin, X } from 'lucide-react';
+import { Search, MessageCircle, LogIn, ChevronDown, Calendar, Users, UserCircle, Settings, Flag, LogOut, Bookmark, UserPlus, Edit, MapPin, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { AppLogo } from '@/shared/components/AppLogo';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
@@ -69,8 +69,6 @@ export function WebHeader({
   onLoginClick,
   onLogoClick,
   onSearch,
-  onMyEventsClick,
-  onMyGroupsClick,
   onMyCreatedEventsClick,
   onMyJoinedEventsClick,
   onMySavedEventsClick,

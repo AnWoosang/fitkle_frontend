@@ -1,4 +1,4 @@
-import { Users, Calendar, MapPin, Star, TrendingUp, Heart, Award, Edit } from 'lucide-react';
+import { Users, Calendar, MapPin, Star, Award, Edit } from 'lucide-react';
 import { BackButton } from '@/shared/components/BackButton';
 import { groups } from '@/data/groups';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';

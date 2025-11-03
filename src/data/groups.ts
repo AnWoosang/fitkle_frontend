@@ -11,6 +11,7 @@ export interface Group {
   tags: string[];
   isVerified?: boolean;
   location: string;
+  rating?: number;
 }
 
 export const groups: Group[] = [

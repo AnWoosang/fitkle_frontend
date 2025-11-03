@@ -31,7 +31,7 @@ interface Member {
   role: MemberRole;
 }
 
-export function ManageMembersScreen({ groupId, onBack }: ManageMembersScreenProps) {
+export function ManageMembersScreen({ onBack }: ManageMembersScreenProps) {
   // Mock data - 실제로는 API에서 가져옴
   const [confirmedMembers, setConfirmedMembers] = useState<Member[]>([
     { id: '1', name: 'Jiyoung Park', country: '🇰🇷', joinedDate: '2024.09.01', status: 'confirmed', role: 'owner' },
@@ -75,17 +75,6 @@ export function ManageMembersScreen({ groupId, onBack }: ManageMembersScreenProp
     setConfirmedMembers(prev => 
       prev.map(m => m.id === memberId ? { ...m, role: 'member' as MemberRole } : m)
     );
-  };
-
-  const getRoleIcon = (role: MemberRole) => {
-    switch (role) {
-      case 'owner':
-        return <Crown className="w-4 h-4" />;
-      case 'admin':
-        return <ShieldCheck className="w-4 h-4" />;
-      default:
-        return null;
-    }
   };
 
   const getRoleBadge = (role: MemberRole) => {

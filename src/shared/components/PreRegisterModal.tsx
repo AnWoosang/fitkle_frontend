@@ -74,7 +74,7 @@ export function PreRegisterModal({ isOpen, onClose }: PreRegisterModalProps) {
     setIsSubmitting(true);
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('pre_registrations')
         .insert([
           {

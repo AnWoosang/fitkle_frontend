@@ -1,6 +1,7 @@
 "use client";
 
-import { Star, Calendar, Users, MessageCircle, Shield, CheckCircle, Mail } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Star, Calendar, Users, MessageCircle, Shield, CheckCircle } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
@@ -26,6 +27,7 @@ interface Review {
 }
 
 export function UserProfileScreen({ userId, onBack, onEventClick, onChatClick }: UserProfileScreenProps) {
+  const t = useTranslations('profile');
   // Mock user data - 실제로는 props나 context에서 가져와야 함
   const user = {
     id: userId || 'jiyoung-park',
@@ -90,7 +92,6 @@ export function UserProfileScreen({ userId, onBack, onEventClick, onChatClick }:
 
   // Filter events
   const upcomingEvents = events.slice(0, 3);
-  const pastEvents = events.slice(3, 6);
 
   return (
     <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-6">
@@ -259,7 +260,7 @@ export function UserProfileScreen({ userId, onBack, onEventClick, onChatClick }:
             {upcomingEvents.map((event) => (
               <EventCard
                 key={event.id}
-                event={event}
+                {...event}
                 onClick={() => onEventClick(event.id)}
               />
             ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Mail, Lock, User, Globe } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -15,6 +16,7 @@ interface SignupScreenProps {
 }
 
 export function SignupScreen({ onSignup, onLoginClick, onBack }: SignupScreenProps) {
+  const t = useTranslations('auth');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,7 +38,8 @@ export function SignupScreen({ onSignup, onLoginClick, onBack }: SignupScreenPro
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="mb-8">
-            <AppLogo subtitle={t('joinCommunity')} />
+            <AppLogo />
+            <p className="text-center text-muted-foreground mt-2">{t('joinCommunity')}</p>
           </div>
 
           {/* Signup Form */}

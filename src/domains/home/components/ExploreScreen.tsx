@@ -22,8 +22,6 @@ interface ExploreScreenProps {
 export function ExploreScreen({ onEventClick, onGroupClick, initialSearchQuery = '', initialLocation = '모든 지역', onBack }: ExploreScreenProps) {
   const t = useTranslations('explore');
   const tCommon = useTranslations('common');
-  const tEvent = useTranslations('event');
-  const tGroup = useTranslations('group');
 
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedCategory, setSelectedCategory] = useState('all');

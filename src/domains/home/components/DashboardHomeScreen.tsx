@@ -18,9 +18,7 @@ interface DashboardHomeScreenProps {
 
 export function DashboardHomeScreen({
   onEventClick,
-  onGroupClick,
   onBrowseAllClick,
-  onFindEventsClick,
   onExploreGroupsClick,
   onNewsClick
 }: DashboardHomeScreenProps) {

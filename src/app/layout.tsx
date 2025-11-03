@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   description: 'Connect with people and join exciting events',
 };
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default async function RootLayout({
   children,
 }: {

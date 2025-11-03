@@ -16,13 +16,11 @@ interface HomeScreenProps {
 
 export function HomeScreen({
   onEventClick,
-  onGroupClick,
   onExploreGroupsClick,
   onNewsClick,
   onMyEventsClick
 }: HomeScreenProps) {
   const t = useTranslations('home');
-  const tCommon = useTranslations('common');
 
   // Mock upcoming events (user's RSVPed events)
   const upcomingEvents = [

@@ -3,8 +3,16 @@ import { cookies } from 'next/headers';
 import { defaultLocale, locales, type Locale } from './config';
 
 export default getRequestConfig(async () => {
-  const cookieStore = await cookies();
-  const locale = (cookieStore.get('locale')?.value || defaultLocale) as Locale;
+  let locale = defaultLocale;
+
+  try {
+    const cookieStore = await cookies();
+    locale = (cookieStore.get('locale')?.value || defaultLocale) as Locale;
+  } catch (error) {
+    // cookies() not available in static rendering contexts (404, error pages)
+    // Use default locale
+    locale = defaultLocale;
+  }
 
   // Validate locale
   const validLocale = locales.includes(locale) ? locale : defaultLocale;

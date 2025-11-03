@@ -9,7 +9,7 @@ interface BottomNavigationProps {
   onCreateEvent?: () => void;
 }
 
-export function BottomNavigation({ onCreateEvent }: BottomNavigationProps) {
+export function BottomNavigation({}: BottomNavigationProps) {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('common');

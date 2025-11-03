@@ -37,7 +37,7 @@ interface Message {
   timestamp: string;
 }
 
-export function ChatScreen({ userId, userName, onBack }: ChatScreenProps) {
+export function ChatScreen({ userName, onBack }: ChatScreenProps) {
   const [message, setMessage] = useState('');
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);

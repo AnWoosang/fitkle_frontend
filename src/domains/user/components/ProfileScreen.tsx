@@ -19,7 +19,7 @@ interface ProfileScreenProps {
   onAuthClick?: () => void;
 }
 
-export function ProfileScreen({ onLogout, onEventsClick, onGroupsClick, onAuthClick }: ProfileScreenProps) {
+export function ProfileScreen({}: ProfileScreenProps) {
   const [isEditing, setIsEditing] = useState(false);
   
   // Profile state
@@ -41,7 +41,8 @@ export function ProfileScreen({ onLogout, onEventsClick, onGroupsClick, onAuthCl
   });
 
   const handleSaveProfile = (updatedProfile: { bio: string; lookingFor: string[]; tags: string[] }) => {
-    // Handle profile updates
+    setProfile(prev => ({ ...prev, ...updatedProfile }));
+    setIsEditing(false);
   };
 
   if (isEditing) {
@@ -264,7 +265,7 @@ export function ProfileScreen({ onLogout, onEventsClick, onGroupsClick, onAuthCl
               {myGroups.map((group) => (
                 <button
                   key={group.id}
-                  onClick={onGroupsClick}
+                  onClick={() => {}}
                   className="text-left bg-gradient-to-br from-muted/30 to-muted/10 rounded-2xl overflow-hidden hover:from-primary/5 hover:to-primary/10 transition-all border border-border/40 hover:border-primary/30 group hover:shadow-md"
                 >
                   <div className="aspect-[16/9] bg-gradient-to-br from-gray-200 to-gray-300 relative overflow-hidden">

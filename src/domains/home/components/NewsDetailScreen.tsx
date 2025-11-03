@@ -59,7 +59,7 @@ export function NewsDetailScreen({ newsId, onBack }: NewsDetailScreenProps) {
           <Badge className="bg-primary/10 text-primary border-0">
             {post.category === 'announcement' ? t('categoryAnnouncement') :
              post.category === 'update' ? t('categoryUpdate') :
-             post.category === 'event' ? t('categoryEvent') :
+             post.category === 'story' ? t('categoryStory') :
              post.category === 'community' ? t('categoryCommunity') : post.category}
           </Badge>
         </div>

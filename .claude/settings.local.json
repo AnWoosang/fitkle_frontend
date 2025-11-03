@@ -134,7 +134,10 @@
       "Bash(export SUPABASE_PROJECT_REF=\"phxzjlgauwnxmtvpeort\")",
       "Read(//Volumes/woosang/project/**)",
       "Bash(git filter-branch:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git log:*)",
+      "Bash(do echo -n \"$icon: \")",
+      "Bash(NEXT_TELEMETRY_DISABLED=1 npm run build:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

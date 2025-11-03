@@ -1,9 +1,8 @@
 "use client";
 
-import { Search, Users, Calendar, User, Star, SlidersHorizontal, X, MapPin } from 'lucide-react';
+import { Search, Users, Calendar, User, SlidersHorizontal, X, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { groups } from '@/data/groups';
-import { WebLayout } from '@/shared/layout';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/shared/components/ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { Button } from '@/shared/components/ui/button';

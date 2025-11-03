@@ -2,8 +2,6 @@
 
 import { Footer } from '@/shared/components';
 import { DashboardHomeScreen } from './DashboardHomeScreen';
-import { ExploreScreen } from './ExploreScreen';
-import { HomeScreen } from './HomeScreen';
 
 interface WebHomeScreenProps {
   onEventClick: (eventId: string) => void;
@@ -17,7 +15,7 @@ interface WebHomeScreenProps {
   showBackButton?: boolean;
 }
 
-export function WebHomeScreen({ onEventClick, onGroupClick, onBrowseAllClick, onFindEventsClick, onExploreGroupsClick, onNewsClick, searchQuery, onBack, showBackButton }: WebHomeScreenProps) {
+export function WebHomeScreen({ onEventClick, onGroupClick, onBrowseAllClick, onFindEventsClick, onExploreGroupsClick, onNewsClick }: WebHomeScreenProps) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <DashboardHomeScreen

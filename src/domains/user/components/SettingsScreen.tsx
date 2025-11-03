@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, User, FileText, Settings, Mail, Lock, Share2, Heart, Bell, Edit2, MapPin, Info, Calendar, Plus, X, Search, ChevronDown, UserX, Facebook, Instagram, Twitter, Linkedin } from 'lucide-react';
+import { ArrowLeft, User, Settings, Lock, Share2, Heart, Edit2, Info, Calendar, Plus, X, Search, UserX, Facebook, Instagram, Twitter, Linkedin } from 'lucide-react';
 import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Input } from '@/shared/components/ui/input';
@@ -21,7 +21,7 @@ type SettingSection =
 export function SettingsScreen({ onBack }: SettingsScreenProps) {
   const [activeSection, setActiveSection] = useState<SettingSection>('editProfile');
   const [name, setName] = useState('Tony');
-  const [location, setLocation] = useState('Seoul, Korea (South)');
+  const location = 'Seoul, Korea (South)';
   const [birthdate, setBirthdate] = useState('10/02/1997');
   const [gender, setGender] = useState('male');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);

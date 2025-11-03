@@ -34,7 +34,8 @@ export function LoginScreen({ onLogin, onSignupClick, onBack }: LoginScreenProps
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="mb-8">
-            <AppLogo subtitle="다시 만나서 반가워요!" />
+            <AppLogo />
+            <p className="text-center text-muted-foreground mt-2">다시 만나서 반가워요!</p>
           </div>
 
           {/* Login Form */}
