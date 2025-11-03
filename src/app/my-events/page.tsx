@@ -13,12 +13,8 @@ export default function MyEventsPage() {
     router.push('/profile');
   };
 
-  const handleEventClick = (eventId: string, isOwner: boolean = false) => {
+  const handleEventClick = (eventId: string) => {
     router.push(`/events/${eventId}`);
-  };
-
-  const handleCreateEvent = () => {
-    router.push('/events/create');
   };
 
   return (
@@ -33,18 +29,16 @@ export default function MyEventsPage() {
       }}
       mobileContent={
         <MyEventsListScreen
-          filter={filter}
+          initialFilter={filter}
           onBack={handleBack}
           onEventClick={handleEventClick}
-          onCreateEvent={handleCreateEvent}
         />
       }
       webContent={
         <MyEventsListScreen
-          filter={filter}
+          initialFilter={filter}
           onBack={handleBack}
           onEventClick={handleEventClick}
-          onCreateEvent={handleCreateEvent}
         />
       }
     />

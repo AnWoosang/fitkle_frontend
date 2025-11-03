@@ -1,7 +1,6 @@
-import { Calendar, Clock, MapPin, Users, Star, Heart, TrendingUp, UserPlus } from 'lucide-react';
+import { Calendar, Clock, MapPin, Star, Heart, UserPlus } from 'lucide-react';
 import { BackButton } from '@/shared/components/BackButton';
 import { events } from '@/data/events';
-import { groups } from '@/data/groups';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { useState } from 'react';
 
@@ -17,12 +16,6 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
   // Mock data - 실제로는 사용자가 참여한 이벤트만 필터링
   const upcomingEvents = events.slice(0, 8);
   const pastEvents = events.slice(8, 16);
-  
-  const getGroupName = (groupId?: string) => {
-    if (!groupId) return null;
-    const group = groups.find(g => g.id === groupId);
-    return group?.name || null;
-  };
 
   const stats = [
     {

@@ -3,8 +3,12 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.js
-.yarn/install-state.gz
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # testing
 /coverage
@@ -38,6 +42,7 @@ env.local
 
 # Supabase
 .supabase
+.claude
 
 # MCP 설정 (민감한 토큰 포함)
 mcp.json
@@ -52,6 +57,25 @@ mcp.json
 
 # vercel
 .vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+.mcp.json
+# Local Netlify folder
+.netlify
+
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
 # typescript
 *.tsbuildinfo

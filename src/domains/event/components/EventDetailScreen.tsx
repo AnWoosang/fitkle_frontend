@@ -268,15 +268,15 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
               country="🇰🇷"
               rating={4.9}
               reviewCount={23}
-              bio={event.type === 'personal' 
-                ? "안녕하세요! 새로운 친구들과 함께 즐거운 시간을 보내고 싶어요 😊" 
+              bio={event.type === 'personal'
+                ? "안녕하세요! 새로운 친구들과 함께 즐거운 시간을 보내고 싶어요 😊"
                 : "안녕하세요! 서울에서 3년째 살고 있는 지영입니다. 다양한 나라에서 온 친구들과 함께 즐거운 시간을 보내는 걸 좋아해요."}
               stats={[
                 { label: '주최한 이벤트', value: '25회' },
                 { label: '총 참여자', value: '150명' },
                 { label: '활동 기간', value: '2년' },
               ]}
-              onClick={onHostClick}
+              onClick={() => onHostClick('jiyoung-park')}
               isVerified={true}
             />
           </div>
@@ -438,8 +438,8 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
                 
                 {/* Hosted By */}
                 <div>
-                  <button 
-                    onClick={onHostClick}
+                  <button
+                    onClick={() => onHostClick('jiyoung-park')}
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                   >
                     <Avatar className="w-10 h-10">
@@ -637,8 +637,8 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
                 <div className="bg-card border border-border rounded-2xl p-6">
                   <div className="flex items-start gap-6">
                     {/* Organizer */}
-                    <button 
-                      onClick={onHostClick}
+                    <button
+                      onClick={() => onHostClick('jiyoung-park')}
                       className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
                     >
                       <div className="relative">

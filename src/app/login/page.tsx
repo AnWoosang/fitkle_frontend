@@ -8,12 +8,16 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleLogin = (email: string, password: string) => {
-    console.log('Login:', email);
+    console.log('Login:', email, password);
     router.push('/');
   };
 
   const handleSignupClick = () => {
     router.push('/signup');
+  };
+
+  const handleBack = () => {
+    router.back();
   };
 
   return (
@@ -29,12 +33,14 @@ export default function LoginPage() {
         <LoginScreen
           onLogin={handleLogin}
           onSignupClick={handleSignupClick}
+          onBack={handleBack}
         />
       }
       webContent={
         <LoginScreen
           onLogin={handleLogin}
           onSignupClick={handleSignupClick}
+          onBack={handleBack}
         />
       }
     />

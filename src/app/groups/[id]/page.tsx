@@ -25,10 +25,6 @@ export default function GroupDetailPage({
     router.push(`/users/${userId}`);
   };
 
-  const handleChatClick = (userId: string, userName: string) => {
-    router.push(`/messages/${userId}`);
-  };
-
   const handleEditGroup = () => {
     router.push(`/groups/${id}/edit`);
   };
@@ -60,7 +56,6 @@ export default function GroupDetailPage({
           onBack={handleBack}
           onEventClick={handleEventClick}
           onUserClick={handleUserClick}
-          onChatClick={handleChatClick}
           isOwner={false}
           onEditGroup={handleEditGroup}
           onManageMembers={handleManageMembers}
@@ -73,7 +68,6 @@ export default function GroupDetailPage({
           onBack={handleBack}
           onEventClick={handleEventClick}
           onUserClick={handleUserClick}
-          onChatClick={handleChatClick}
           isOwner={false}
           onEditGroup={handleEditGroup}
           onManageMembers={handleManageMembers}

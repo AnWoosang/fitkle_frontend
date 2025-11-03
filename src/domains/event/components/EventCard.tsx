@@ -22,7 +22,6 @@ interface EventCardProps {
 export function EventCard({
   title,
   date,
-  time,
   location,
   attendees,
   maxAttendees,

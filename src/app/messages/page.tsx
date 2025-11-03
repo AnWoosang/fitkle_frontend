@@ -11,7 +11,7 @@ export default function MessagesPage() {
     router.push('/');
   };
 
-  const handleChatClick = (userId: string, userName: string) => {
+  const handleChatClick = (userId: string) => {
     router.push(`/messages/${userId}`);
   };
 

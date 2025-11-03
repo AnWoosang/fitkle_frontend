@@ -15,6 +15,8 @@ interface MobileLayoutProps {
   stickyHeader?: boolean;
   showBackButton?: boolean;
   onBack?: () => void;
+  showBottomNav?: boolean;
+  onCreateEvent?: () => void;
 }
 
 interface WebLayoutProps {

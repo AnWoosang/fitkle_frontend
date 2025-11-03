@@ -7,12 +7,8 @@ import { ResponsiveLayout } from '@/shared/layout';
 export default function GroupsPage() {
   const router = useRouter();
 
-  const handleGroupClick = (groupId: string, isOwner: boolean = false) => {
+  const handleGroupClick = (groupId: string) => {
     router.push(`/groups/${groupId}`);
-  };
-
-  const handleCreateGroup = () => {
-    router.push('/groups/create');
   };
 
   return (
@@ -27,15 +23,11 @@ export default function GroupsPage() {
       mobileContent={
         <GroupsScreen
           onGroupClick={handleGroupClick}
-          onCreateGroup={handleCreateGroup}
-          onBack={() => router.push('/')}
         />
       }
       webContent={
         <GroupsScreen
           onGroupClick={handleGroupClick}
-          onCreateGroup={handleCreateGroup}
-          onBack={() => router.push('/')}
         />
       }
     />

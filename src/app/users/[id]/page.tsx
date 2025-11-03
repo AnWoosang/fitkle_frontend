@@ -17,8 +17,12 @@ export default function UserProfilePage({
     router.back();
   };
 
-  const handleChatClick = (userId: string, userName: string) => {
+  const handleChatClick = (userId: string) => {
     router.push(`/messages/${userId}`);
+  };
+
+  const handleEventClick = (eventId: string) => {
+    router.push(`/events/${eventId}`);
   };
 
   return (
@@ -34,6 +38,7 @@ export default function UserProfilePage({
         <UserProfileScreen
           userId={id}
           onBack={handleBack}
+          onEventClick={handleEventClick}
           onChatClick={handleChatClick}
         />
       }
@@ -41,6 +46,7 @@ export default function UserProfilePage({
         <UserProfileScreen
           userId={id}
           onBack={handleBack}
+          onEventClick={handleEventClick}
           onChatClick={handleChatClick}
         />
       }

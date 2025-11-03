@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Calendar, Clock, CheckCircle, History } from 'lucide-react';
 import { events } from '@/data/events';
 import { EventCard } from '@/domains/event/components/EventCard';
@@ -7,6 +8,7 @@ interface MyEventsScreenProps {
 }
 
 export function MyEventsScreen({ onEventClick }: MyEventsScreenProps) {
+  const t = useTranslations('event');
   const upcomingEvents = events.slice(0, 3);
   const pastEvents = events.slice(10, 13);
 

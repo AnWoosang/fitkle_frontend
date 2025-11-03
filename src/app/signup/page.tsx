@@ -13,12 +13,16 @@ export default function SignupPage() {
     password: string,
     country: string
   ) => {
-    console.log('Signup:', name, email, country);
+    console.log('Signup:', name, email, password, country);
     router.push('/');
   };
 
   const handleLoginClick = () => {
     router.push('/login');
+  };
+
+  const handleBack = () => {
+    router.back();
   };
 
   return (
@@ -34,12 +38,14 @@ export default function SignupPage() {
         <SignupScreen
           onSignup={handleSignup}
           onLoginClick={handleLoginClick}
+          onBack={handleBack}
         />
       }
       webContent={
         <SignupScreen
           onSignup={handleSignup}
           onLoginClick={handleLoginClick}
+          onBack={handleBack}
         />
       }
     />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Calendar, Shield, Heart, Share2, MapPin, Star, CheckCircle2, Facebook, Linkedin, Mail, User, MessageCircle, MoreVertical, Edit, UserCog, Trash2 } from 'lucide-react';
+import { Users, Calendar, Shield, MapPin, Star, CheckCircle2, Facebook, Linkedin, Mail, User, MessageCircle, MoreVertical, Edit, UserCog, Trash2 } from 'lucide-react';
 import { groups } from '@/data/groups';
 import { events } from '@/data/events';
 import { Button } from '@/shared/components/ui/button';

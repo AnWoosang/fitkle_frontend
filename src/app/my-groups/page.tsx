@@ -15,7 +15,7 @@ export default function MyGroupsPage() {
     router.back();
   };
 
-  const handleGroupClick = (groupId: string, isOwner?: boolean) => {
+  const handleGroupClick = (groupId: string) => {
     router.push(`/groups/${groupId}`);
   };
 

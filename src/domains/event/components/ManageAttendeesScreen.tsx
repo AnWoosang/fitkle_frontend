@@ -5,7 +5,6 @@ import { BackButton } from '@/shared/components/BackButton';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { Badge } from '@/shared/components/ui/badge';
 import { Check, X, UserMinus } from 'lucide-react';
 
 interface ManageAttendeesScreenProps {
@@ -13,7 +12,7 @@ interface ManageAttendeesScreenProps {
   onBack: () => void;
 }
 
-export function ManageAttendeesScreen({ eventId, onBack }: ManageAttendeesScreenProps) {
+export function ManageAttendeesScreen({ onBack }: ManageAttendeesScreenProps) {
   // Mock data - 실제로는 API에서 가져옴
   const [confirmedAttendees, setConfirmedAttendees] = useState([
     { id: '1', name: 'Sarah Kim', country: '🇺🇸', joinedDate: '2024.10.15', status: 'confirmed' },
