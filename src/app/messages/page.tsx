@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { MessagesScreen } from '@/domains/message';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -16,22 +15,6 @@ export default function MessagesPage() {
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showBottomNav: true,
-        showLogo: false,
-        contentClassName: 'h-full',
-      }}
-      webLayoutProps={{
-        maxWidth: 'full',
-        noPadding: true,
-      }}
-      mobileContent={
-        <MessagesScreen onBack={handleBack} onChatClick={handleChatClick} />
-      }
-      webContent={
-        <MessagesScreen onBack={handleBack} onChatClick={handleChatClick} />
-      }
-    />
+    <MessagesScreen onBack={handleBack} onChatClick={handleChatClick} />
   );
 }

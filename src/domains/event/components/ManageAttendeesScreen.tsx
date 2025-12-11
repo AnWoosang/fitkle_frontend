@@ -6,6 +6,10 @@ import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Check, X, UserMinus } from 'lucide-react';
+import {
+  confirmedAttendees as initialConfirmedAttendees,
+  pendingAttendees as initialPendingAttendees
+} from '@/data/attendees';
 
 interface ManageAttendeesScreenProps {
   eventId: string;
@@ -13,19 +17,9 @@ interface ManageAttendeesScreenProps {
 }
 
 export function ManageAttendeesScreen({ onBack }: ManageAttendeesScreenProps) {
-  // Mock data - 실제로는 API에서 가져옴
-  const [confirmedAttendees, setConfirmedAttendees] = useState([
-    { id: '1', name: 'Sarah Kim', country: '🇺🇸', joinedDate: '2024.10.15', status: 'confirmed' },
-    { id: '2', name: 'Emma Lee', country: '🇬🇧', joinedDate: '2024.10.16', status: 'confirmed' },
-    { id: '3', name: 'Maria Garcia', country: '🇪🇸', joinedDate: '2024.10.17', status: 'confirmed' },
-    { id: '4', name: 'Lisa Chen', country: '🇩🇪', joinedDate: '2024.10.18', status: 'confirmed' },
-    { id: '5', name: 'Anna Park', country: '🇫🇷', joinedDate: '2024.10.19', status: 'confirmed' },
-  ]);
-
-  const [pendingAttendees, setPendingAttendees] = useState([
-    { id: '6', name: 'Sophie Johnson', country: '🇨🇦', joinedDate: '2024.10.20', status: 'pending' },
-    { id: '7', name: 'Michael Brown', country: '🇦🇺', joinedDate: '2024.10.21', status: 'pending' },
-  ]);
+  // Use imported mock data as initial state
+  const [confirmedAttendees, setConfirmedAttendees] = useState(initialConfirmedAttendees);
+  const [pendingAttendees, setPendingAttendees] = useState(initialPendingAttendees);
 
   const handleApprove = (attendeeId: string) => {
     const attendee = pendingAttendees.find(a => a.id === attendeeId);
@@ -97,68 +91,6 @@ export function ManageAttendeesScreen({ onBack }: ManageAttendeesScreenProps) {
     </div>
   );
 
-  // Mobile Layout
-  const MobileView = () => (
-    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-24">
-      {/* Header */}
-      <div className="sticky top-0 left-0 right-0 z-20 px-4 pt-4 pb-3 bg-gradient-to-b from-background via-background to-transparent backdrop-blur-sm border-b border-border/50">
-        <div className="flex items-center gap-3 mb-4">
-          <BackButton onClick={onBack} className="bg-card" />
-          <h1 className="text-xl">참가자 관리</h1>
-        </div>
-      </div>
-
-      <Tabs defaultValue="confirmed" className="w-full">
-        <div className="sticky top-[72px] z-10 bg-background border-b border-border/50">
-          <TabsList className="w-full justify-start rounded-none bg-transparent border-0 h-auto p-0">
-            <TabsTrigger
-              value="confirmed"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-            >
-              확정 참가자 ({confirmedAttendees.length})
-            </TabsTrigger>
-            <TabsTrigger
-              value="pending"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-            >
-              승인 대기 ({pendingAttendees.length})
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="confirmed" className="mt-0 px-4 py-4 space-y-3">
-          {confirmedAttendees.length > 0 ? (
-            confirmedAttendees.map((attendee) => (
-              <AttendeeCard key={attendee.id} attendee={attendee} />
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-center px-6">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <UserMinus className="w-10 h-10 text-primary" />
-              </div>
-              <p className="text-muted-foreground">확정된 참가자가 없습니다</p>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="pending" className="mt-0 px-4 py-4 space-y-3">
-          {pendingAttendees.length > 0 ? (
-            pendingAttendees.map((attendee) => (
-              <AttendeeCard key={attendee.id} attendee={attendee} isPending />
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-center px-6">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Check className="w-10 h-10 text-primary" />
-              </div>
-              <p className="text-muted-foreground">승인 대기 중인 참가자가 없습니다</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-
   // Desktop Layout
   const DesktopView = () => (
     <div className="min-h-screen bg-background pb-12">
@@ -184,33 +116,33 @@ export function ManageAttendeesScreen({ onBack }: ManageAttendeesScreenProps) {
             </TabsList>
 
             <TabsContent value="confirmed" className="space-y-3">
-              {confirmedAttendees.length > 0 ? (
-                confirmedAttendees.map((attendee) => (
-                  <AttendeeCard key={attendee.id} attendee={attendee} />
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <UserMinus className="w-10 h-10 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground">확정된 참가자가 없습니다</p>
-                </div>
-              )}
-            </TabsContent>
+          {confirmedAttendees.length > 0 ? (
+            confirmedAttendees.map((attendee) => (
+              <AttendeeCard key={attendee.id} attendee={attendee} />
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center h-64 text-center px-6">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <UserMinus className="w-10 h-10 text-primary" />
+              </div>
+              <p className="text-muted-foreground">확정된 참가자가 없습니다</p>
+            </div>
+          )}
+        </TabsContent>
 
             <TabsContent value="pending" className="space-y-3">
-              {pendingAttendees.length > 0 ? (
-                pendingAttendees.map((attendee) => (
-                  <AttendeeCard key={attendee.id} attendee={attendee} isPending />
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Check className="w-10 h-10 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground">승인 대기 중인 참가자가 없습니다</p>
-                </div>
-              )}
+          {pendingAttendees.length > 0 ? (
+            pendingAttendees.map((attendee) => (
+              <AttendeeCard key={attendee.id} attendee={attendee} isPending />
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center h-64 text-center px-6">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Check className="w-10 h-10 text-primary" />
+              </div>
+              <p className="text-muted-foreground">승인 대기 중인 참가자가 없습니다</p>
+            </div>
+          )}
             </TabsContent>
           </Tabs>
         </div>
@@ -218,14 +150,5 @@ export function ManageAttendeesScreen({ onBack }: ManageAttendeesScreenProps) {
     </div>
   );
 
-  return (
-    <>
-      <div className="lg:hidden">
-        <MobileView />
-      </div>
-      <div className="hidden lg:block">
-        <DesktopView />
-      </div>
-    </>
-  );
+  return <DesktopView />;
 }

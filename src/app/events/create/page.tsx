@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { CreateEventScreen } from '@/domains/event';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -17,25 +16,9 @@ export default function CreateEventPage() {
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showBottomNav: true,
-      }}
-      webLayoutProps={{
-        maxWidth: 'wide',
-      }}
-      mobileContent={
-        <CreateEventScreen
-          onCreate={handleCreateEvent}
-          onBack={handleBack}
-        />
-      }
-      webContent={
-        <CreateEventScreen
-          onCreate={handleCreateEvent}
-          onBack={handleBack}
-        />
-      }
+    <CreateEventScreen
+      onCreate={handleCreateEvent}
+      onBack={handleBack}
     />
   );
 }

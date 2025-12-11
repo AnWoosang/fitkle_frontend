@@ -3,7 +3,6 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserProfileScreen } from '@/domains/user';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function UserProfilePage({
   params,
@@ -26,30 +25,11 @@ export default function UserProfilePage({
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
-      }}
-      webLayoutProps={{
-        maxWidth: 'default',
-      }}
-      mobileContent={
-        <UserProfileScreen
-          userId={id}
-          onBack={handleBack}
-          onEventClick={handleEventClick}
-          onChatClick={handleChatClick}
-        />
-      }
-      webContent={
-        <UserProfileScreen
-          userId={id}
-          onBack={handleBack}
-          onEventClick={handleEventClick}
-          onChatClick={handleChatClick}
-        />
-      }
+    <UserProfileScreen
+      userId={id}
+      onBack={handleBack}
+      onEventClick={handleEventClick}
+      onChatClick={handleChatClick}
     />
   );
 }

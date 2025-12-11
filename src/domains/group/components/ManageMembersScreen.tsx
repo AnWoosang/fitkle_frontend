@@ -176,36 +176,31 @@ export function ManageMembersScreen({ onBack }: ManageMembersScreenProps) {
     </div>
   );
 
-  // Mobile Layout
-  const MobileView = () => (
-    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-24">
-      {/* Header */}
-      <div className="sticky top-0 left-0 right-0 z-20 px-4 pt-4 pb-3 bg-gradient-to-b from-background via-background to-transparent backdrop-blur-sm border-b border-border/50">
-        <div className="flex items-center gap-3 mb-4">
-          <BackButton onClick={onBack} className="bg-card" />
-          <h1 className="text-xl">멤버 관리</h1>
+  // Desktop Layout
+  const DesktopView = () => (
+    <div className="min-h-screen bg-background pb-12">
+      {/* Back Button */}
+      <div className="px-8 xl:px-12 pt-6 pb-4">
+        <div className="max-w-5xl mx-auto">
+          <BackButton onClick={onBack} />
         </div>
       </div>
 
-      <Tabs defaultValue="confirmed" className="w-full">
-        <div className="sticky top-[72px] z-10 bg-background border-b border-border/50">
-          <TabsList className="w-full justify-start rounded-none bg-transparent border-0 h-auto p-0">
-            <TabsTrigger
-              value="confirmed"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-            >
-              멤버 ({confirmedMembers.length})
-            </TabsTrigger>
-            <TabsTrigger
-              value="pending"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
-            >
-              가입 대기 ({pendingMembers.length})
-            </TabsTrigger>
-          </TabsList>
-        </div>
+      <div className="px-8 xl:px-12">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-3xl mb-8">멤버 관리</h1>
 
-        <TabsContent value="confirmed" className="mt-0 px-4 py-4 space-y-3">
+          <Tabs defaultValue="confirmed" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="confirmed">
+                멤버 ({confirmedMembers.length})
+              </TabsTrigger>
+              <TabsTrigger value="pending">
+                가입 대기 ({pendingMembers.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="confirmed" className="space-y-4">
           {/* Role Summary */}
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-center">
@@ -251,7 +246,7 @@ export function ManageMembersScreen({ onBack }: ManageMembersScreenProps) {
           )}
         </TabsContent>
 
-        <TabsContent value="pending" className="mt-0 px-4 py-4 space-y-3">
+            <TabsContent value="pending" className="space-y-3">
           {pendingMembers.length > 0 ? (
             pendingMembers.map((member) => (
               <MemberCard key={member.id} member={member} isPending />
@@ -264,96 +259,6 @@ export function ManageMembersScreen({ onBack }: ManageMembersScreenProps) {
               <p className="text-muted-foreground">가입 대기 중인 멤버가 없습니다</p>
             </div>
           )}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-
-  // Desktop Layout
-  const DesktopView = () => (
-    <div className="min-h-screen bg-background pb-12">
-      {/* Back Button */}
-      <div className="px-8 xl:px-12 pt-6 pb-4">
-        <div className="max-w-5xl mx-auto">
-          <BackButton onClick={onBack} />
-        </div>
-      </div>
-
-      <div className="px-8 xl:px-12">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl mb-8">멤버 관리</h1>
-
-          <Tabs defaultValue="confirmed" className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="confirmed">
-                멤버 ({confirmedMembers.length})
-              </TabsTrigger>
-              <TabsTrigger value="pending">
-                가입 대기 ({pendingMembers.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="confirmed" className="space-y-4">
-              {/* Role Summary */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center">
-                  <div className="flex justify-center mb-2">
-                    <Crown className="w-6 h-6 text-amber-700" />
-                  </div>
-                  <p className="text-muted-foreground mb-1">그룹장</p>
-                  <p className="text-2xl font-medium text-amber-700">
-                    {confirmedMembers.filter(m => m.role === 'owner').length}
-                  </p>
-                </div>
-                <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
-                  <div className="flex justify-center mb-2">
-                    <ShieldCheck className="w-6 h-6 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground mb-1">부관리자</p>
-                  <p className="text-2xl font-medium text-primary">
-                    {confirmedMembers.filter(m => m.role === 'admin').length}
-                  </p>
-                </div>
-                <div className="bg-muted border border-border rounded-xl p-4 text-center">
-                  <div className="flex justify-center mb-2">
-                    <Shield className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-muted-foreground mb-1">일반 멤버</p>
-                  <p className="text-2xl font-medium">
-                    {confirmedMembers.filter(m => m.role === 'member').length}
-                  </p>
-                </div>
-              </div>
-
-              {confirmedMembers.length > 0 ? (
-                <div className="space-y-3">
-                  {confirmedMembers.map((member) => (
-                    <MemberCard key={member.id} member={member} />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <UserMinus className="w-10 h-10 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground">멤버가 없습니다</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="pending" className="space-y-3">
-              {pendingMembers.length > 0 ? (
-                pendingMembers.map((member) => (
-                  <MemberCard key={member.id} member={member} isPending />
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Check className="w-10 h-10 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground">가입 대기 중인 멤버가 없습니다</p>
-                </div>
-              )}
             </TabsContent>
           </Tabs>
         </div>
@@ -361,14 +266,5 @@ export function ManageMembersScreen({ onBack }: ManageMembersScreenProps) {
     </div>
   );
 
-  return (
-    <>
-      <div className="lg:hidden">
-        <MobileView />
-      </div>
-      <div className="hidden lg:block">
-        <DesktopView />
-      </div>
-    </>
-  );
+  return <DesktopView />;
 }

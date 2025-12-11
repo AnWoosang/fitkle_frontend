@@ -3,7 +3,6 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChatScreen } from '@/domains/message';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function ChatPage({
   params,
@@ -18,28 +17,10 @@ export default function ChatPage({
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
-      }}
-      webLayoutProps={{
-        maxWidth: 'default',
-      }}
-      mobileContent={
-        <ChatScreen
-          userId={userId}
-          userName="User"
-          onBack={handleBack}
-        />
-      }
-      webContent={
-        <ChatScreen
-          userId={userId}
-          userName="User"
-          onBack={handleBack}
-        />
-      }
+    <ChatScreen
+      userId={userId}
+      userName="User"
+      onBack={handleBack}
     />
   );
 }

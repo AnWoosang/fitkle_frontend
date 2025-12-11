@@ -1,10 +1,11 @@
 'use client';
 
 import { Calendar, Clock, MapPin, Star, Heart, UserPlus } from 'lucide-react';
-import { BackButton } from '@/shared/components/BackButton';
-import { events } from '@/data/events';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useMyEvents } from '../hooks/useMyEvents';
+import { useAuthUtils } from '@/domains/auth/hooks/useAuthQueries';
+import type { Event } from '../types/event';
 
 interface MyEventsListScreenProps {
   onBack: () => void;
@@ -12,38 +13,90 @@ interface MyEventsListScreenProps {
   initialFilter?: 'created' | 'joined' | 'saved';
 }
 
-export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'created' }: MyEventsListScreenProps) {
+export function MyEventsListScreen({ onBack: _onBack, onEventClick, initialFilter = 'created' }: MyEventsListScreenProps) {
   const [activeTab, setActiveTab] = useState<'created' | 'joined' | 'saved'>(initialFilter);
 
-  // Mock data - 실제로는 사용자가 참여한 이벤트만 필터링
-  const upcomingEvents = events.slice(0, 8);
-  const pastEvents = events.slice(8, 16);
+  // initialFilter가 변경되면 activeTab도 업데이트 (URL 변경 시)
+  useEffect(() => {
+    setActiveTab(initialFilter);
+  }, [initialFilter]);
 
+  // 인증 체크
+  const { user, isAuthenticated, isLoading: authLoading } = useAuthUtils();
+
+  // 내 이벤트 조회 (참여한 이벤트 + 생성한 이벤트)
+  const { data: myEvents = [], isLoading: eventsLoading } = useMyEvents({
+    enabled: isAuthenticated, // 인증된 경우에만 실행
+  });
+
+  // 탭별 필터링
+  const hostedEvents = myEvents.filter(e => e.hostId === user?.id);
+  const joinedEvents = myEvents.filter(e => e.hostId !== user?.id);
+  const savedEvents: Event[] = []; // TODO: 찜 기능 구현 필요
+
+  // 통계 데이터 (실제 값으로 계산)
   const stats = [
     {
       icon: Calendar,
       label: 'Total Events',
-      value: '24',
+      value: myEvents.length.toString(),
       color: 'bg-gradient-to-br from-primary to-primary/80',
       iconBg: 'bg-primary/20',
     },
     {
       icon: UserPlus,
-      label: 'Friends Made',
-      value: '42',
+      label: 'Hosted Events',
+      value: hostedEvents.length.toString(),
       color: 'bg-gradient-to-br from-accent-sage to-accent-sage/80',
       iconBg: 'bg-accent-sage/20',
     },
     {
       icon: Heart,
-      label: 'Favorite Events',
-      value: '8',
+      label: 'Joined Events',
+      value: joinedEvents.length.toString(),
       color: 'bg-gradient-to-br from-accent-rose to-accent-rose/80',
       iconBg: 'bg-accent-rose/20',
     },
   ];
 
-  const EventCard = ({ event, isOwner = false }: { event: typeof events[0], isOwner?: boolean }) => (
+  // 로딩 상태
+  const isLoading = authLoading || eventsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">이벤트를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 비인증 상태 처리
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center px-6">
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
+            <Calendar className="w-10 h-10 text-primary" />
+          </div>
+          <h3 className="text-xl mb-2">로그인이 필요합니다</h3>
+          <p className="text-sm text-muted-foreground mb-6">
+            내 이벤트를 확인하려면 로그인해주세요
+          </p>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+          >
+            홈으로 가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const EventCard = ({ event, isOwner = false }: { event: Event, isOwner?: boolean }) => (
     <button
       onClick={() => onEventClick(event.id, isOwner)}
       className="w-full bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/40 hover:shadow-lg transition-all duration-300 text-left group"
@@ -118,7 +171,7 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
         <div className="flex items-center justify-between pt-2.5 border-t border-border/30">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-            <span className="text-xs text-muted-foreground truncate">{event.location}</span>
+            <span className="text-xs text-muted-foreground truncate">{event.streetAddress}</span>
           </div>
           <div className="flex items-center gap-1 ml-2">
             <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
@@ -131,42 +184,8 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
 
   return (
     <div className="flex flex-col min-h-full bg-background">
-      {/* Mobile Header */}
-      <div className="lg:hidden bg-gradient-to-b from-background via-background to-background/95 backdrop-blur-sm">
-        <div className="flex items-center gap-3 px-4 pt-4 pb-2">
-          <BackButton onClick={onBack} />
-          <div className="flex-1">
-            <h1 className="text-xl">My Events</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Your event journey
-            </p>
-          </div>
-        </div>
-
-        {/* Stats Cards - Mobile */}
-        <div className="px-4 py-4">
-          <div className="grid grid-cols-3 gap-2">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div
-                  key={index}
-                  className="relative overflow-hidden rounded-2xl p-3 border border-border/50 bg-card"
-                >
-                  <div className={`w-9 h-9 rounded-xl ${stat.iconBg} flex items-center justify-center mb-2`}>
-                    <Icon className="w-4 h-4 text-primary" />
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-0.5 leading-tight">{stat.label}</p>
-                  <p className="text-lg font-semibold text-foreground">{stat.value}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Header */}
-      <div className="hidden lg:block bg-white">
+      {/* Header */}
+      <div className="bg-white">
         <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 py-5 max-w-[1600px] mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -203,52 +222,37 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
       {/* Tabs & Events List */}
       <div className="flex-1">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'created' | 'joined' | 'saved')}>
-          {/* Mobile Tabs */}
-          <div className="lg:hidden px-4 pt-2">
-            <TabsList className="grid w-full grid-cols-3 mb-4">
-              <TabsTrigger value="created" className="rounded-xl text-xs">
-                내가 만든
-              </TabsTrigger>
-              <TabsTrigger value="joined" className="rounded-xl text-xs">
-                참여한
-              </TabsTrigger>
-              <TabsTrigger value="saved" className="rounded-xl text-xs">
-                찜한
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Desktop Tabs */}
-          <div className="hidden lg:block bg-background">
+          {/* Tabs */}
+          <div className="bg-background">
             <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 max-w-[1600px] mx-auto">
               <TabsList className="bg-transparent border-0 p-0 h-auto">
-                <TabsTrigger 
-                  value="created" 
+                <TabsTrigger
+                  value="created"
                   className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
                 >
-                  내가 만든 이벤트 ({upcomingEvents.length})
+                  내가 만든 이벤트 ({hostedEvents.length})
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="joined"
                   className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
                 >
-                  참여한 이벤트 ({pastEvents.length})
+                  참여한 이벤트 ({joinedEvents.length})
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="saved"
                   className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
                 >
-                  찜한 이벤트 (5)
+                  찜한 이벤트 ({savedEvents.length})
                 </TabsTrigger>
               </TabsList>
             </div>
           </div>
           
-          <TabsContent value="created" className="mt-0 px-4 lg:px-24 xl:px-32 2xl:px-40 py-4 lg:py-6 pb-24 lg:pb-6">
+          <TabsContent value="created" className="mt-0 px-8 lg:px-24 xl:px-32 2xl:px-40 py-6 pb-6">
             <div className="max-w-[1600px] mx-auto">
-              {upcomingEvents.length > 0 ? (
+              {hostedEvents.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {upcomingEvents.map((event) => (
+                  {hostedEvents.map((event: Event) => (
                     <EventCard key={event.id} event={event} isOwner={true} />
                   ))}
                 </div>
@@ -266,11 +270,11 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
             </div>
           </TabsContent>
           
-          <TabsContent value="joined" className="mt-0 px-4 lg:px-24 xl:px-32 2xl:px-40 py-4 lg:py-6 pb-24 lg:pb-6">
+          <TabsContent value="joined" className="mt-0 px-8 lg:px-24 xl:px-32 2xl:px-40 py-6 pb-6">
             <div className="max-w-[1600px] mx-auto">
-              {pastEvents.length > 0 ? (
+              {joinedEvents.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {pastEvents.map((event) => (
+                  {joinedEvents.map((event: Event) => (
                     <EventCard key={event.id} event={event} isOwner={false} />
                   ))}
                 </div>
@@ -288,11 +292,11 @@ export function MyEventsListScreen({ onBack, onEventClick, initialFilter = 'crea
             </div>
           </TabsContent>
 
-          <TabsContent value="saved" className="mt-0 px-4 lg:px-24 xl:px-32 2xl:px-40 py-4 lg:py-6 pb-24 lg:pb-6">
+          <TabsContent value="saved" className="mt-0 px-8 lg:px-24 xl:px-32 2xl:px-40 py-6 pb-6">
             <div className="max-w-[1600px] mx-auto">
-              {events.slice(0, 5).length > 0 ? (
+              {savedEvents.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {events.slice(0, 5).map((event) => (
+                  {savedEvents.map((event: Event) => (
                     <EventCard key={event.id} event={event} isOwner={false} />
                   ))}
                 </div>

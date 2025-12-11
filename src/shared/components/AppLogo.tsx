@@ -19,10 +19,12 @@ export function AppLogo({ compact = false, onClick }: AppLogoProps) {
       <div
         className={`flex items-center gap-2 ${onClick ? 'cursor-pointer' : ''}`}
         onClick={handleClick}
+        translate="no"
+        lang="en"
       >
         <Image
           src="/logo.png"
-          alt="Fitkle"
+          alt=""
           width={100}
           height={28}
           className="h-7 w-auto"
@@ -35,10 +37,12 @@ export function AppLogo({ compact = false, onClick }: AppLogoProps) {
     <div
       className={`flex items-center gap-2 ${onClick ? 'cursor-pointer' : ''}`}
       onClick={handleClick}
+      translate="no"
+      lang="en"
     >
       <Image
         src="/logo.png"
-        alt="Fitkle"
+        alt=""
         width={100}
         height={32}
         className="h-8 w-auto"

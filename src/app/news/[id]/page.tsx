@@ -12,10 +12,20 @@ export default function NewsDetailPage() {
     router.back();
   };
 
+  const handleNewsViewMoreClick = (category?: string) => {
+    // 카테고리가 있으면 해당 카테고리로 필터링, 없으면 전체
+    if (category) {
+      router.push(`/news?category=${category}`);
+    } else {
+      router.push('/news');
+    }
+  };
+
   return (
     <NewsDetailScreen
       newsId={newsId}
       onBack={handleBack}
+      onNewsViewMoreClick={handleNewsViewMoreClick}
     />
   );
 }

@@ -1,24 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { WebHeader } from './WebHeader';
-import { useMediaQuery } from '@/shared/hooks';
+import { useAuthUtils, useLogout } from '@/domains/auth/hooks/useAuthQueries';
+import { useUIStore } from '@/shared/store';
 
 export function WebHeaderWrapper() {
   const router = useRouter();
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const { user, isAuthenticated } = useAuthUtils();
+  const { mutate: logoutMutation } = useLogout();
+  const { openLoginModal } = useUIStore();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // WebHeader를 숨겨야 하는 페이지들
+  const hideHeaderPaths = ['/signup', '/signup-success', '/complete-profile', '/auth/callback'];
+
   if (!mounted) {
     return null;
   }
 
-  if (isMobile) {
+  // 현재 경로가 헤더를 숨겨야 하는 경로인지 확인
+  if (hideHeaderPaths.some((path) => pathname.startsWith(path))) {
     return null;
   }
 
@@ -35,14 +43,18 @@ export function WebHeaderWrapper() {
   };
 
   const handleLoginClick = () => {
-    router.push('/login');
+    openLoginModal();
   };
 
   const handleSearch = (query: string, location: string) => {
     const params = new URLSearchParams();
     if (query) params.set('query', query);
-    if (location !== '모든 지역') params.set('location', location);
+    // "모든 지역", "All Regions", "전체 지역" 모두 체크
+    if (location && location !== '모든 지역' && location !== 'All Regions' && location !== '전체 지역') {
+      params.set('location', location);
+    }
 
+    console.log('[WebHeaderWrapper] Search params:', { query, location, url: `/explore?${params.toString()}` });
     router.push(`/explore?${params.toString()}`);
   };
 
@@ -92,8 +104,7 @@ export function WebHeaderWrapper() {
   };
 
   const handleLogoutClick = () => {
-    console.log('Logout');
-    router.push('/login');
+    logoutMutation();
   };
 
   return (
@@ -115,7 +126,8 @@ export function WebHeaderWrapper() {
       onSettingsClick={handleSettingsClick}
       onReportClick={handleReportClick}
       onLogoutClick={handleLogoutClick}
-      isLoggedIn={true}
+      isLoggedIn={isAuthenticated}
+      user={user}
     />
   );
 }

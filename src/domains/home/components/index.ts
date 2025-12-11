@@ -1,5 +1,12 @@
 export { HomeScreen } from './HomeScreen';
-export { WebHomeScreen } from './WebHomeScreen';
 export { DashboardHomeScreen } from './DashboardHomeScreen';
 export { ExploreScreen } from './ExploreScreen';
 export { NewsDetailScreen } from './NewsDetailScreen';
+export { NewsListScreen } from './NewsListScreen';
+export { NewsCategoryBadge } from './NewsCategoryBadge';
+export { FloatingImagesHero } from './FloatingImagesHero';
+export { CategoryGrid } from './CategoryGrid';
+export { HeroSection } from './HeroSection';
+export { FeaturesGrid } from './FeaturesGrid';
+export { CtaCard } from './CtaCard';
+export { HowItWorksFlow } from './HowItWorksFlow';

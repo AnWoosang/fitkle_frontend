@@ -3,7 +3,6 @@
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ExploreScreen } from '@/domains/home/components/ExploreScreen';
-import { ResponsiveLayout } from '@/shared/layout';
 
 function ExploreContent() {
   const router = useRouter();
@@ -11,6 +10,8 @@ function ExploreContent() {
 
   const searchQuery = searchParams.get('query') || '';
   const location = searchParams.get('location') || '모든 지역';
+
+  console.log('[ExplorePage] URL Params:', { searchQuery, location });
 
   const handleEventClick = (eventId: string) => {
     router.push(`/events/${eventId}`);
@@ -25,31 +26,12 @@ function ExploreContent() {
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showBottomNav: true,
-      }}
-      webLayoutProps={{
-        maxWidth: 'wide',
-      }}
-      mobileContent={
-        <ExploreScreen
-          onEventClick={handleEventClick}
-          onGroupClick={handleGroupClick}
-          initialSearchQuery={searchQuery}
-          initialLocation={location}
-          onBack={handleBack}
-        />
-      }
-      webContent={
-        <ExploreScreen
-          onEventClick={handleEventClick}
-          onGroupClick={handleGroupClick}
-          initialSearchQuery={searchQuery}
-          initialLocation={location}
-          onBack={handleBack}
-        />
-      }
+    <ExploreScreen
+      onEventClick={handleEventClick}
+      onGroupClick={handleGroupClick}
+      initialSearchQuery={searchQuery}
+      initialLocation={location}
+      onBack={handleBack}
     />
   );
 }

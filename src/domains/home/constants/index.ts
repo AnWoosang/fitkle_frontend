@@ -1,0 +1,1 @@
+export { newsKeys } from './queryKeys';

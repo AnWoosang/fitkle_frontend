@@ -7,7 +7,7 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { BackButton } from '@/shared/components/BackButton';
-import { events } from '@/data/events';
+import { useEvent } from '../hooks/useEvent';
 
 interface EditEventScreenProps {
   eventId: string;
@@ -16,6 +16,7 @@ interface EditEventScreenProps {
 }
 
 export function EditEventScreen({ eventId, onBack, onUpdate }: EditEventScreenProps) {
+  const { data: event } = useEvent(eventId);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -35,17 +36,16 @@ export function EditEventScreen({ eventId, onBack, onUpdate }: EditEventScreenPr
 
   // Load existing event data
   useEffect(() => {
-    const event = events.find(e => e.id === eventId);
     if (event) {
       setTitle(event.title);
-      setDescription('주말 아침을 여유롭게 시작해보세요! 강남역 근처의 아늑한 카페에서 브런치를 즐기며 다양한 국적의 친구들과 이야기를 나눠요.');
+      setDescription(event.description || '주말 아침을 여유롭게 시작해보세요! 강남역 근처의 아늑한 카페에서 브런치를 즐기며 다양한 국적의 친구들과 이야기를 나눠요.');
       setDate(event.date);
       setTime(event.time);
-      setLocation(event.location);
+      setLocation(event.streetAddress || '');
       setMaxAttendees(event.maxAttendees.toString());
-      setCategory(event.category);
+      setCategory(event.categoryCode || '');
     }
-  }, [eventId]);
+  }, [event]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,19 +61,23 @@ export function EditEventScreen({ eventId, onBack, onUpdate }: EditEventScreenPr
     });
   };
 
-  // Mobile Layout
-  const MobileView = () => (
-    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-6">
-      {/* Header */}
-      <div className="sticky top-0 left-0 right-0 z-20 px-4 pt-4 pb-3 bg-gradient-to-b from-background via-background to-transparent backdrop-blur-sm border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <BackButton onClick={onBack} className="bg-card" />
-          <h1 className="text-xl">이벤트 수정</h1>
+  // Desktop Layout
+  const DesktopView = () => (
+    <div className="min-h-screen bg-background pb-12">
+      {/* Back Button */}
+      <div className="px-8 xl:px-12 pt-6 pb-4">
+        <div className="max-w-4xl mx-auto">
+          <BackButton onClick={onBack} />
         </div>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="flex-1 px-4 py-5 space-y-5">
+      {/* Form Container */}
+      <div className="px-8 xl:px-12">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-card border border-border rounded-2xl p-8">
+            <h1 className="text-3xl mb-8">이벤트 수정</h1>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
         {/* Event Image */}
         <div>
           <Label>이벤트 이미지</Label>
@@ -179,33 +183,6 @@ export function EditEventScreen({ eventId, onBack, onUpdate }: EditEventScreenPr
           />
         </div>
 
-        {/* Submit Button */}
-        <div className="pt-4">
-          <Button type="submit" className="w-full py-6">
-            수정 완료
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
-
-  // Desktop Layout
-  const DesktopView = () => (
-    <div className="min-h-screen bg-background pb-12">
-      {/* Back Button */}
-      <div className="px-8 xl:px-12 pt-6 pb-4">
-        <div className="max-w-4xl mx-auto">
-          <BackButton onClick={onBack} />
-        </div>
-      </div>
-
-      {/* Form Container */}
-      <div className="px-8 xl:px-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-card border border-border rounded-2xl p-8">
-            <h1 className="text-3xl mb-8">이벤트 수정</h1>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Event Image */}
               <div>
                 <Label>이벤트 이미지</Label>
@@ -328,14 +305,5 @@ export function EditEventScreen({ eventId, onBack, onUpdate }: EditEventScreenPr
     </div>
   );
 
-  return (
-    <>
-      <div className="lg:hidden">
-        <MobileView />
-      </div>
-      <div className="hidden lg:block">
-        <DesktopView />
-      </div>
-    </>
-  );
+  return <DesktopView />;
 }

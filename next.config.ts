@@ -10,11 +10,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Skip static error pages during build
-  skipTrailingSlashRedirect: true,
   experimental: {
     optimizePackageImports: ['@supabase/supabase-js'],
   },
+  // 정적 에러 페이지 생성 스킵
+  skipTrailingSlashRedirect: true,
 };
 
 export default nextConfig;

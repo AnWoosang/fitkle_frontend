@@ -1,10 +1,9 @@
 'use client';
 
-import { events } from '@/data/events';
-import { HostCard } from '@/shared/components/HostCard';
-import { InfoCard } from '@/shared/components/InfoCard';
+import { useEvent, useEventParticipants, useEventImages, useEventHost } from '../hooks';
+import { useGroup } from '@/domains/group/hooks';
+import { BackButton } from '@/shared/components/BackButton';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
-import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import {
   DropdownMenu,
@@ -14,9 +13,22 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 import { Calendar, CheckCircle2, Edit, Flag, Heart, MapPin, MoreVertical, Share2, Star, Trash2, User, UserCog, Users } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { EventMap } from './EventMap';
 import { PhotoGallery } from './PhotoGallery';
+import { EventCard } from './EventCard';
+import { ShareDialog } from '@/shared/components/ShareDialog';
+import { MembersModal } from '@/shared/components/MembersModal';
+import { useUIStore } from '@/shared/store/uiStore';
+import { useLike } from '@/shared/hooks';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/shared/components/ui/carousel';
 
 interface EventDetailScreenProps {
   eventId: string;
@@ -29,382 +41,219 @@ interface EventDetailScreenProps {
 }
 
 export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = false, onEditEvent, onManageAttendees, onDeleteEvent }: EventDetailScreenProps) {
-  const [selectedDate, setSelectedDate] = useState(0);
-  const [activeTab, setActiveTab] = useState<'about' | 'photos' | 'attendees'>('about');
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'about' | 'photos'>('about');
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [isAttendeesModalOpen, setIsAttendeesModalOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
-  
+  const { openShareDialog } = useUIStore();
+  const { isLiked, toggleLike } = useLike(eventId, 'event');
+
   // Refs for scroll-to-section
   const aboutRef = useRef<HTMLDivElement>(null);
   const photosRef = useRef<HTMLDivElement>(null);
-  const attendeesRef = useRef<HTMLDivElement>(null);
 
-  const handleTabClick = (tab: 'about' | 'photos' | 'attendees') => {
+  const handleTabClick = (tab: 'about' | 'photos') => {
     setActiveTab(tab);
-    
+
     // Scroll to the corresponding section after state update
     setTimeout(() => {
       const refs = {
         about: aboutRef,
-        photos: photosRef,
-        attendees: attendeesRef
+        photos: photosRef
       };
-      
+
       const targetRef = refs[tab];
       if (targetRef.current) {
         // Get the scroll container by ID
         const scrollContainer = document.getElementById('main-scroll-container');
-        
+
         if (scrollContainer) {
           // Calculate the position relative to the scroll container
           const containerRect = scrollContainer.getBoundingClientRect();
           const targetRect = targetRef.current.getBoundingClientRect();
           const offsetTop = targetRect.top - containerRect.top + scrollContainer.scrollTop;
-          
+
           // Scroll with offset for sticky tab bar (approximately 60px for tab bar height)
-          scrollContainer.scrollTo({ 
-            top: offsetTop - 60, 
-            behavior: 'smooth' 
+          scrollContainer.scrollTo({
+            top: offsetTop - 60,
+            behavior: 'smooth'
           });
         }
       }
     }, 50);
   };
-  
-  // Find the selected event
-  const event = events.find(e => e.id === eventId);
-  
-  if (!event) {
-    return <div>Event not found</div>;
+
+  // Fetch event data using hook
+  const { data: event, isLoading, error } = useEvent(eventId);
+
+  // Fetch group data if event has a groupId
+  const { data: groupData } = useGroup(event?.groupId || '');
+
+  // Fetch participants, images, and host using hooks
+  const { data: rawParticipants = [] } = useEventParticipants(eventId);
+  const { data: rawEventImages = [] } = useEventImages(eventId);
+  const { data: hostData } = useEventHost(eventId);
+
+  // 이벤트 카드 클릭 핸들러 (useCallback으로 메모이제이션) - Hook이므로 조건문 이전에 호출
+  const handleEventCardClick = useCallback((eventId: string) => {
+    router.push(`/events/${eventId}`);
+  }, [router]);
+
+  // API 응답을 UI 형식으로 변환
+  const attendees = rawParticipants.map((participant: any) => ({
+    id: participant.id,
+    name: participant.name,
+    avatarUrl: participant.avatarUrl,
+    status: participant.status,
+  }));
+
+  const photos = rawEventImages.map((img: any) => ({
+    id: img.id,
+    url: img.imageUrl,
+    caption: img.caption,
+  }));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading event...</p>
+        </div>
+      </div>
+    );
   }
 
-  const attendees = [
-    { name: 'Sarah', avatar: '', country: '🇺🇸', joined: '2개월 전' },
-    { name: 'Emma', avatar: '', country: '🇬🇧', joined: '5개월 전' },
-    { name: 'Maria', avatar: '', country: '🇪🇸', joined: '1개월 전' },
-    { name: 'Lisa', avatar: '', country: '🇩🇪', joined: '3개월 전' },
-    { name: 'Anna', avatar: '', country: '🇫🇷', joined: '4개월 전' },
-    { name: 'Sophie', avatar: '', country: '🇨🇦', joined: '6개월 전' },
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-destructive mb-2">Error loading event</p>
+          <p className="text-sm text-muted-foreground">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Event not found</p>
+      </div>
+    );
+  }
+
+  // Mock 추천 이벤트 데이터
+  const recommendedEvents = [
+    {
+      id: 'rec-1',
+      image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      date: '10월 20일',
+      time: '7:00 PM',
+      title: 'Coffee Chat at Blue Bottle',
+      location: '서울시 강남구',
+      attendees: 5,
+      maxAttendees: 10,
+      category: 'cafe'
+    },
+    {
+      id: 'rec-2',
+      image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      date: '10월 21일',
+      time: '6:00 PM',
+      title: 'Weekend Tennis Match',
+      location: '서울시 송파구',
+      attendees: 4,
+      maxAttendees: 8,
+      category: 'fitness'
+    },
+    {
+      id: 'rec-3',
+      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      date: '10월 22일',
+      time: '2:00 PM',
+      title: 'Study Session at Library',
+      location: '서울시 서초구',
+      attendees: 6,
+      maxAttendees: 12,
+      category: 'language'
+    },
+    {
+      id: 'rec-4',
+      image: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      date: '10월 23일',
+      time: '8:00 PM',
+      title: 'Movie Night: Korean Cinema',
+      location: '서울시 마포구',
+      attendees: 8,
+      maxAttendees: 15,
+      category: 'art'
+    }
   ];
 
-  const eventPhotos = [
-    'https://images.unsplash.com/photo-1623121181613-eeced17aea39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmcmllbmRzJTIwbWVldGluZyUyMGNhZmV8ZW58MXx8fHwxNzYxMDU4ODQ5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    'https://images.unsplash.com/photo-1730875648117-ff32ae9b98c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2NpYWwlMjBnYXRoZXJpbmclMjBwZW9wbGV8ZW58MXx8fHwxNzYxMDU4ODQ5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    'https://images.unsplash.com/photo-1714761131527-accab693e96e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncm91cCUyMGRpbm5lciUyMGZyaWVuZHN8ZW58MXx8fHwxNzYxMDU4ODQ5fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    'https://images.unsplash.com/photo-1573860838444-ae841678963d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZW9wbGUlMjB0YWxraW5nJTIwcmVzdGF1cmFudHxlbnwxfHx8fDE3NjEwNTg4NTB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    'https://images.unsplash.com/photo-1598908314766-3e3ce9bd2f48?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2ZmZWUlMjBtZWV0dXAlMjBmcmllbmRzfGVufDF8fHx8MTc2MTAxMzA4NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    'https://images.unsplash.com/photo-1635367474298-5b8cd525f2b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvdXRkb29yJTIwZXZlbnQlMjBwZW9wbGV8ZW58MXx8fHwxNzYxMDAwMzY1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    'https://images.unsplash.com/photo-1543603819-cb2d1c267265?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2ZmZWUlMjBtZWV0aW5nJTIwZnJpZW5kc3xlbnwxfHx8fDE3NjA1MzEzMTR8MA&ixlib=rb-4.1.0&q=80&w=1080',
-    'https://images.unsplash.com/photo-1671576193244-964fe85e1797?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncm91cCUyMHBlb3BsZSUyMG1lZXR1cHxlbnwxfHx8fDE3NjA1MzE1NTR8MA&ixlib=rb-4.1.0&q=80&w=1080',
+  // Mock 최근 본 이벤트 데이터
+  const recentlyViewedEvents = [
+    {
+      id: 'recent-1',
+      image: 'https://images.unsplash.com/photo-1534083449179-cc7f3afd1b8f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      date: '10월 24일',
+      time: '9:00 AM',
+      title: 'Morning Jog at Han River',
+      location: '서울시 용산구',
+      attendees: 10,
+      maxAttendees: 20,
+      category: 'fitness'
+    },
+    {
+      id: 'recent-2',
+      image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      date: '10월 25일',
+      time: '7:00 PM',
+      title: 'Cooking Together: Italian Night',
+      location: '서울시 용산구',
+      attendees: 6,
+      maxAttendees: 10,
+      category: 'food'
+    },
+    {
+      id: 'recent-3',
+      image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      date: '10월 26일',
+      time: '3:00 PM',
+      title: 'Traditional Tea Ceremony',
+      location: '서울시 종로구',
+      attendees: 8,
+      maxAttendees: 12,
+      category: 'culture'
+    },
+    {
+      id: 'recent-4',
+      image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+      date: '10월 27일',
+      time: '5:00 PM',
+      title: 'Photography Walk in Seoul',
+      location: '서울시 중구',
+      attendees: 7,
+      maxAttendees: 10,
+      category: 'art'
+    }
   ];
 
-  // Mock recurring dates
-  const upcomingDates = [
-    { date: 'Oct 25', time: '8 PM GMT-9', label: 'Oct 25 @ 8 PM GMT-9' },
-    { date: 'Nov 1', time: '8 PM GMT-9', label: 'Nov 1 @ 8 PM GMT-9' },
-    { date: 'Nov 8', time: '8 PM GMT-9', label: 'Nov 8 @ 8 PM GMT-9' },
-  ];
-
-  // Mobile Layout
-  const MobileView = () => (
-    <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain">
-      {/* Header Image */}
-      <div className="relative h-72">
-        <img
-          src={event.image}
-          alt={event.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-
+  return (
+    <>
+      <div className="min-h-screen bg-background pb-12">
         {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="absolute top-4 left-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-border/50"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-
-        {/* Action buttons */}
-        <div className="absolute top-4 right-4 flex gap-2">
-          {isOwner && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-lg">
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={onEditEvent} className="cursor-pointer">
-                  <Edit className="w-4 h-4 mr-3 text-primary" />
-                  <span>이벤트 수정</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onManageAttendees} className="cursor-pointer">
-                  <UserCog className="w-4 h-4 mr-3 text-primary" />
-                  <span>참가자 관리</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onDeleteEvent} className="cursor-pointer text-destructive focus:text-destructive">
-                  <Trash2 className="w-4 h-4 mr-3" />
-                  <span>이벤트 삭제</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-border/50">
-            <Share2 className="w-5 h-5" />
-          </button>
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-border/50">
-            <Heart className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1">
-        <div className="px-4 py-5 space-y-6">
-          {/* Title & Info */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant="secondary" className="bg-accent text-primary border-0">
-                {event.category}
-              </Badge>
-              <span className="text-sm text-muted-foreground">· {event.date}</span>
-              {event.isHot && (
-                <Badge variant="secondary" className="bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-orange-200 border">
-                  🔥 인기
-                </Badge>
-              )}
-              {event.isNew && (
-                <Badge variant="secondary" className="bg-accent-rose/30 text-accent-rose-dark">
-                  ✨ 신규
-                </Badge>
-              )}
-            </div>
-            <h1 className="mb-3 text-2xl">{event.title}</h1>
-          </div>
-
-          {/* Quick Info */}
-          <div className="grid grid-cols-2 gap-3">
-            <InfoCard
-              icon={Calendar}
-              label="날짜 및 시간"
-              value={
-                <>
-                  <p>{event.date}</p>
-                  <p>{event.time}</p>
-                </>
-              }
-            />
-            
-            <InfoCard
-              icon={Users}
-              label="참가자"
-              value={
-                <>
-                  <p className="font-semibold">{event.attendees} / {event.maxAttendees} 명</p>
-                  <p className="text-sm text-muted-foreground">
-                    {event.maxAttendees - event.attendees > 0 
-                      ? `${event.maxAttendees - event.attendees} spots left`
-                      : 'Full'}
-                  </p>
-                </>
-              }
-            />
-            
-            <InfoCard
-              icon={MapPin}
-              label="장소"
-              value={event.location}
-              subValue="정확한 주소는 참가 신청 후 공개됩니다"
-              className="col-span-2"
-            />
-
-            {event.type === 'personal' && event.hostName && (
-              <div className="col-span-2 p-3 bg-accent/30 rounded-lg border border-accent-sage/30">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-primary" />
-                  <p className="text-sm">
-                    <span className="text-muted-foreground">Personal Event by </span>
-                    <span className="font-medium">{event.hostName}</span>
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {event.type === 'group' && event.groupId && (
-              <div className="col-span-2 p-3 bg-accent/30 rounded-lg border border-accent-sage/30">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-primary" />
-                  <p className="text-sm">
-                    <span className="text-muted-foreground">Group Event</span>
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Map */}
-          <div>
-            <h3 className="mb-3">위치</h3>
-            <EventMap location={event.location} />
-          </div>
-
-          {/* Host */}
-          <div>
-            <h3 className="mb-3">호스트</h3>
-            <HostCard
-              name={event.type === 'personal' && event.hostName ? event.hostName : "Jiyoung Park"}
-              country="🇰🇷"
-              rating={4.9}
-              reviewCount={23}
-              bio={event.type === 'personal'
-                ? "안녕하세요! 새로운 친구들과 함께 즐거운 시간을 보내고 싶어요 😊"
-                : "안녕하세요! 서울에서 3년째 살고 있는 지영입니다. 다양한 나라에서 온 친구들과 함께 즐거운 시간을 보내는 걸 좋아해요."}
-              stats={[
-                { label: '주최한 이벤트', value: '25회' },
-                { label: '총 참여자', value: '150명' },
-                { label: '활동 기간', value: '2년' },
-              ]}
-              onClick={() => onHostClick('jiyoung-park')}
-              isVerified={true}
-            />
-          </div>
-
-          {/* Photos from past events */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3>지난 모임 사진 ({eventPhotos.length})</h3>
-              {eventPhotos.length > 6 && (
-                <button 
-                  onClick={() => {
-                    setGalleryStartIndex(0);
-                    setIsGalleryOpen(true);
-                  }}
-                  className="text-sm text-primary"
-                >
-                  전체보기
-                </button>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {eventPhotos.slice(0, 6).map((photo, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setGalleryStartIndex(idx);
-                    setIsGalleryOpen(true);
-                  }}
-                  className="relative aspect-square rounded-lg overflow-hidden"
-                >
-                  <img
-                    src={photo}
-                    alt={`Past event ${idx + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                  {idx === 5 && eventPhotos.length > 6 && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <p className="text-white text-xl">+{eventPhotos.length - 6}</p>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Attendees */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3>참가자 ({attendees.length}명)</h3>
-              <button className="text-sm text-primary">전체보기</button>
-            </div>
-            <div className="space-y-2">
-              {attendees.slice(0, 4).map((attendee, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                  <Avatar className="w-10 h-10">
-                    <AvatarFallback className="bg-secondary text-secondary-foreground text-sm">
-                      {attendee.name[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="text-sm">{attendee.name} {attendee.country}</p>
-                    <p className="text-xs text-muted-foreground">fitkle 가입 {attendee.joined}</p>
-                  </div>
-                </div>
-              ))}
-              {attendees.length > 4 && (
-                <button className="w-full p-3 text-sm text-primary bg-muted rounded-lg hover:bg-secondary transition-colors">
-                  +{attendees.length - 4}명 더보기
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Description */}
-          <div>
-            <h3 className="mb-3">상세정보</h3>
-            <div className="prose prose-sm max-w-none text-muted-foreground">
-              <p>
-                주말 아침을 여유롭게 시작해보세요! 강남역 근처의 아늑한 카페에서 
-                브런치를 즐기며 다양한 국적의 친구들과 이야기를 나눠요.
-              </p>
-              <p>
-                한국 생활, 여행, 취미 등 다양한 주제로 편하게 대화하실 수 있어요. 
-                한국어 학습에 관심 있으신 분들도 환영합니다!
-              </p>
-              <p className="mt-4">
-                <strong className="text-foreground">준비사항</strong><br />
-                • 특별히 준비할 것은 없어요<br />
-                • 편안한 복장으로 오시면 됩니다
-              </p>
-              <p className="mt-4">
-                <strong className="text-foreground">참가비</strong><br />
-                무료 (각자 주문한 음식값 개별 부담)
-              </p>
-            </div>
+        <div className="px-8 xl:px-12 pt-6 pb-4">
+          <div className="max-w-7xl mx-auto">
+            <BackButton onClick={onBack} />
           </div>
         </div>
-      </div>
 
-      {/* Bottom Join Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-white border-t border-border/50 z-10">
-        <Button 
-          className={`w-full h-12 ${
-            event.attendees >= event.maxAttendees 
-              ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-              : 'bg-primary hover:bg-primary/90 text-primary-foreground'
-          }`}
-          disabled={event.attendees >= event.maxAttendees}
-        >
-          <Users className="w-5 h-5 mr-2" />
-          {event.attendees >= event.maxAttendees 
-            ? `모집 마감 (${event.attendees}/${event.maxAttendees})`
-            : `참가 신청 (${event.attendees}/${event.maxAttendees})`
-          }
-        </Button>
-      </div>
-    </div>
-  );
-
-  // Desktop Layout - Meetup Style with Tabs
-  const DesktopView = () => (
-    <div className="min-h-screen bg-background pb-12">
-      {/* Main Content - 2 Column Layout */}
-      <div className="max-w-[1600px] mx-auto px-8 lg:px-24 xl:px-32 2xl:px-40">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_480px] gap-8 xl:gap-12">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_480px] gap-8 xl:gap-12">
+        {/* Main Content - 2 Column Layout */}
+        <div className="px-8 xl:px-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
             {/* Left Column */}
             <div className="space-y-8">
               {/* Title with emoji and admin menu */}
@@ -441,69 +290,87 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
                 {/* Hosted By */}
                 <div>
                   <button
-                    onClick={() => onHostClick('jiyoung-park')}
+                    onClick={() => hostData?.id && onHostClick(hostData.id)}
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                   >
                     <Avatar className="w-10 h-10">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {(event.type === 'personal' && event.hostName 
-                          ? event.hostName.split(' ').map(n => n[0]).join('').toUpperCase()
-                          : 'JY')}
-                      </AvatarFallback>
+                      {hostData?.avatarUrl ? (
+                        <img
+                          src={hostData.avatarUrl}
+                          alt={hostData.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {hostData?.name
+                            ? hostData.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+                            : event.hostName?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'H'}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <div className="text-left">
                       <p className="text-sm text-muted-foreground">Hosted by</p>
                       <div className="flex items-center gap-1.5">
-                        <p>{event.type === 'personal' && event.hostName ? event.hostName : 'Becky'}</p>
-                        <CheckCircle2 className="w-4 h-4 text-primary fill-primary" />
+                        <p>{hostData?.name || event.hostName || 'Unknown'}</p>
+                        {hostData?.isVerified && (
+                          <CheckCircle2 className="w-4 h-4 text-primary fill-primary" />
+                        )}
                       </div>
                     </div>
                   </button>
-                  
+
                   {/* Host About Me */}
-                  <div className="mt-3 ml-[52px]">
-                    <p className="text-sm text-muted-foreground">
-                      {event.type === 'personal' 
-                        ? "안녕하세요! 새로운 친구들과 함께 즐거운 시간을 보내고 싶어요 😊" 
-                        : "안녕하세요! 서울에서 3년째 살고 있는 지영입니다. 다양한 나라에서 온 친구들과 함께 즐거운 시간을 보내는 걸 좋아해요."}
-                    </p>
-                  </div>
+                  {hostData?.bio && (
+                    <div className="mt-3 ml-[52px]">
+                      <p className="text-sm text-muted-foreground">
+                        {hostData.bio}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Meet the Group - Only show if event has a group */}
-              {event.groupId && (
+              {event.groupId && groupData && (
                 <div className="bg-card border border-border rounded-2xl p-6">
                   <p className="text-sm text-muted-foreground mb-4">Meet the group</p>
-                  <div className="flex items-start gap-4">
+                  <button
+                    onClick={() => router.push(`/groups/${groupData.id}`)}
+                    className="flex items-start gap-4 w-full text-left hover:opacity-80 transition-opacity"
+                  >
                     {/* Group Logo/Icon */}
-                    <div className="w-16 h-16 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl">Group</span>
-                      <div className="absolute -top-1 -right-1 text-xs">
-                        <span className="text-sm">example</span>
-                      </div>
+                    <div className="w-16 h-16 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {groupData.image ? (
+                        <img
+                          src={groupData.image}
+                          alt={groupData.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-2xl">Group</span>
+                      )}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
-                      <h3 className="mb-2">🎊 2030 global student party in Hongdae 🎊</h3>
+                      <h3 className="mb-2">{groupData.name}</h3>
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1">
-                          <span className="text-xl">4.3</span>
+                          <span className="text-xl">{groupData.rating?.toFixed(1) || '0.0'}</span>
                           <div className="flex">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
                                 className={`w-4 h-4 ${
-                                  star <= 4 ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-300 text-gray-300'
+                                  star <= Math.round(groupData.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-300 text-gray-300'
                                 }`}
                               />
                             ))}
                           </div>
                         </div>
-                        <span className="text-sm text-muted-foreground">16 reviews</span>
+                        <span className="text-sm text-muted-foreground">{groupData.members} members</span>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 </div>
               )}
 
@@ -513,11 +380,10 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
                   {[
                     { id: 'about', icon: '📝', label: 'About' },
                     { id: 'photos', icon: '📸', label: 'Photos' },
-                    { id: 'attendees', icon: '👥', label: 'Attendees' },
                   ].map((tab) => (
                     <button
                       key={tab.id}
-                      onClick={() => handleTabClick(tab.id as any)}
+                      onClick={() => handleTabClick(tab.id as 'about' | 'photos')}
                       className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
                         activeTab === tab.id
                           ? 'border-primary text-primary'
@@ -531,187 +397,111 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
                 </div>
               </div>
 
-              {/* About Tab Content */}
-              <div ref={aboutRef} className="space-y-8">
-                {/* Details */}
-                <div>
-                  <h2 className="mb-4">Details</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-muted-foreground">
-                        ✅ The meet-up will be held on the 5th floor ❗
+              {/* Tab Content */}
+              {activeTab === 'about' && (
+                <div ref={aboutRef} className="space-y-8">
+                  {/* Details */}
+                  <div>
+                    <h2 className="mb-4">Details</h2>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-muted-foreground">
+                          ✅ The meet-up will be held on the 5th floor ❗
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-muted-foreground">
+                          ✅ Korean Address: 서울특별시 마포구 와우산로 65, 5층
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-muted-foreground">
+                          ✅ English Address: 65, Wausan-ro, Mapo-gu, Seoul, Republic of Korea (5F)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <h2 className="mb-4">About this event</h2>
+                    <div className="prose prose-sm max-w-none text-muted-foreground space-y-4">
+                      <p>
+                        주말 아침을 여유롭게 시작해보세요! 강남역 근처의 아늑한 카페에서
+                        브런치를 즐기며 다양한 국적의 친구들과 이야기를 나눠요.
+                      </p>
+                      <p>
+                        한국 생활, 여행, 취미 등 다양한 주제로 편하게 대화하실 수 있어요.
+                        한국어 학습에 관심 있으신 분들도 환영합니다!
                       </p>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-muted-foreground">
-                        ✅ Korean Address: 서울특별시 마포구 와우산로 65, 5층
-                      </p>
+                  </div>
+
+                  {/* Map */}
+                  <div>
+                    <h2 className="mb-4">위치</h2>
+                    <EventMap location={event.streetAddress || ''} />
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'photos' && (
+                <div ref={photosRef}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <h2>Photos</h2>
+                      <span className="text-muted-foreground">{photos.length}</span>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-muted-foreground">
-                        ✅ English Address: 65, Wausan-ro, Mapo-gu, Seoul, Republic of Korea (5F)
-                      </p>
-                    </div>
+                    {photos.length > 6 && (
+                      <button
+                        onClick={() => {
+                          setGalleryStartIndex(0);
+                          setIsGalleryOpen(true);
+                        }}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        See all photos
+                      </button>
+                    )}
                   </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <h2 className="mb-4">About this event</h2>
-                  <div className="prose prose-sm max-w-none text-muted-foreground space-y-4">
-                    <p>
-                      주말 아침을 여유롭게 시작해보세요! 강남역 근처의 아늑한 카페에서 
-                      브런치를 즐기며 다양한 국적의 친구들과 이야기를 나눠요.
-                    </p>
-                    <p>
-                      한국 생활, 여행, 취미 등 다양한 주제로 편하게 대화하실 수 있어요. 
-                      한국어 학습에 관심 있으신 분들도 환영합니다!
-                    </p>
-                  </div>
-                </div>
-
-                {/* Map */}
-                <div>
-                  <h2 className="mb-4">위치</h2>
-                  <EventMap location={event.location} />
-                </div>
-              </div>
-
-              {/* Photos Tab Content */}
-              <div ref={photosRef}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <h2>Photos</h2>
-                    <span className="text-muted-foreground">{eventPhotos.length}</span>
-                  </div>
-                  {eventPhotos.length > 6 && (
-                    <button 
-                      onClick={() => {
-                        setGalleryStartIndex(0);
-                        setIsGalleryOpen(true);
-                      }}
-                      className="text-sm text-primary hover:underline"
-                    >
-                      See all photos
-                    </button>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                  {eventPhotos.slice(0, 6).map((photo, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setGalleryStartIndex(idx);
-                        setIsGalleryOpen(true);
-                      }}
-                      className="relative aspect-square rounded-xl overflow-hidden bg-muted"
-                    >
-                      <img
-                        src={photo}
-                        alt={`Past event ${idx + 1}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      />
-                      {idx === 5 && eventPhotos.length > 6 && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                          <p className="text-white text-2xl">+{eventPhotos.length - 6}</p>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Attendees Tab Content */}
-              <div ref={attendeesRef}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <h2>Attendees</h2>
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                      <span className="text-sm">{attendees.length + 25}</span>
-                    </div>
-                  </div>
-                  <button className="text-sm text-primary hover:underline">See all</button>
-                </div>
-                
-                <div className="bg-card border border-border rounded-2xl p-6">
-                  <div className="flex items-start gap-6">
-                    {/* Organizer */}
-                    <button
-                      onClick={() => onHostClick('jiyoung-park')}
-                      className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
-                    >
-                      <div className="relative">
-                        <Avatar className="w-20 h-20">
-                          <AvatarFallback className="bg-primary text-primary-foreground">
-                            {(event.type === 'personal' && event.hostName 
-                              ? event.hostName.split(' ').map(n => n[0]).join('').toUpperCase()
-                              : 'JY')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-background">
-                          <Star className="w-4 h-4 fill-white text-white" />
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <p className="text-sm">{event.type === 'personal' && event.hostName ? event.hostName : 'Becky'}</p>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-primary fill-primary" />
-                        </div>
-                        <p className="text-xs text-muted-foreground">Organizer</p>
-                      </div>
-                    </button>
-
-                    {/* Members */}
-                    {attendees.slice(0, 2).map((attendee, idx) => (
-                      <div key={idx} className="flex flex-col items-center gap-2">
-                        <Avatar className="w-20 h-20">
-                          <AvatarFallback className="bg-secondary text-secondary-foreground">
-                            {attendee.name[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="text-center">
-                          <p className="text-sm">{attendee.name}</p>
-                          <p className="text-xs text-muted-foreground">Member</p>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 justify-center">
-                            <User className="w-3 h-3" />
-                            5 guests
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-
-                    {/* More avatars */}
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="flex -space-x-3">
-                        {['K', '김', 'S', '+25'].map((initial, idx) => (
-                          <div
-                            key={idx}
-                            className={`w-12 h-12 rounded-full flex items-center justify-center border-2 border-background ${
-                              idx === 0 ? 'bg-purple-200' :
-                              idx === 1 ? 'bg-orange-200' :
-                              idx === 2 ? 'bg-yellow-200' :
-                              'bg-rose-400 text-white'
-                            }`}
-                          >
-                            <span className="text-sm">{initial}</span>
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    {photos.slice(0, 6).map((photo: any, idx: number) => (
+                      <button
+                        key={photo.id || idx}
+                        onClick={() => {
+                          setGalleryStartIndex(idx);
+                          setIsGalleryOpen(true);
+                        }}
+                        className="relative aspect-square rounded-xl overflow-hidden bg-muted"
+                      >
+                        <img
+                          src={photo.url}
+                          alt={photo.caption || `Past event ${idx + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                        {idx === 5 && photos.length > 6 && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <p className="text-white text-2xl">+{photos.length - 6}</p>
                           </div>
-                        ))}
-                      </div>
-                      <p className="text-sm mt-2">+28 more</p>
-                    </div>
+                        )}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* See More Events from Group - Only show if event has a group */}
-              {event.groupId && (
+              {event.groupId && groupData && (
                 <div>
-                  <button className="w-full bg-muted/30 hover:bg-muted/50 border border-border rounded-2xl p-5 flex items-center justify-between transition-colors group">
+                  <button
+                    onClick={() => router.push(`/groups/${groupData.id}`)}
+                    className="w-full bg-muted/30 hover:bg-muted/50 border border-border rounded-2xl p-5 flex items-center justify-between transition-colors group"
+                  >
                     <span className="text-sm">
-                      See more events by 🎊 2030 global student party in Hongdae 🎊
+                      See more events by {groupData.name}
                     </span>
                     <svg className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -720,12 +510,81 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
                 </div>
               )}
 
+              {/* Recommended Events Slider - Desktop */}
+              <div className="mt-12 relative">
+                <h2 className="mb-6">추천 이벤트</h2>
+                <div className="relative px-8">
+                  <Carousel
+                    opts={{
+                      align: "start",
+                      loop: false,
+                    }}
+                    className="w-full"
+                  >
+                    <CarouselContent className="-ml-2">
+                      {recommendedEvents.map((e) => (
+                        <CarouselItem key={e.id} className="pl-2 md:basis-1/2 lg:basis-1/3">
+                          <EventCard
+                            id={e.id}
+                            title={e.title}
+                            date={e.date}
+                            time={e.time}
+                            location={e.location}
+                            attendees={e.attendees}
+                            maxAttendees={e.maxAttendees}
+                            image={e.image}
+                            category={e.category}
+                            onClick={handleEventCardClick}
+                          />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="-left-4" />
+                    <CarouselNext className="-right-4" />
+                  </Carousel>
+                </div>
+              </div>
+
+              {/* Recently Viewed Events Slider - Desktop */}
+              <div className="mt-12 relative pb-12">
+                <h2 className="mb-6">최근 본 이벤트</h2>
+                <div className="relative px-8">
+                  <Carousel
+                    opts={{
+                      align: "start",
+                      loop: false,
+                    }}
+                    className="w-full"
+                  >
+                    <CarouselContent className="-ml-2">
+                      {recentlyViewedEvents.map((e) => (
+                        <CarouselItem key={e.id} className="pl-2 md:basis-1/2 lg:basis-1/3">
+                          <EventCard
+                            id={e.id}
+                            title={e.title}
+                            date={e.date}
+                            time={e.time}
+                            location={e.location}
+                            attendees={e.attendees}
+                            maxAttendees={e.maxAttendees}
+                            image={e.image}
+                            category={e.category}
+                            onClick={handleEventCardClick}
+                          />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="-left-4" />
+                    <CarouselNext className="-right-4" />
+                  </Carousel>
+                </div>
+              </div>
             </div>
 
             {/* Right Column - Sticky */}
-            <div className="lg:sticky lg:top-6 lg:self-start space-y-6">
+            <div className="lg:sticky lg:top-6 lg:self-start space-y-4">
               {/* Event Image */}
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
                 <img
                   src={event.image}
                   alt={event.title}
@@ -733,157 +592,196 @@ export function EventDetailScreen({ eventId, onBack, onHostClick, isOwner = fals
                 />
               </div>
 
-              {/* Date Selection Pills */}
-              <div className="flex flex-wrap gap-2">
-                {upcomingDates.map((dateOption, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedDate(idx)}
-                    className={`px-4 py-2 rounded-full transition-all ${
-                      selectedDate === idx
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-foreground hover:bg-secondary'
-                    }`}
-                  >
-                    {dateOption.label}
-                  </button>
-                ))}
-              </div>
-
               {/* Event Info Card */}
-              <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+              <div className="bg-card border border-border rounded-xl p-4 space-y-3">
                 {/* Attendees Count */}
-                <div className="flex items-center gap-3 pb-3 border-b border-border">
-                  <Users className="w-5 h-5 text-primary flex-shrink-0" />
+                <div className="flex items-center gap-2 pb-2 border-b border-border">
+                  <Users className="w-4 h-4 text-primary flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Attendees</p>
-                    <p className="font-semibold">
+                    <p className="text-xs text-muted-foreground">Attendees</p>
+                    <p className="text-sm font-semibold">
                       {event.attendees} / {event.maxAttendees} people
                     </p>
-                  </div>
-                  <div className="flex -space-x-2">
-                    {[...Array(Math.min(3, event.attendees))].map((_, i) => (
-                      <div key={i} className="w-8 h-8 rounded-full bg-primary/20 border-2 border-background flex items-center justify-center">
-                        <span className="text-xs font-medium">{String.fromCharCode(65 + i)}</span>
-                      </div>
-                    ))}
                   </div>
                 </div>
 
                 {/* Date and Time */}
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <Calendar className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="space-y-2.5">
+                  <div className="flex items-start gap-2">
+                    <Calendar className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">Date & Time</p>
-                      <p>{event.date}</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">{event.time}</p>
+                      <p className="text-xs text-muted-foreground mb-0.5">Date & Time</p>
+                      <p className="text-sm">{event.date}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{event.time}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">Location</p>
-                      <p>{event.location}</p>
+                      <p className="text-xs text-muted-foreground mb-0.5">Location</p>
+                      <p className="text-sm">{event.streetAddress}</p>
                     </div>
                   </div>
 
-                  {event.type === 'group' && event.groupId && (
-                    <div className="flex items-start gap-3">
-                      <Users className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  {event.groupId && (
+                    <div className="flex items-start gap-2">
+                      <Users className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Event Type</p>
-                        <p>Group Event</p>
+                        <p className="text-xs text-muted-foreground mb-0.5">Event Type</p>
+                        <p className="text-sm">Group Event</p>
                       </div>
                     </div>
                   )}
 
-                  {event.type === 'personal' && event.hostName && (
-                    <div className="flex items-start gap-3">
-                      <User className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  {!event.groupId && event.hostName && (
+                    <div className="flex items-start gap-2">
+                      <User className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Event Type</p>
-                        <p>Personal Event by {event.hostName}</p>
+                        <p className="text-xs text-muted-foreground mb-0.5">Event Type</p>
+                        <p className="text-sm">Personal Event by {event.hostName}</p>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Join Button */}
-                <Button 
-                  className={`w-full h-12 ${
-                    event.attendees >= event.maxAttendees 
-                      ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-                      : 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                  }`}
-                  disabled={event.attendees >= event.maxAttendees}
-                >
-                  <Users className="w-5 h-5 mr-2" />
-                  {event.attendees >= event.maxAttendees ? 'Event Full' : 'Attend'}
-                </Button>
-
                 {/* Group/Host Info */}
-                {event.type === 'group' && event.groupId && (
-                  <div className="pt-4 border-t border-border">
-                    <p className="text-sm mb-2">Group Event</p>
-                    <p className="text-xs text-muted-foreground">
+                {event.groupId && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-xs mb-1">Group Event</p>
+                    <p className="text-[10px] text-muted-foreground">
                       Public group · Hosted by community
                     </p>
                   </div>
                 )}
 
-                {event.type === 'personal' && event.hostName && (
-                  <div className="pt-4 border-t border-border">
-                    <p className="text-sm mb-2">Personal Event</p>
-                    <p className="text-xs text-muted-foreground">
+                {!event.groupId && event.hostName && (
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-xs mb-1">Personal Event</p>
+                    <p className="text-[10px] text-muted-foreground">
                       Hosted by {event.hostName}
                     </p>
                   </div>
                 )}
               </div>
 
+              {/* Attendees Section */}
+              <div className="bg-card border border-border rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold">Attendees ({attendees.length})</h3>
+                  <button
+                    onClick={() => setIsAttendeesModalOpen(true)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    See all
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {attendees.slice(0, 8).map((attendee: any, idx: number) => {
+                    const getAvatarColor = (index: number) => {
+                      const colors = ['bg-pink-200', 'bg-purple-200', 'bg-blue-200', 'bg-green-200', 'bg-yellow-200', 'bg-red-200'];
+                      return colors[index % colors.length];
+                    };
+                    const getInitial = (name: string) => name.charAt(0).toUpperCase();
+
+                    return (
+                      <div key={attendee.id || idx} className="relative group">
+                        <div className={`w-10 h-10 rounded-full ${getAvatarColor(idx)} flex items-center justify-center`}>
+                          <span className="text-sm font-medium">{getInitial(attendee.name)}</span>
+                        </div>
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          {attendee.name}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {attendees.length > 8 && (
+                    <button
+                      onClick={() => setIsAttendeesModalOpen(true)}
+                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-medium text-xs hover:scale-110 transition-transform"
+                    >
+                      +{attendees.length - 8}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+                {/* Join Button */}
+                <Button
+                  className={`w-full h-10 text-sm ${
+                    event.attendees >= event.maxAttendees
+                      ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                      : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                  }`}
+                  disabled={event.attendees >= event.maxAttendees}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  {event.attendees >= event.maxAttendees ? 'Event Full' : 'Attend'}
+                </Button>
+
+
               {/* Share, Save and Report */}
-              <div className="flex gap-3">
-                <button className="flex-1 px-4 py-3 bg-muted rounded-lg hover:bg-secondary transition-colors flex items-center justify-center gap-2">
-                  <Share2 className="w-4 h-4" />
-                  <span className="text-sm">Share</span>
+              <div className="flex gap-2">
+                <button
+                  className="flex-1 px-3 py-2 bg-muted rounded-lg hover:bg-secondary transition-colors flex items-center justify-center gap-1.5"
+                  onClick={() =>
+                    openShareDialog({
+                      title: '이벤트 공유하기',
+                      description: '이벤트를 친구들과 공유하세요.',
+                      shareText: event?.title || '',
+                    })
+                  }
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span className="text-xs">Share</span>
                 </button>
-                <button className="flex-1 px-4 py-3 bg-muted rounded-lg hover:bg-secondary transition-colors flex items-center justify-center gap-2">
-                  <Heart className="w-4 h-4" />
-                  <span className="text-sm">Save</span>
+                <button
+                  className="flex-1 px-3 py-2 bg-muted rounded-lg hover:bg-secondary transition-colors flex items-center justify-center gap-1.5"
+                  onClick={toggleLike}
+                >
+                  {isLiked ? (
+                    <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500" />
+                  ) : (
+                    <Heart className="w-3.5 h-3.5" />
+                  )}
+                  <span className="text-xs">{isLiked ? 'Liked' : 'Like'}</span>
                 </button>
-                <button className="flex-1 px-4 py-3 bg-muted rounded-lg hover:bg-secondary transition-colors flex items-center justify-center gap-2">
-                  <Flag className="w-4 h-4" />
-                  <span className="text-sm">Report</span>
+                <button className="flex-1 px-3 py-2 bg-muted rounded-lg hover:bg-secondary transition-colors flex items-center justify-center gap-1.5">
+                  <Flag className="w-3.5 h-3.5" />
+                  <span className="text-xs">Report</span>
                 </button>
               </div>
             </div>
           </div>
+
         </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <>
-      {/* Mobile View */}
-      <div className="lg:hidden">
-        <MobileView />
-      </div>
-
-      {/* Desktop View */}
-      <div className="hidden lg:block">
-        <DesktopView />
+        </div>
       </div>
 
       {/* Photo Gallery Modal */}
       <PhotoGallery
-        photos={eventPhotos}
+        photos={photos.map((p: any) => p.url)}
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
         initialIndex={galleryStartIndex}
       />
+
+      {/* Attendees Modal */}
+      <MembersModal
+        isOpen={isAttendeesModalOpen}
+        onClose={() => setIsAttendeesModalOpen(false)}
+        members={attendees.map(attendee => ({
+          id: attendee.id || attendee.name,
+          name: attendee.name,
+          avatarUrl: attendee.avatarUrl,
+          status: attendee.status
+        }))}
+        title="Event Attendees"
+        onMemberClick={onHostClick}
+      />
+
+      {/* Share Dialog */}
+      <ShareDialog />
     </>
   );
 }

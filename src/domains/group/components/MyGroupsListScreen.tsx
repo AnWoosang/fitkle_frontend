@@ -1,10 +1,11 @@
 'use client';
 
 import { Users, Calendar, MapPin, Star, Award, Edit } from 'lucide-react';
-import { BackButton } from '@/shared/components/BackButton';
-import { groups } from '@/data/groups';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useMyGroups } from '../hooks/useMyGroups';
+import { useAuthUtils } from '@/domains/auth/hooks/useAuthQueries';
+import type { Group } from '../types/group';
 
 interface MyGroupsListScreenProps {
   onBack: () => void;
@@ -12,13 +13,27 @@ interface MyGroupsListScreenProps {
   initialFilter?: 'created' | 'joined';
 }
 
-export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'created' }: MyGroupsListScreenProps) {
+export function MyGroupsListScreen({ onBack: _onBack, onGroupClick, initialFilter = 'created' }: MyGroupsListScreenProps) {
   const [activeTab, setActiveTab] = useState<'created' | 'joined'>(initialFilter);
 
-  // Mock data - 실제로는 사용자가 참여한 그룹만 필터링
-  const createdGroups = groups.slice(0, 4);
-  const joinedGroups = groups.slice(4, 12);
+  // initialFilter가 변경되면 activeTab도 업데이트 (URL 변경 시)
+  useEffect(() => {
+    setActiveTab(initialFilter);
+  }, [initialFilter]);
 
+  // 인증 체크
+  const { user, isAuthenticated, isLoading: authLoading } = useAuthUtils();
+
+  // 내 그룹 조회 (호스트인 그룹 + 멤버로 참여 중인 그룹)
+  const { data: myGroups = [], isLoading: groupsLoading } = useMyGroups({
+    enabled: isAuthenticated, // 인증된 경우에만 실행
+  });
+
+  // 탭별 필터링
+  const createdGroups = myGroups.filter(g => g.hostId === user?.id);
+  const joinedGroups = myGroups.filter(g => g.hostId !== user?.id);
+
+  // 통계 데이터 (실제 값으로 계산)
   const stats = [
     {
       icon: Users,
@@ -29,19 +44,56 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
     },
     {
       icon: Calendar,
-      label: 'Events Joined',
-      value: '36',
+      label: 'Created Groups',
+      value: createdGroups.length.toString(),
       color: 'bg-gradient-to-br from-accent-sage to-accent-sage/80',
       iconBg: 'bg-accent-sage/20',
     },
     {
       icon: Award,
-      label: 'Active Member',
-      value: '5',
+      label: 'Joined Groups',
+      value: joinedGroups.length.toString(),
       color: 'bg-gradient-to-br from-accent-rose to-accent-rose/80',
       iconBg: 'bg-accent-rose/20',
     },
   ];
+
+  // 로딩 상태
+  const isLoading = authLoading || groupsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">그룹을 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 비인증 상태 처리
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center px-6">
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 mx-auto">
+            <Users className="w-10 h-10 text-primary" />
+          </div>
+          <h3 className="text-xl mb-2">로그인이 필요합니다</h3>
+          <p className="text-sm text-muted-foreground mb-6">
+            내 그룹을 확인하려면 로그인해주세요
+          </p>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+          >
+            홈으로 가기
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const getActivityColor = (eventCount: number) => {
     if (eventCount >= 15) return 'bg-emerald-500';
@@ -55,7 +107,7 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
     return 'New';
   };
 
-  const GroupCard = ({ group, isOwner = false }: { group: typeof groups[0], isOwner?: boolean }) => (
+  const GroupCard = ({ group, isOwner = false }: { group: Group, isOwner?: boolean }) => (
     <button
       onClick={() => onGroupClick(group.id, isOwner)}
       className="relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/40 hover:shadow-lg transition-all duration-300 text-left group"
@@ -110,7 +162,7 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
         {/* Category Badge */}
         <div className="mb-1.5 lg:mb-2">
           <span className="inline-block text-[10px] lg:text-xs px-2 py-0.5 lg:px-2.5 lg:py-1 bg-primary/10 text-primary rounded-lg font-medium">
-            {group.category}
+            {group.categoryName || group.categoryCode || 'Category'}
           </span>
         </div>
 
@@ -135,42 +187,8 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
 
   return (
     <div className="flex flex-col min-h-full bg-background">
-      {/* Mobile Header */}
-      <div className="lg:hidden bg-gradient-to-b from-background via-background to-background/95 backdrop-blur-sm">
-        <div className="flex items-center gap-3 px-4 pt-4 pb-2">
-          <BackButton onClick={onBack} />
-          <div className="flex-1">
-            <h1 className="text-xl">My Groups</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Your communities
-            </p>
-          </div>
-        </div>
-
-        {/* Stats Cards - Mobile */}
-        <div className="px-4 py-4">
-          <div className="grid grid-cols-3 gap-2">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div
-                  key={index}
-                  className="relative overflow-hidden rounded-2xl p-3 border border-border/50 bg-card"
-                >
-                  <div className={`w-9 h-9 rounded-xl ${stat.iconBg} flex items-center justify-center mb-2`}>
-                    <Icon className="w-4 h-4 text-primary" />
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-0.5 leading-tight">{stat.label}</p>
-                  <p className="text-lg font-semibold text-foreground">{stat.value}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Header */}
-      <div className="hidden lg:block bg-white">
+      {/* Header */}
+      <div className="bg-white">
         <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 py-5 max-w-[1600px] mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -207,20 +225,8 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
       {/* Tabs & Groups Grid */}
       <div className="flex-1">
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'created' | 'joined')}>
-          {/* Mobile Tabs */}
-          <div className="lg:hidden px-4 pt-2">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="created" className="rounded-xl">
-                내가 만든
-              </TabsTrigger>
-              <TabsTrigger value="joined" className="rounded-xl">
-                가입한
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Desktop Tabs */}
-          <div className="hidden lg:block bg-background">
+          {/* Tabs */}
+          <div className="bg-background">
             <div className="px-8 lg:px-24 xl:px-32 2xl:px-40 max-w-[1600px] mx-auto">
               <TabsList className="bg-transparent border-0 p-0 h-auto">
                 <TabsTrigger
@@ -239,7 +245,7 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
             </div>
           </div>
 
-          <TabsContent value="created" className="mt-0 px-4 lg:px-24 xl:px-32 2xl:px-40 py-4 lg:py-6 pb-24 lg:pb-6">
+          <TabsContent value="created" className="mt-0 px-8 lg:px-24 xl:px-32 2xl:px-40 py-6 pb-6">
             <div className="max-w-[1600px] mx-auto">
               {createdGroups.length > 0 ? (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
@@ -261,7 +267,7 @@ export function MyGroupsListScreen({ onBack, onGroupClick, initialFilter = 'crea
             </div>
           </TabsContent>
 
-          <TabsContent value="joined" className="mt-0 px-4 lg:px-24 xl:px-32 2xl:px-40 py-4 lg:py-6 pb-24 lg:pb-6">
+          <TabsContent value="joined" className="mt-0 px-8 lg:px-24 xl:px-32 2xl:px-40 py-6 pb-6">
             <div className="max-w-[1600px] mx-auto">
               {joinedGroups.length > 0 ? (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">

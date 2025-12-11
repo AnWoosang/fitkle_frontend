@@ -3,7 +3,6 @@
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MyEventsListScreen } from '@/domains/event';
-import { ResponsiveLayout } from '@/shared/layout';
 
 function MyEventsContent() {
   const router = useRouter();
@@ -19,29 +18,10 @@ function MyEventsContent() {
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showBackButton: true,
-        onBack: handleBack,
-        title: 'My Events',
-      }}
-      webLayoutProps={{
-        maxWidth: 'wide',
-      }}
-      mobileContent={
-        <MyEventsListScreen
-          initialFilter={filter}
-          onBack={handleBack}
-          onEventClick={handleEventClick}
-        />
-      }
-      webContent={
-        <MyEventsListScreen
-          initialFilter={filter}
-          onBack={handleBack}
-          onEventClick={handleEventClick}
-        />
-      }
+    <MyEventsListScreen
+      initialFilter={filter}
+      onBack={handleBack}
+      onEventClick={handleEventClick}
     />
   );
 }
