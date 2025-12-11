@@ -70,19 +70,11 @@ export function EditGroupScreen({ groupId, onBack, onUpdate }: EditGroupScreenPr
 
   return (
     <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain">
-      {/* Mobile Header */}
-      <div className="lg:hidden sticky top-0 left-0 right-0 z-20 px-4 pt-4 pb-3 bg-gradient-to-b from-background via-background to-transparent backdrop-blur-sm border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <BackButton onClick={onBack} className="bg-card" />
-          <h1 className="text-xl">그룹 수정</h1>
-        </div>
-      </div>
-
       {/* Desktop Layout */}
       <div className="flex-1">
         <div className="max-w-4xl mx-auto px-4 lg:px-8 py-6 lg:py-8">
           {/* Desktop Header */}
-          <div className="hidden lg:flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-4 mb-8">
             <BackButton onClick={onBack} className="bg-card" />
             <div>
               <h1 className="text-3xl">그룹 수정</h1>

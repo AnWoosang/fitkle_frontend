@@ -1,53 +1,28 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { SignupScreen } from '@/domains/user';
-import { ResponsiveLayout } from '@/shared/layout';
+import { Suspense } from 'react';
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handleSignup = (
-    name: string,
-    email: string,
-    password: string,
-    country: string
-  ) => {
-    console.log('Signup:', name, email, password, country);
+  // URL 쿼리 파라미터를 key로 사용하여 강제 리마운트
+  // 매번 랜덤 쿼리가 없어도 페이지 경로가 바뀔 때마다 리마운트됨
+  const resetKey = searchParams.get('reset') || 'default';
+
+  const handleBack = () => {
     router.push('/');
   };
 
-  const handleLoginClick = () => {
-    router.push('/login');
-  };
+  return <SignupScreen key={resetKey} onBack={handleBack} />;
+}
 
-  const handleBack = () => {
-    router.back();
-  };
-
+export default function SignupPage() {
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showLogo: true,
-        stickyHeader: false,
-      }}
-      webLayoutProps={{
-        maxWidth: 'default',
-      }}
-      mobileContent={
-        <SignupScreen
-          onSignup={handleSignup}
-          onLoginClick={handleLoginClick}
-          onBack={handleBack}
-        />
-      }
-      webContent={
-        <SignupScreen
-          onSignup={handleSignup}
-          onLoginClick={handleLoginClick}
-          onBack={handleBack}
-        />
-      }
-    />
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignupContent />
+    </Suspense>
   );
 }

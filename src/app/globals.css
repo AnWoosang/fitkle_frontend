@@ -1,5 +1,5 @@
-@import "~slick-carousel/slick/slick.css";
-@import "~slick-carousel/slick/slick-theme.css";
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
 
 @tailwind base;
 @tailwind components;
@@ -10,37 +10,37 @@
     --font-size: 16px;
 
     /* Core Colors */
-    --background: #fafbf7;
-    --foreground: #2d3319;
-    --card: #ffffff;
-    --card-foreground: #2d3319;
-    --popover: #ffffff;
-    --popover-foreground: #1a1a1a;
+    --background: 250 251 247;
+    --foreground: 45 51 25;
+    --card: 255 255 255;
+    --card-foreground: 45 51 25;
+    --popover: 255 255 255;
+    --popover-foreground: 26 26 26;
 
     /* Primary Sage Green Theme */
-    --primary: #9eb384;
-    --primary-foreground: #ffffff;
-    --accent-sage: #c8d5b9;
-    --accent-rose: #e8c4c4;
-    --accent-rose-dark: #d4999b;
+    --primary: 158 179 132;
+    --primary-foreground: 255 255 255;
+    --accent-sage: 200 213 185;
+    --accent-rose: 232 196 196;
+    --accent-rose-dark: 212 153 155;
 
     /* Secondary & Accents */
-    --secondary: #f9f5fc;
-    --secondary-foreground: #1a1a1a;
-    --muted: #f5f2f7;
-    --muted-foreground: #6b6b6b;
-    --accent: #fff0f7;
-    --accent-foreground: #1a1a1a;
+    --secondary: 249 245 252;
+    --secondary-foreground: 26 26 26;
+    --muted: 245 242 247;
+    --muted-foreground: 107 107 107;
+    --accent: 255 240 247;
+    --accent-foreground: 26 26 26;
 
     /* Destructive */
-    --destructive: #d4183d;
-    --destructive-foreground: #ffffff;
+    --destructive: 212 24 61;
+    --destructive-foreground: 255 255 255;
 
     /* Borders & Inputs */
-    --border: #efe8f3;
+    --border: 239 232 243;
     --input: transparent;
-    --input-background: #ffffff;
-    --ring: #9eb384;
+    --input-background: 255 255 255;
+    --ring: 158 179 132;
 
     /* Border Radius */
     --radius: 0.75rem;
@@ -59,6 +59,7 @@
   html,
   body {
     height: 100%;
+    min-width: 768px;
   }
 
   body {
@@ -88,6 +89,16 @@
 }
 
 @layer utilities {
+  /* Scrollbar Hide */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
   /* iPhone Safe Area Support */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);

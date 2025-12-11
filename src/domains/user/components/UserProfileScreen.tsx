@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
 import { EventCard } from '@/domains/event/components/EventCard';
-import { events } from '@/data/events';
 import { BackButton } from '@/shared/components/BackButton';
 
 interface UserProfileScreenProps {
@@ -90,8 +89,8 @@ export function UserProfileScreen({ userId, onBack, onEventClick, onChatClick }:
     },
   ];
 
-  // Filter events
-  const upcomingEvents = events.slice(0, 3);
+  // Mock events - 실제로는 API에서 가져와야 함
+  const upcomingEvents: any[] = [];
 
   return (
     <div className="flex flex-col h-full bg-background overflow-y-auto overscroll-contain pb-6">

@@ -485,26 +485,13 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile Header */}
-      <div className="lg:hidden sticky top-0 z-10 bg-white border-b border-border px-4 py-3">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="p-2 -ml-2 hover:bg-secondary rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h2>설정</h2>
-        </div>
-      </div>
-
       {/* Desktop & Mobile Layout */}
       <div className="max-w-7xl mx-auto">
-        <div className="lg:flex lg:gap-0">
+        <div className="flex gap-0">
           {/* Sidebar */}
-          <div className="lg:w-72 lg:border-r border-border bg-white lg:min-h-screen">
+          <div className="w-72 border-r border-border bg-white min-h-screen">
             {/* Desktop Back Button */}
-            <div className="hidden lg:block border-b border-border px-6 py-4">
+            <div className="block border-b border-border px-6 py-4">
               <button
                 onClick={onBack}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -539,7 +526,7 @@ export function SettingsScreen({ onBack }: SettingsScreenProps) {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 p-6 lg:p-12">
+          <div className="flex-1 p-12">
             {renderContent()}
           </div>
         </div>

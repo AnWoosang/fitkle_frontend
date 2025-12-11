@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { CreateGroupScreen } from '@/domains/group';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function CreateGroupPage() {
   const router = useRouter();
@@ -17,25 +16,9 @@ export default function CreateGroupPage() {
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showBottomNav: true,
-      }}
-      webLayoutProps={{
-        maxWidth: 'wide',
-      }}
-      mobileContent={
-        <CreateGroupScreen
-          onCreate={handleCreateGroup}
-          onBack={handleBack}
-        />
-      }
-      webContent={
-        <CreateGroupScreen
-          onCreate={handleCreateGroup}
-          onBack={handleBack}
-        />
-      }
+    <CreateGroupScreen
+      onCreate={handleCreateGroup}
+      onBack={handleBack}
     />
   );
 }

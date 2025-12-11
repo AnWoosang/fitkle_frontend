@@ -11,70 +11,52 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import regionsData from '@/assets/regions.json';
 
 interface LocationFilterProps {
-  selectedLocation: string;
-  onLocationChange: (location: string) => void;
+  value: string;
+  onChange: (location: string) => void;
 }
 
-const locations = {
-  '서울': [
-    '강남구', '강동구', '강북구', '강서구', '관악구', 
-    '광진구', '구로구', '금천구', '노원구', '도봉구',
-    '동대문구', '동작구', '마포구', '서대문구', '서초구',
-    '성동구', '성북구', '송파구', '양천구', '영등포구',
-    '용산구', '은평구', '종로구', '중구', '중랑구'
-  ],
-  '경기': [
-    '수원시', '성남시', '고양시', '용인시', '부천시',
-    '안산시', '안양시', '남양주시', '화성시', '평택시'
-  ],
-  '인천': ['전체'],
-  '부산': ['전체'],
-  '대구': ['전체'],
-  '대전': ['전체'],
-  '광주': ['전체'],
-};
+// regions.json 데이터를 사용
+const locations = regionsData as Record<string, string[]>;
 
-export function LocationFilter({ selectedLocation, onLocationChange }: LocationFilterProps) {
+export function LocationFilter({ value, onChange }: LocationFilterProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg hover:bg-secondary/50 transition-colors">
           <MapPin className="w-4 h-4 text-muted-foreground" />
-          <span>{selectedLocation}</span>
+          <span className="text-sm">{value}</span>
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-48">
-        <DropdownMenuItem onClick={() => onLocationChange('전체 지역')}>
+      <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuItem onClick={() => onChange('전체 지역')}>
           전체 지역
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {Object.entries(locations).map(([city, districts]) => (
-          districts.length === 1 && districts[0] === '전체' ? (
-            <DropdownMenuItem key={city} onClick={() => onLocationChange(city)}>
-              {city}
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuSub key={city}>
-              <DropdownMenuSubTrigger>{city}</DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="max-h-96 overflow-y-auto">
-                <DropdownMenuItem onClick={() => onLocationChange(city)}>
-                  {city} 전체
+        {Object.entries(locations).map(([province, districts]) => (
+          <DropdownMenuSub key={province}>
+            <DropdownMenuSubTrigger className="text-sm">
+              {province}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="max-h-96 overflow-y-auto w-48">
+              <DropdownMenuItem onClick={() => onChange(province)}>
+                {province} 전체
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {districts.map((district) => (
+                <DropdownMenuItem
+                  key={district}
+                  onClick={() => onChange(`${province} ${district}`)}
+                  className="text-sm"
+                >
+                  {district}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {districts.map((district) => (
-                  <DropdownMenuItem
-                    key={district}
-                    onClick={() => onLocationChange(`${city} ${district}`)}
-                  >
-                    {district}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          )
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

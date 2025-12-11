@@ -64,7 +64,7 @@ export function ScreenGallery({ onScreenSelect, onClose }: ScreenGalleryProps) {
       icon: FileText,
       color: 'from-indigo-500 to-indigo-600',
       category: 'Detail Screens',
-      params: { eventId: '21' }
+      params: { eventId: 'c610e78f-8377-447e-9d3d-20bfed978d72' }
     },
     {
       id: 'userProfile',

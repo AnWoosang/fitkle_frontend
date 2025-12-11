@@ -105,3 +105,6 @@ Hãy cùng nhau xây dựng một cộng đồng ấm áp và hòa nhập! 🌈`
     readTime: '3 min read',
   },
 ];
+
+// Legacy export for backward compatibility
+export const news = newsPosts;

@@ -1,3 +1,4 @@
+export { GroupCard } from './GroupCard';
 export { GroupsScreen } from './GroupsScreen';
 export { GroupDetailScreen } from './GroupDetailScreen';
 export { CreateGroupScreen } from './CreateGroupScreen';

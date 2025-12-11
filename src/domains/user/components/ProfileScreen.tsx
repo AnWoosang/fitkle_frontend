@@ -1,8 +1,7 @@
 "use client";
 
-import { Edit2, MapPin, Calendar, Globe, Mail, Sparkles, Users, Heart, Shield, TrendingUp, Award, HelpCircle, CheckCircle } from 'lucide-react';
-import { useState } from 'react';
-import { ProfileEditScreen } from './ProfileEditScreen';
+import { Edit2, MapPin, Calendar, Globe, Mail, Sparkles, Users, Heart, Shield, HelpCircle, CheckCircle2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -11,6 +10,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/shared/components/ui/tooltip';
+import { useProfile } from '../hooks';
+import type { TrustLevel } from '../types/user';
 
 interface ProfileScreenProps {
   onLogout?: () => void;
@@ -20,290 +21,265 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({}: ProfileScreenProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  
-  // Profile state
-  const [profile, setProfile] = useState({
-    name: 'Tony',
-    email: 'show19971002@gmail.com',
-    location: 'Seoul, KR',
-    nationality: '🇺🇸 United States',
-    memberSince: 'Oct 2025',
-    groups: 2,
-    interests: 6,
-    bio: '안녕하세요! 서울에서 새로운 친구들을 만나고 다양한 활동을 즐기는 것을 좋아합니다. 카페 투어, 하이킹, 문화 체험 등 재미있는 것이라면 무엇이든 환영입니다! 😊',
-    // Trust Score System
-    trustScore: 92,
-    attendanceRate: 95,
-    eventsAttended: 18,
-    totalRSVPs: 19,
-    trustLevel: 'Excellent' as 'Excellent' | 'Good' | 'Fair' | 'Poor',
-  });
+  const router = useRouter();
 
-  const handleSaveProfile = (updatedProfile: { bio: string; lookingFor: string[]; tags: string[] }) => {
-    setProfile(prev => ({ ...prev, ...updatedProfile }));
-    setIsEditing(false);
+  // 커스텀 훅으로 프로필 데이터 관리
+  const { data: profile, isLoading } = useProfile();
+
+  // 편집 페이지로 이동
+  const handleEditClick = () => {
+    router.push('/profile/edit');
   };
 
-  if (isEditing) {
+  // 로딩 중일 때
+  if (isLoading) {
     return (
-      <ProfileEditScreen
-        onBack={() => setIsEditing(false)}
-        currentProfile={{
-          bio: '',
-          lookingFor: [],
-          tags: [],
-        }}
-        onSave={handleSaveProfile}
-      />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">프로필을 불러오는 중...</p>
+        </div>
+      </div>
     );
   }
 
-  const myInterests = ['Social', 'Outdoors', 'New In Town', 'Make New Friends', 'Fun Times', 'Social Networking'];
-  
-  const myGroups = [
-    {
-      id: '1',
-      name: 'Darklight_Seoul',
-      image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400',
-      members: 342,
-    },
-    {
-      id: '2',
-      name: 'Seoul Social and Wellness Meetup',
-      image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400',
-      members: 156,
-    },
-  ];
+  // 프로필이 없을 때
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">프로필을 불러올 수 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Trust Score 관련 유틸 함수
+  const getTrustColor = (score: number | undefined) => {
+    if (!score) return 'from-gray-400 to-gray-500';
+    if (score >= 90) return 'from-green-500 to-emerald-600';
+    if (score >= 70) return 'from-blue-500 to-cyan-600';
+    if (score >= 50) return 'from-yellow-500 to-orange-500';
+    return 'from-red-500 to-pink-600';
+  };
+
+  const getTrustEmoji = (level: TrustLevel | undefined) => {
+    if (!level) return '❓';
+    switch (level) {
+      case 'Excellent': return '🌟';
+      case 'Good': return '👍';
+      case 'Fair': return '⚠️';
+      default: return '⛔';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-6 lg:px-8 lg:py-10">
-        {/* Profile Header */}
-        <div className="bg-card rounded-3xl p-6 lg:p-8 border border-border/30 shadow-sm mb-6">
-          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6">
-            {/* Avatar */}
-            <div className="relative flex-shrink-0">
-              <div className="w-32 h-32 lg:w-36 lg:h-36 rounded-full bg-gradient-to-br from-accent-rose via-accent-rose/80 to-accent-rose-dark flex items-center justify-center shadow-lg ring-4 ring-white">
-                <span className="text-5xl lg:text-6xl text-white">T</span>
-              </div>
-              <button 
-                onClick={() => setIsEditing(true)}
-                className="absolute bottom-0 right-0 w-10 h-10 bg-primary rounded-full border-4 border-white flex items-center justify-center hover:bg-primary/90 transition-all shadow-lg hover:scale-110"
-              >
-                <Edit2 className="w-4 h-4 text-white" />
-              </button>
-            </div>
-
-            {/* Profile Info */}
-            <div className="flex-1 text-center lg:text-left">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-                <h2>{profile.name}</h2>
+      {/* Hero Header Banner */}
+      <div className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-accent-sage/20 border-b border-border/30">  
+        <div className="max-w-6xl mx-auto px-4 lg:px-8 py-8">
+          <div className="flex items-center justify-between gap-6">
+            {/* Avatar and Name */}
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-accent-rose via-accent-rose/80 to-accent-rose-dark flex items-center justify-center shadow-xl ring-4 ring-white/50">
+                  <span className="text-4xl text-white">T</span>
+                </div>
                 <button
-                  onClick={() => setIsEditing(true)}
-                  className="text-sm text-primary hover:text-primary/80 transition-all flex items-center justify-center lg:justify-start gap-2 px-4 py-2 bg-primary/5 rounded-xl hover:bg-primary/10 border border-primary/20"
+                  onClick={handleEditClick}
+                  className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full border-2 border-white flex items-center justify-center hover:bg-primary/90 transition-all shadow-lg hover:scale-110"
                 >
-                  <Edit2 className="w-4 h-4" />
-                  Edit profile
+                  <Edit2 className="w-3.5 h-3.5 text-white" />
                 </button>
               </div>
-
-              {/* Basic Info Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-                <div className="flex items-center justify-center lg:justify-start gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="truncate">{profile.email}</span>
-                </div>
-                <div className="flex items-center justify-center lg:justify-start gap-2 text-sm text-muted-foreground">
-                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span>{profile.location}</span>
-                </div>
-                <div className="flex items-center justify-center lg:justify-start gap-2 text-sm text-muted-foreground">
-                  <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
+              <div>
+                <h1 className="text-2xl font-bold mb-1">{profile.name}</h1>
+                <p className="text-sm text-muted-foreground">@{profile.name.toLowerCase()}</p>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                  <Calendar className="w-3 h-3" />
                   <span>Joined {profile.memberSince}</span>
                 </div>
-                <div className="flex items-center justify-center lg:justify-start gap-2 text-sm text-muted-foreground">
+              </div>
+            </div>
+
+            {/* Edit Button */}
+            <button
+              onClick={handleEditClick}
+              className="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-xl hover:bg-white transition-all border border-border/30 shadow-md hover:shadow-lg"
+            >
+              <Edit2 className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Edit profile</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content - 2단 레이아웃 */}
+      <div className="max-w-6xl mx-auto px-4 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* 기본 정보 Card */}
+            <div className="bg-card rounded-2xl p-5 border border-border/30 shadow-sm">
+              <h3 className="font-semibold mb-4">기본 정보</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                  <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">이메일</p>
+                    <p className="text-xs font-medium truncate">{profile.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">위치</p>
+                    <p className="text-xs font-medium">{profile.location}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
                   <Globe className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span>{profile.nationality}</span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">국적</p>
+                    <p className="text-xs font-medium">{profile.nationality}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                  <Users className="w-4 h-4 text-primary flex-shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">그룹</p>
+                    <p className="text-xs font-medium">{profile.groups}개 참여 중</p>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Trust Score */}
-              <div className="pt-5 mt-5 border-t border-border/30">
-                <TooltipProvider>
-                  <div className="space-y-4">
-                    {/* Trust Score Header */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Shield className="w-4 h-4 text-primary" />
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm text-foreground">Trust Score</span>
+            {/* About Me */}
+            <div className="bg-card rounded-2xl p-5 border border-border/30 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="font-semibold">About me</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {profile.bio}
+              </p>
+            </div>
+
+            {/* My Interests */}
+            <div className="bg-card rounded-2xl p-5 border border-border/30 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Heart className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="font-semibold">My interests <span className="text-sm text-muted-foreground">({profile.interests})</span></h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {profile.interestsList && profile.interestsList.length > 0 ? (
+                  profile.interestsList.map((interest) => (
+                    <Badge
+                      key={interest.id}
+                      variant="outline"
+                      className="px-3 py-1 text-xs bg-primary/5 border-primary/20 text-primary hover:bg-primary/10 cursor-pointer transition-all"
+                    >
+                      {interest.emoji && `${interest.emoji} `}{interest.name_ko}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">관심사를 추가해주세요.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Find Your People Banner */}
+            <div className="bg-gradient-to-br from-accent-sage/30 via-primary/10 to-accent-sage/20 rounded-2xl p-5 border border-primary/20 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+
+              <div className="relative flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="text-4xl group-hover:scale-110 transition-transform">👋</div>
+                  <div>
+                    <h3 className="text-sm font-semibold mb-0.5">Find your people</h3>
+                    <p className="text-xs text-muted-foreground">Join a new group near you!</p>
+                  </div>
+                </div>
+                <Button className="bg-primary text-white hover:bg-primary/90 rounded-full px-4 py-2 text-sm shadow-md hover:shadow-lg transition-all">
+                  Explore
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="space-y-6">
+            {/* Trust Score Card */}
+            <div className="bg-card rounded-2xl p-5 border border-border/30 shadow-sm">
+              <TooltipProvider>
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getTrustColor(profile.trustScore)} flex items-center justify-center shadow-lg`}>
+                        <Shield className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-medium">Trust Score</span>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <button className="text-muted-foreground hover:text-primary transition-colors">
                                 <HelpCircle className="w-3.5 h-3.5" />
                               </button>
                             </TooltipTrigger>
-                            <TooltipContent className="max-w-xs p-3 bg-card border-primary/20">
+                            <TooltipContent className="max-w-xs p-3 bg-black text-white border-black">
                               <div className="space-y-2">
-                                <p className="text-sm">
-                                  <strong>신뢰도 점수란?</strong>
+                                <p className="text-xs font-medium">신뢰도 점수란?</p>
+                                <p className="text-xs text-gray-300">
+                                  RSVP 후 실제 참석률을 기반으로 계산됩니다.
                                 </p>
-                                <p className="text-xs text-muted-foreground leading-relaxed">
-                                  RSVP 후 실제 참석률을 기반으로 계산됩니다. 노쇼 시 점수가 감소하며, 꾸준히 참석하면 높은 신뢰도를 유지할 수 있습니다.
-                                </p>
-                                <div className="pt-2 border-t border-border/50 space-y-1 text-xs">
-                                  <p><strong>90-100점:</strong> Excellent 🌟</p>
-                                  <p><strong>70-89점:</strong> Good 👍</p>
-                                  <p><strong>50-69점:</strong> Fair ⚠️</p>
-                                  <p><strong>0-49점:</strong> Poor ⛔</p>
-                                </div>
                               </div>
                             </TooltipContent>
                           </Tooltip>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-2xl text-primary">{profile.trustScore}</div>
-                        <Badge variant="secondary" className="bg-primary/10 text-primary border-0">
-                          <Award className="w-3 h-3 mr-1" />
-                          {profile.trustLevel}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary transition-all duration-700"
-                          style={{ width: `${profile.trustScore}%` }}
-                        />
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-2xl font-bold text-primary">{profile.trustScore}</span>
+                          <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                            {getTrustEmoji(profile.trustLevel)} {profile.trustLevel}
+                          </span>
+                        </div>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="cursor-help">
-                            <div className="flex items-center gap-1.5 mb-1 text-muted-foreground">
-                              <TrendingUp className="w-3.5 h-3.5" />
-                              <span className="text-xs">참석률</span>
-                            </div>
-                            <div className="text-xl text-foreground">{profile.attendanceRate}<span className="text-sm text-muted-foreground ml-0.5">%</span></div>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">RSVP한 이벤트 중 실제 참석한 비율입니다.</p>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="cursor-help">
-                            <div className="flex items-center gap-1.5 mb-1 text-muted-foreground">
-                              <CheckCircle className="w-3.5 h-3.5" />
-                              <span className="text-xs">참석</span>
-                            </div>
-                            <div className="text-xl text-foreground">{profile.eventsAttended}<span className="text-sm text-muted-foreground ml-0.5">/ {profile.totalRSVPs}</span></div>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">참석한 이벤트 / 전체 RSVP 이벤트</p>
-                        </TooltipContent>
-                      </Tooltip>
+                  {/* Progress Bar */}
+                  <div>
+                    <div className="h-2.5 bg-muted rounded-full overflow-hidden shadow-inner">
+                      <div
+                        className={`h-full bg-gradient-to-r ${getTrustColor(profile.trustScore)} transition-all duration-700`}
+                        style={{ width: `${profile.trustScore}%` }}
+                      />
                     </div>
                   </div>
-                </TooltipProvider>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Content Sections */}
-        <div className="space-y-6">
-          {/* About Me */}
-          <div className="bg-card rounded-3xl p-6 lg:p-7 border border-border/30 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h2>About me</h2>
-            </div>
-            <p className="text-muted-foreground leading-relaxed">
-              {profile.bio}
-            </p>
-          </div>
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Attendance Rate */}
+                    <div className="flex flex-col items-center p-3 rounded-xl bg-muted/20 border border-border/30">
+                      <CheckCircle2 className="w-4 h-4 text-rose-400 mb-1.5" />
+                      <span className="text-xs text-muted-foreground mb-1">Attendance</span>
+                      <span className="text-xs font-semibold">{profile.attendanceRate}%</span>
+                    </div>
 
-          {/* My Interests */}
-          <div className="bg-card rounded-3xl p-6 lg:p-7 border border-border/30 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-2 mb-5">
-              <Heart className="w-5 h-5 text-primary" />
-              <h2>My interests <span className="text-muted-foreground">({profile.interests})</span></h2>
-            </div>
-            <div className="flex flex-wrap gap-2.5">
-              {myInterests.map((interest, idx) => (
-                <Badge
-                  key={idx}
-                  variant="secondary"
-                  className="bg-gradient-to-r from-muted to-muted/80 hover:from-primary/10 hover:to-primary/5 text-foreground border border-border/50 px-4 py-2.5 cursor-pointer transition-all hover:scale-105 hover:shadow-sm"
-                >
-                  {interest}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* My Groups */}
-          <div className="bg-card rounded-3xl p-6 lg:p-7 border border-border/30 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-2 mb-5">
-              <Users className="w-5 h-5 text-primary" />
-              <h2>내 그룹 <span className="text-muted-foreground">({profile.groups})</span></h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {myGroups.map((group) => (
-                <button
-                  key={group.id}
-                  onClick={() => {}}
-                  className="text-left bg-gradient-to-br from-muted/30 to-muted/10 rounded-2xl overflow-hidden hover:from-primary/5 hover:to-primary/10 transition-all border border-border/40 hover:border-primary/30 group hover:shadow-md"
-                >
-                  <div className="aspect-[16/9] bg-gradient-to-br from-gray-200 to-gray-300 relative overflow-hidden">
-                    <img 
-                      src={group.image} 
-                      alt={group.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  </div>
-                  <div className="p-4">
-                    <p className="text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">{group.name}</p>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{group.members} members</span>
+                    {/* Total RSVPs */}
+                    <div className="flex flex-col items-center p-3 rounded-xl bg-muted/20 border border-border/30">
+                      <CheckCircle2 className="w-4 h-4 text-rose-400 mb-1.5" />
+                      <span className="text-xs text-muted-foreground mb-1">RSVP</span>
+                      <span className="text-xs font-semibold">{profile.totalRSVPs}</span>
                     </div>
                   </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Find Your People Banner */}
-          <div className="bg-gradient-to-br from-accent-sage/30 via-primary/10 to-accent-sage/20 rounded-3xl p-6 lg:p-8 border border-primary/20 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-            {/* Decorative elements */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
-            
-            <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="text-5xl group-hover:scale-110 transition-transform">👋</div>
-                <div>
-                  <h3 className="mb-1">Find your people</h3>
-                  <p className="text-sm text-muted-foreground">Join a new group near you!</p>
                 </div>
-              </div>
-              <Button className="bg-primary text-white hover:bg-primary/90 rounded-full px-6 py-2.5 shadow-md hover:shadow-lg transition-all whitespace-nowrap">
-                Explore
-              </Button>
+              </TooltipProvider>
             </div>
           </div>
         </div>

@@ -1,16 +1,39 @@
 "use client";
 
-import { groups } from '@/data/groups';
 import { BackButton } from '@/shared/components/BackButton';
+import { MultiImageUploader } from '@/shared/components';
 import { Button } from '@/shared/components/ui/button';
-import { Checkbox } from '@/shared/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { Calendar, Clock, Search, Users, Wifi } from 'lucide-react';
 import { useState } from 'react';
+import { getCoordinatesFromAddress } from '@/utils/kakao';
+import { useAuthUtils } from '@/domains/auth';
+import { useUIStore } from '@/shared/store';
+import { uploadImagesToStorage } from '@/shared/utils/uploadImages';
+import { useEventCategories } from '@/shared/hooks';
+import { useMyGroups } from '@/domains/group/hooks';
+import type { CategoryCode } from '@/shared/types';
+
+// Daum Postcode 타입 정의
+declare global {
+  interface Window {
+    daum: {
+      Postcode: new (options: {
+        oncomplete: (data: {
+          roadAddress: string;
+          jibunAddress: string;
+          zonecode: string;
+          buildingName: string;
+        }) => void;
+      }) => {
+        open: () => void;
+      };
+    };
+  }
+}
 
 interface CreateEventScreenProps {
   onBack: () => void;
@@ -18,66 +41,181 @@ interface CreateEventScreenProps {
 }
 
 export function CreateEventScreen({ onBack, onCreate }: CreateEventScreenProps) {
+  // React Query를 통한 인증 정보 가져오기
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuthUtils();
+  const { openLoginModal } = useUIStore();
+
+  // 사용자가 호스트인 그룹 목록 조회
+  const { data: myGroups = [], isLoading: isGroupsLoading } = useMyGroups();
+
+  // 이벤트 카테고리 목록 조회 (DB에서)
+  const { data: categories = [], isLoading: isCategoriesLoading } = useEventCategories();
+
   const [eventType, setEventType] = useState<'personal' | 'group'>('personal');
   const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [isGroupMembersOnly, setIsGroupMembersOnly] = useState(true);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [isRecurring, setIsRecurring] = useState(false);
   const [locationType, setLocationType] = useState<'online' | 'offline'>('offline');
   const [location, setLocation] = useState('');
   const [detailedAddress, setDetailedAddress] = useState('');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [onlineLink, setOnlineLink] = useState('');
   const [maxAttendees, setMaxAttendees] = useState('');
-  const [category, setCategory] = useState('카페 모임');
-  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
-  const [addressSearchQuery, setAddressSearchQuery] = useState('');
+  const [category, setCategory] = useState<CategoryCode>('SOCIAL');
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'saving' | 'done'>('idle');
 
-  const categories = [
-    { name: '카페 모임', emoji: '☕' },
-    { name: '맛집 탐방', emoji: '🍽️' },
-    { name: '야외 활동', emoji: '🌳' },
-    { name: '문화/예술', emoji: '🎨' },
-    { name: '운동', emoji: '💪' },
-    { name: '언어교환', emoji: '💬' },
-  ];
+  // Daum 우편번호 서비스로 주소 검색
+  const handleAddressSearch = () => {
+    if (typeof window === 'undefined' || !window.daum) {
+      alert('주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
 
-  // Mock address search results
-  const mockAddresses = [
-    { roadAddress: '서울 강남구 테헤란로 123', jibunAddress: '서울 강남구 역삼동 123-45' },
-    { roadAddress: '서울 강남구 강남대로 456', jibunAddress: '서울 강남구 역삼동 456-78' },
-    { roadAddress: '서울 서초구 서초대로 789', jibunAddress: '서울 서초구 서초동 789-12' },
-    { roadAddress: '서울 송파구 올림픽로 321', jibunAddress: '서울 송파구 잠실동 321-54' },
-  ].filter(addr => 
-    addressSearchQuery === '' || 
-    addr.roadAddress.includes(addressSearchQuery) ||
-    addr.jibunAddress.includes(addressSearchQuery)
-  );
+    new window.daum.Postcode({
+      oncomplete: async function (data: any) {
+        const fullAddress = data.roadAddress || data.jibunAddress;
+        setLocation(fullAddress);
 
-  const handleAddressSelect = (roadAddress: string) => {
-    setLocation(roadAddress);
-    setIsAddressDialogOpen(false);
-    setAddressSearchQuery('');
+        const coords = await getCoordinatesFromAddress(fullAddress);
+
+        if (coords) {
+          setLatitude(coords.latitude);
+          setLongitude(coords.longitude);
+        } else {
+          setLatitude(null);
+          setLongitude(null);
+        }
+      },
+    }).open();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onCreate({
-      eventType,
-      groupId: eventType === 'group' ? selectedGroupId : null,
-      title,
-      description,
-      date,
-      time,
-      isRecurring,
-      locationType,
-      location: locationType === 'offline' ? location : 'Online',
-      detailedAddress: locationType === 'offline' ? detailedAddress : '',
-      onlineLink: locationType === 'online' ? onlineLink : '',
-      maxAttendees: parseInt(maxAttendees),
-      category,
-    });
+
+    if (isSubmitting) return;
+
+    // 필수 필드 검증
+    if (!title || !description || !date || !time || !category || !maxAttendees) {
+      alert('필수 항목을 모두 입력해주세요');
+      return;
+    }
+
+    if (locationType === 'offline' && (!location || latitude === null || longitude === null)) {
+      alert('오프라인 이벤트는 주소 검색을 통해 위치를 설정해주세요');
+      return;
+    }
+
+    if (locationType === 'online' && !onlineLink) {
+      alert('온라인 이벤트는 링크를 입력해주세요');
+      return;
+    }
+
+    if (eventType === 'group' && !selectedGroupId) {
+      alert('그룹을 선택해주세요');
+      return;
+    }
+
+    if (images.length > 10) {
+      alert('이미지는 최대 10장까지 업로드 가능합니다');
+      return;
+    }
+
+    if (!isAuthenticated || !user) {
+      openLoginModal();
+      alert('로그인이 필요합니다');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setUploadProgress(0);
+    setUploadStatus('uploading');
+
+    try {
+      // 이미지가 있는 경우에만 업로드
+      let uploadedUrls: string[] = [];
+      let transactionId = crypto.randomUUID();
+
+      if (images.length > 0) {
+        // 1. Storage에 이미지 직접 업로드
+        const uploadResult = await uploadImagesToStorage(images, {
+          bucketName: 'fitkle',
+          folder: 'event',
+          onProgress: (uploaded, total) => {
+            const progress = Math.round((uploaded / total) * 100);
+            setUploadProgress(progress);
+          },
+        });
+
+        if (!uploadResult.success) {
+          throw new Error(
+            uploadResult.error ||
+            `이미지 업로드 실패 (${uploadResult.failedFiles.length}개)`
+          );
+        }
+
+        uploadedUrls = uploadResult.uploadedUrls;
+        transactionId = uploadResult.transactionId;
+      }
+
+      // 2. BFF에 DB 저장 요청
+      setUploadStatus('saving');
+      setUploadProgress(100);
+
+      const response = await fetch('/api/events/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transactionId,
+          imageUrls: uploadedUrls,
+          title: title.trim(),
+          description: description.trim(),
+          date,
+          time,
+          category,
+          maxAttendees: parseInt(maxAttendees),
+          hostId: user.id,
+          hostName: user.name,
+          type: locationType,
+          location: locationType === 'offline' ? location.trim() : undefined,
+          address: locationType === 'offline' ? detailedAddress.trim() : undefined,
+          latitude: locationType === 'offline' ? latitude : undefined,
+          longitude: locationType === 'offline' ? longitude : undefined,
+          onlineLink: locationType === 'online' ? onlineLink.trim() : undefined,
+          groupId: eventType === 'group' ? selectedGroupId : undefined,
+          isGroupMembersOnly: eventType === 'group' ? isGroupMembersOnly : undefined,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || '이벤트 생성에 실패했습니다');
+      }
+
+      setUploadStatus('done');
+
+      onCreate(result.data);
+    } catch (error) {
+      console.error('이벤트 생성 오류:', error);
+
+      const errorMessage = error instanceof Error
+        ? error.message
+        : '이벤트 생성 중 오류가 발생했습니다';
+
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+      setUploadStatus('idle');
+      setUploadProgress(0);
+    }
   };
 
   return (
@@ -173,22 +311,104 @@ export function CreateEventScreen({ onBack, onCreate }: CreateEventScreenProps) 
             </div>
             <Select value={selectedGroupId} onValueChange={setSelectedGroupId} required={eventType === 'group'}>
               <SelectTrigger className="w-full h-12 bg-input-background border-border/60">
-                <SelectValue placeholder="이벤트를 만들 그룹을 선택하세요" />
+                <SelectValue placeholder={isGroupsLoading ? "그룹 로딩 중..." : myGroups.length === 0 ? "생성한 그룹이 없습니다" : "이벤트를 만들 그룹을 선택하세요"} />
               </SelectTrigger>
               <SelectContent>
-                {groups.map((group) => (
-                  <SelectItem key={group.id} value={group.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{group.name}</span>
-                      <span className="text-xs text-muted-foreground">({group.members}명)</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                {isGroupsLoading ? (
+                  <div className="px-4 py-2 text-sm text-muted-foreground">
+                    그룹을 불러오는 중...
+                  </div>
+                ) : myGroups.length === 0 ? (
+                  <div className="px-4 py-2 text-sm text-muted-foreground">
+                    먼저 그룹을 생성해주세요
+                  </div>
+                ) : (
+                  myGroups.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{group.name}</span>
+                        <span className="text-xs text-muted-foreground">({group.members}명)</span>
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground flex items-start gap-1.5 relative z-10">
               <span className="text-lg">💡</span>
               <span className="pt-0.5">선택한 그룹의 멤버들에게 이벤트가 표시됩니다</span>
+            </p>
+          </div>
+        )}
+
+        {/* Group Event Participation - Only shown for Group Events */}
+        {eventType === 'group' && (
+          <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-2xl p-5 border border-border/50 shadow-sm space-y-3 overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -z-0"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-accent-sage/10 rounded-full blur-2xl -z-0"></div>
+
+            <div className="flex items-center gap-2 relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-sm">
+                <span className="text-xl">🎫</span>
+              </div>
+              <Label className="text-base">참여 범위</Label>
+              <span className="text-accent-rose-dark">*</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 relative z-10">
+              <button
+                type="button"
+                onClick={() => setIsGroupMembersOnly(true)}
+                className={`p-5 rounded-xl border-2 transition-all ${
+                  isGroupMembersOnly
+                    ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md scale-[1.02]'
+                    : 'border-border/60 hover:border-primary/40 hover:bg-muted/30 hover:scale-[1.01]'
+                }`}
+              >
+                <div className="flex flex-col items-center gap-2.5">
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                    isGroupMembersOnly
+                      ? 'bg-gradient-to-br from-primary/20 to-primary/10 shadow-sm'
+                      : 'bg-muted/50'
+                  }`}>
+                    <span className="text-3xl">🔒</span>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium">그룹원 전용</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">그룹 멤버만 참여</div>
+                  </div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsGroupMembersOnly(false)}
+                className={`p-5 rounded-xl border-2 transition-all ${
+                  !isGroupMembersOnly
+                    ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md scale-[1.02]'
+                    : 'border-border/60 hover:border-primary/40 hover:bg-muted/30 hover:scale-[1.01]'
+                }`}
+              >
+                <div className="flex flex-col items-center gap-2.5">
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                    !isGroupMembersOnly
+                      ? 'bg-gradient-to-br from-primary/20 to-primary/10 shadow-sm'
+                      : 'bg-muted/50'
+                  }`}>
+                    <span className="text-3xl">🌍</span>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium">모두 참여 가능</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">누구나 참여 가능</div>
+                  </div>
+                </div>
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground flex items-start gap-1.5 relative z-10">
+              <span className="text-lg">💡</span>
+              <span className="pt-0.5">
+                {isGroupMembersOnly
+                  ? '그룹 멤버만 이벤트를 보고 참여할 수 있습니다'
+                  : '그룹 외부 사용자도 이벤트를 검색하고 참여할 수 있습니다'}
+              </span>
             </p>
           </div>
         )}
@@ -249,37 +469,44 @@ export function CreateEventScreen({ onBack, onCreate }: CreateEventScreenProps) 
               <span className="text-accent-rose-dark">*</span>
             </Label>
             <div className="flex flex-wrap gap-2.5">
-              {categories.map((cat) => (
-                <button
-                  key={cat.name}
-                  type="button"
-                  onClick={() => setCategory(cat.name)}
-                  className={`p-3.5 rounded-xl border-2 transition-all text-sm flex items-center gap-2 ${
-                    category === cat.name
-                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 text-primary shadow-md scale-[1.02]'
-                      : 'border-border/60 hover:border-primary/40 hover:bg-gradient-to-br hover:from-muted/30 hover:to-accent-rose/5 hover:scale-[1.01]'
-                  }`}
+              {isCategoriesLoading ? (
+                <div className="text-sm text-muted-foreground">카테고리 로딩 중...</div>
+              ) : (
+                categories.map((cat) => (
+                  <button
+                    key={cat.code}
+                    type="button"
+                    onClick={() => setCategory(cat.code as CategoryCode)}
+                    className={`p-3.5 rounded-xl border-2 transition-all text-sm flex items-center gap-2 ${
+                      category === cat.code
+                        ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 text-primary shadow-md scale-[1.02]'
+                        : 'border-border/60 hover:border-primary/40 hover:bg-gradient-to-br hover:from-muted/30 hover:to-accent-rose/5 hover:scale-[1.01]'
+                    }`}
                 >
                   <span className="text-xl">{cat.emoji}</span>
                   <span>{cat.name}</span>
                 </button>
-              ))}
+              ))
+            )}
             </div>
           </div>
 
           {/* Event Image */}
           <div className="relative z-10">
-            <Label className="text-sm mb-2 block flex items-center gap-1.5">
-              <span>이벤트 이미지</span>
-              <span className="text-base">📸</span>
-            </Label>
-            <div className="relative border-2 border-dashed border-border/60 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-gradient-to-br hover:from-primary/5 hover:to-accent-rose/5 transition-all cursor-pointer group">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-primary/10 to-accent-rose/10 group-hover:from-primary/20 group-hover:to-accent-rose/20 flex items-center justify-center transition-all">
-                <span className="text-3xl group-hover:scale-110 transition-transform">🖼️</span>
-              </div>
-              <p className="text-sm mb-1">이미지 업로드</p>
-              <p className="text-xs text-muted-foreground">권장: 1200x630px</p>
-            </div>
+            <MultiImageUploader
+              title="이벤트 이미지"
+              recommendation="1200x630px"
+              images={images}
+              imagePreviews={imagePreviews}
+              onImagesChange={(newImages, newPreviews) => {
+                setImages(newImages);
+                setImagePreviews(newPreviews);
+              }}
+              required={false}
+              maxSize={5}
+              maxImages={10}
+              showFormatText="PNG, JPG, GIF"
+            />
           </div>
         </div>
 
@@ -331,32 +558,6 @@ export function CreateEventScreen({ onBack, onCreate }: CreateEventScreenProps) 
             </div>
           </div>
 
-          {/* Recurring Event Option */}
-          <div className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all relative z-10 ${
-            isRecurring 
-              ? 'bg-gradient-to-br from-primary/10 to-accent-sage/10 border-primary/30 shadow-sm' 
-              : 'bg-gradient-to-br from-muted/20 to-transparent border-border/40'
-          }`}>
-            <Checkbox
-              id="recurring"
-              checked={isRecurring}
-              onCheckedChange={(checked) => setIsRecurring(checked as boolean)}
-              className="mt-0.5"
-            />
-            <div className="flex-1">
-              <label
-                htmlFor="recurring"
-                className="text-sm cursor-pointer flex items-center gap-2"
-              >
-                <span className="text-lg">🔄</span>
-                <span>매주 반복 이벤트</span>
-              </label>
-              <p className="text-xs text-muted-foreground mt-1.5 flex items-start gap-1.5">
-                <span className="text-base">✨</span>
-                <span className="pt-0.5">매주 같은 요일, 같은 시간에 이벤트가 자동으로 생성됩니다</span>
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Location Type & Details */}
@@ -448,14 +649,14 @@ export function CreateEventScreen({ onBack, onCreate }: CreateEventScreenProps) 
                     value={location}
                     readOnly
                     className="h-12 bg-input-background border-border/60 flex-1 cursor-pointer"
-                    onClick={() => setIsAddressDialogOpen(true)}
+                    onClick={handleAddressSearch}
                     required={locationType === 'offline'}
                   />
                   <Button
                     type="button"
                     variant="outline"
                     className="h-12 px-4 border-border/60 flex items-center gap-2"
-                    onClick={() => setIsAddressDialogOpen(true)}
+                    onClick={handleAddressSearch}
                   >
                     <Search className="w-4 h-4" />
                     <span>검색</span>
@@ -466,51 +667,6 @@ export function CreateEventScreen({ onBack, onCreate }: CreateEventScreenProps) 
                   <span className="pt-0.5">정확한 주소를 입력하면 참가자들이 찾기 쉬워요</span>
                 </p>
               </div>
-
-              <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <span className="text-xl">🔍</span>
-                      <span>주소 검색</span>
-                    </DialogTitle>
-                    <DialogDescription>
-                      도로명, 건물명 또는 지번으로 주소를 검색하세요
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        placeholder="예: 테헤란로, 강남역, 역삼동"
-                        value={addressSearchQuery}
-                        onChange={(e) => setAddressSearchQuery(e.target.value)}
-                        className="pl-10 h-11 bg-input-background border-border/60"
-                      />
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto space-y-2">
-                      {mockAddresses.length > 0 ? (
-                        mockAddresses.map((addr, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleAddressSelect(addr.roadAddress)}
-                            className="w-full text-left p-3 rounded-lg border border-border/60 hover:border-primary/50 hover:bg-primary/5 transition-all"
-                          >
-                            <div className="text-sm mb-1">{addr.roadAddress}</div>
-                            <div className="text-xs text-muted-foreground">{addr.jibunAddress}</div>
-                          </button>
-                        ))
-                      ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <span className="text-3xl mb-2 block">🔍</span>
-                          <p className="text-sm">검색어를 입력하세요</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
 
               <div className="space-y-2 relative z-10">
                 <Label htmlFor="detailedAddress" className="text-sm flex items-center gap-1.5">
@@ -591,13 +747,84 @@ export function CreateEventScreen({ onBack, onCreate }: CreateEventScreenProps) 
           </div>
         </div>
 
+          {/* Upload Progress */}
+          {isSubmitting && (
+            <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-2xl p-5 border border-border/50 shadow-sm overflow-hidden">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-sm">
+                      <span className="text-xl">
+                        {uploadStatus === 'uploading' && '📤'}
+                        {uploadStatus === 'saving' && '💾'}
+                        {uploadStatus === 'done' && '✅'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-medium">
+                        {uploadStatus === 'uploading' && '이미지 업로드 중...'}
+                        {uploadStatus === 'saving' && '이벤트 정보 저장 중...'}
+                        {uploadStatus === 'done' && '완료!'}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {uploadStatus === 'uploading' && `${uploadProgress}% 완료`}
+                        {uploadStatus === 'saving' && '잠시만 기다려주세요'}
+                        {uploadStatus === 'done' && '이벤트가 생성되었습니다'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-primary">
+                    {uploadProgress}%
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="pt-2 space-y-3">
-            <Button type="submit" className="w-full h-12 shadow-md bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary flex items-center justify-center gap-2">
-              <span>이벤트 만들기</span>
-              <span className="text-lg">✨</span>
+            <Button
+              type="submit"
+              disabled={isSubmitting || isAuthLoading}
+              className="w-full h-12 shadow-md bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary flex items-center justify-center gap-2"
+            >
+              {isAuthLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>인증 확인 중...</span>
+                </>
+              ) : isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>
+                    {uploadStatus === 'uploading' && '업로드 중...'}
+                    {uploadStatus === 'saving' && '저장 중...'}
+                    {uploadStatus === 'done' && '완료!'}
+                    {uploadStatus === 'idle' && '생성 중...'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span>이벤트 만들기</span>
+                  <span className="text-lg">✨</span>
+                </>
+              )}
             </Button>
-            <Button type="button" variant="outline" onClick={onBack} className="w-full h-12 border-border/60">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onBack}
+              disabled={isSubmitting || isAuthLoading}
+              className="w-full h-12 border-border/60"
+            >
               취소
             </Button>
           </div>

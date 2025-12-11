@@ -3,7 +3,6 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { GroupDetailScreen } from '@/domains/group';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function GroupDetailPage({
   params,
@@ -25,6 +24,10 @@ export default function GroupDetailPage({
     router.push(`/users/${userId}`);
   };
 
+  const handleMessageClick = (userId: string) => {
+    router.push(`/messages/${userId}`);
+  };
+
   const handleEditGroup = () => {
     router.push(`/groups/${id}/edit`);
   };
@@ -41,39 +44,16 @@ export default function GroupDetailPage({
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showLogo: false,
-        showBottomNav: true,
-        contentClassName: 'h-full',
-      }}
-      webLayoutProps={{
-        maxWidth: 'default',
-      }}
-      mobileContent={
-        <GroupDetailScreen
-          groupId={id}
-          onBack={handleBack}
-          onEventClick={handleEventClick}
-          onUserClick={handleUserClick}
-          isOwner={false}
-          onEditGroup={handleEditGroup}
-          onManageMembers={handleManageMembers}
-          onDeleteGroup={handleDeleteGroup}
-        />
-      }
-      webContent={
-        <GroupDetailScreen
-          groupId={id}
-          onBack={handleBack}
-          onEventClick={handleEventClick}
-          onUserClick={handleUserClick}
-          isOwner={false}
-          onEditGroup={handleEditGroup}
-          onManageMembers={handleManageMembers}
-          onDeleteGroup={handleDeleteGroup}
-        />
-      }
+    <GroupDetailScreen
+      groupId={id}
+      onBack={handleBack}
+      onEventClick={handleEventClick}
+      onUserClick={handleUserClick}
+      onMessageClick={handleMessageClick}
+      isOwner={false}
+      onEditGroup={handleEditGroup}
+      onManageMembers={handleManageMembers}
+      onDeleteGroup={handleDeleteGroup}
     />
   );
 }

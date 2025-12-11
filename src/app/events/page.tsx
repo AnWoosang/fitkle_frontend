@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { ExploreScreen } from '@/domains/home';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function EventsPage() {
   const router = useRouter();
@@ -20,28 +19,10 @@ export default function EventsPage() {
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showLogo: true,
-        stickyHeader: true,
-      }}
-      webLayoutProps={{
-        maxWidth: 'wide',
-      }}
-      mobileContent={
-        <ExploreScreen
-          onEventClick={handleEventClick}
-          onGroupClick={handleGroupClick}
-          onBack={handleBack}
-        />
-      }
-      webContent={
-        <ExploreScreen
-          onEventClick={handleEventClick}
-          onGroupClick={handleGroupClick}
-          onBack={handleBack}
-        />
-      }
+    <ExploreScreen
+      onEventClick={handleEventClick}
+      onGroupClick={handleGroupClick}
+      onBack={handleBack}
     />
   );
 }

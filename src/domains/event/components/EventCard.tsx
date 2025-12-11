@@ -1,14 +1,16 @@
 "use client";
 
-import { Calendar, MapPin, Users } from 'lucide-react';
-import { groups } from '@/data/groups';
+import { useState, memo } from 'react';
+import { Users, Star, Clock, MapPin, Heart } from 'lucide-react';
+import { formatDateTime } from '@/shared/utils/dateFormat';
 
 interface EventCardProps {
   id: string;
   title: string;
   date: string;
   time: string;
-  location: string;
+  location?: string;  // 장소 (선택적)
+  hostName?: string;  // 호스트 이름 (선택적)
   attendees: number;
   maxAttendees: number;
   image: string;
@@ -16,100 +18,100 @@ interface EventCardProps {
   isHot?: boolean;
   isNew?: boolean;
   groupId?: string;
-  onClick: () => void;
+  onClick: (id: string) => void;
 }
 
-export function EventCard({
+export const EventCard = memo(function EventCard({
+  id,
   title,
   date,
+  time,
   location,
+  hostName,
   attendees,
   maxAttendees,
   image,
   category,
-  isHot,
-  isNew,
-  groupId,
+  isHot: _isHot,
+  isNew: _isNew,
+  groupId: _groupId,
   onClick
 }: EventCardProps) {
+  const [isLiked, setIsLiked] = useState(false);
   const percentage = (attendees / maxAttendees) * 100;
   const isAlmostFull = percentage >= 80;
-  
-  const getGroupName = (groupId?: string) => {
-    if (!groupId) return null;
-    const group = groups.find(g => g.id === groupId);
-    return group?.name || null;
-  };
-  
-  const groupName = getGroupName(groupId);
 
   return (
-    <div 
-      onClick={onClick}
+    <div
+      onClick={() => onClick(id)}
       className="bg-card rounded-xl overflow-hidden shadow-sm border border-border/50 cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
     >
-      <div className="flex gap-4 p-4">
-        {/* Image */}
-        <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden shadow-sm">
-          <img 
-            src={image} 
-            alt={title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+      {/* Image - 위 */}
+      <div className="relative w-full h-48 overflow-hidden">
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-full object-cover"
+        />
+        {/* Category Tag - 이미지 위 좌상단 */}
+        <div className="absolute top-2 left-2">
+          <span className="inline-block text-xs px-2 py-1 bg-white/90 backdrop-blur-sm text-primary rounded font-medium uppercase shadow-sm">
+            {category}
+          </span>
         </div>
-        
-        {/* Content */}
-        <div className="flex-1 min-w-0 flex flex-col">
-          <div className="mb-2 flex items-center gap-1.5">
-            <span className="inline-block text-xs px-2.5 py-0.5 bg-primary/10 text-primary rounded-lg">
-              {category}
-            </span>
-            {isHot && (
-              <span className="text-[10px] px-1.5 py-0.5 bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 rounded border border-orange-200">
-                HOT
-              </span>
-            )}
-            {isNew && (
-              <span className="text-[10px] px-1.5 py-0.5 bg-accent-rose/30 text-accent-rose-dark rounded">
-                NEW
-              </span>
-            )}
+        {/* Like Button - 이미지 위 우상단 */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsLiked(!isLiked);
+          }}
+          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center hover:bg-white transition-colors"
+          aria-label="Like"
+        >
+          <Heart className={`w-4 h-4 transition-colors ${isLiked ? 'fill-primary text-primary' : 'text-primary'}`} />
+        </button>
+      </div>
+
+      {/* Content - 아래 */}
+      <div className="p-4">
+        {/* Title */}
+        <h3 className="mb-2 line-clamp-2 text-base font-semibold leading-tight">{title}</h3>
+
+        {/* Host Name */}
+        {hostName && (
+          <div className="text-xs text-muted-foreground mb-1 truncate">
+            by {hostName}
           </div>
-          
-          <h3 className="mb-2 line-clamp-2 text-sm leading-tight">{title}</h3>
-          
-          <div className="mt-auto space-y-1.5">
-            {/* Date and Location on the same row */}
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>{date}</span>
-              </div>
-              <span className="text-muted-foreground/50">•</span>
-              <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="truncate">{location}</span>
-              </div>
-            </div>
-            
-            {/* Group name below */}
-            {groupName && (
-              <div className="text-xs text-muted-foreground/80">
-                {groupName}
-              </div>
-            )}
-            
-            <div className="flex items-center gap-1.5 pt-0.5">
-              <Users className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
-              <span className={`text-xs ${isAlmostFull ? 'text-orange-600 font-medium' : 'text-muted-foreground'}`}>
-                {attendees}/{maxAttendees} 명
-                {isAlmostFull && ' 🔥'}
-              </span>
-            </div>
+        )}
+
+        {/* Date and Time */}
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
+          <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>{formatDateTime(date, time)}</span>
+        </div>
+
+        {/* Location */}
+        {location && (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="truncate">{location}</span>
+          </div>
+        )}
+
+        {/* Bottom row: Rating and Attendees */}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1">
+            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+            <span className="font-medium">4.8</span>
+          </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Users className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className={isAlmostFull ? 'text-orange-600 font-medium' : ''}>
+              {attendees}/{maxAttendees} attendees
+            </span>
           </div>
         </div>
       </div>
     </div>
   );
-}
+});

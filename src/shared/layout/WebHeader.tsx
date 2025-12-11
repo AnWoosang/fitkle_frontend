@@ -22,6 +22,14 @@ import {
   TooltipTrigger,
 } from '../components/ui/tooltip';
 import { useState } from 'react';
+import regionsData from '@/assets/regions.json';
+
+interface User {
+  name?: string;
+  nickname?: string;
+  email?: string;
+  profileImageUrl?: string;
+}
 
 interface WebHeaderProps {
   onProfileClick: () => void;
@@ -42,26 +50,11 @@ interface WebHeaderProps {
   onReportClick?: () => void;
   onLogoutClick?: () => void;
   isLoggedIn?: boolean;
+  user?: User | null;
 }
 
-const locations = {
-  '서울': [
-    '강남구', '강동구', '강북구', '강서구', '관악구', 
-    '광진구', '구로구', '금천구', '노원구', '도봉구',
-    '동대문구', '동작구', '마포구', '서대문구', '서초구',
-    '성동구', '성북구', '송파구', '양천구', '영등포구',
-    '용산구', '은평구', '종로구', '중구', '중랑구'
-  ],
-  '경기': [
-    '수원시', '성남시', '고양시', '용인시', '부천시',
-    '안산시', '안양시', '남양주시', '화성시', '평택시'
-  ],
-  '인천': ['전체'],
-  '부산': ['전체'],
-  '대구': ['전체'],
-  '대전': ['전체'],
-  '광주': ['전체'],
-};
+// regions.json 파일에서 가져온 데이터 사용
+const locations = regionsData as Record<string, string[]>;
 
 export function WebHeader({
   onProfileClick,
@@ -79,7 +72,8 @@ export function WebHeader({
   onSettingsClick,
   onReportClick,
   onLogoutClick,
-  isLoggedIn = false
+  isLoggedIn = false,
+  user = null
 }: WebHeaderProps) {
   const t = useTranslations('header');
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,6 +86,33 @@ export function WebHeader({
 
   const handleLocationChange = (location: string) => {
     setSelectedLocation(location);
+  };
+
+  // 유저 이름의 이니셜 생성 (예: "안우상" -> "안우", "John Doe" -> "JD")
+  const getUserInitials = () => {
+    // nickname을 우선 사용, 없으면 email에서 앞 2글자 추출
+    let displayName = user?.nickname;
+
+    if (!displayName) {
+      // nickname이 없으면 email에서 @ 앞부분의 앞 2글자 추출
+      const emailPrefix = user?.email?.split('@')[0];
+      displayName = emailPrefix?.substring(0, 2).toUpperCase() || '?';
+      return displayName;
+    }
+
+    const trimmed = displayName.trim();
+
+    // 한글 이름인 경우 (예: "안우상" -> "안우")
+    if (/[\u3131-\uD79D]/.test(trimmed)) {
+      return trimmed.substring(0, 2);
+    }
+
+    // 영문 이름인 경우 (예: "John Doe" -> "JD")
+    const names = trimmed.split(' ');
+    if (names.length === 1) {
+      return names[0].substring(0, 2).toUpperCase();
+    }
+    return (names[0][0] + names[names.length - 1][0]).toUpperCase();
   };
 
   return (
@@ -239,22 +260,24 @@ export function WebHeader({
               {/* Language Selector */}
               <LanguageSelector />
 
-              {/* Messages Icon */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={onMessagesClick}
-                    className="relative p-2.5 rounded-full hover:bg-secondary/80 transition-colors"
-                  >
-                    <MessageCircle className="w-5 h-5 text-muted-foreground" />
-                    {/* Notification Badge */}
-                    <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('messages')}</p>
-                </TooltipContent>
-              </Tooltip>
+              {/* Messages Icon - 로그인 시에만 표시 */}
+              {isLoggedIn && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={onMessagesClick}
+                      className="relative p-2.5 rounded-full hover:bg-secondary/80 transition-colors"
+                    >
+                      <MessageCircle className="w-5 h-5 text-muted-foreground" />
+                      {/* Notification Badge */}
+                      <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t('messages')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </TooltipProvider>
 
             {isLoggedIn ? (
@@ -264,7 +287,7 @@ export function WebHeader({
                   <button className="flex items-center gap-2 p-1.5 rounded-full hover:bg-secondary/80 transition-colors">
                     <Avatar className="w-8 h-8">
                       <AvatarFallback className="bg-primary text-white text-sm">
-                        JK
+                        {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
                     <ChevronDown className="w-4 h-4 text-muted-foreground" />

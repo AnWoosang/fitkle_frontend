@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { MessageCircle, Search, ChevronRight, Send, MoreVertical, LogOut, Flag } from 'lucide-react';
+import { MessageCircle, Search, Send, MoreVertical, LogOut, Flag } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -158,80 +158,8 @@ export function MessagesScreen({ onChatClick }: MessagesScreenProps) {
 
   return (
     <div className="flex-1 flex flex-col bg-background">
-      {/* Mobile Layout */}
-      <div className="lg:hidden flex flex-col h-full">
-        <div className="px-4 py-4 bg-background border-b border-border/30">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="메시지 검색"
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-card border border-border/50 focus:bg-background focus:border-primary/30 focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all shadow-sm"
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          {messages.length > 0 ? (
-            <div className="space-y-2">
-              {messages.map((msg) => (
-                <button
-                  key={msg.id}
-                  onClick={() => handleChatClick(msg)}
-                  className="w-full bg-card hover:bg-accent/50 border border-border/50 rounded-2xl p-4 transition-all text-left group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Avatar className="w-14 h-14 border-2 border-background">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {msg.userInitials}
-                        </AvatarFallback>
-                      </Avatar>
-                      {msg.online && (
-                        <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-background rounded-full"></div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="truncate">{msg.userName}</h3>
-                        <span className="text-xs text-muted-foreground shrink-0 ml-2">
-                          {msg.timestamp}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className={`text-sm truncate ${msg.unread > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          {msg.lastMessage}
-                        </p>
-                        {msg.unread > 0 && (
-                          <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center ml-2 shrink-0">
-                            <span className="text-[10px] text-primary-foreground">
-                              {msg.unread}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <ChevronRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="w-10 h-10 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground mb-2">메시지가 없습니다</p>
-              <p className="text-sm text-muted-foreground">대화를 시작해보세요</p>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Desktop Layout - Split View */}
-      <div className="hidden lg:flex flex-1">
+      <div className="flex flex-1">
         {/* Left: Messages List */}
         <div className="w-96 border-r border-border/50 flex flex-col bg-background">
           {/* Search Bar */}

@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { GroupsScreen } from '@/domains/group';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function GroupsPage() {
   const router = useRouter();
@@ -12,24 +11,6 @@ export default function GroupsPage() {
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showLogo: true,
-        stickyHeader: true,
-      }}
-      webLayoutProps={{
-        maxWidth: 'wide',
-      }}
-      mobileContent={
-        <GroupsScreen
-          onGroupClick={handleGroupClick}
-        />
-      }
-      webContent={
-        <GroupsScreen
-          onGroupClick={handleGroupClick}
-        />
-      }
-    />
+    <GroupsScreen onGroupClick={handleGroupClick} />
   );
 }

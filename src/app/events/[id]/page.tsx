@@ -3,7 +3,6 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { EventDetailScreen } from '@/domains/event';
-import { ResponsiveLayout } from '@/shared/layout';
 
 export default function EventDetailPage({
   params,
@@ -37,37 +36,14 @@ export default function EventDetailPage({
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showLogo: false,
-        showBottomNav: false,
-        contentClassName: 'h-full',
-      }}
-      webLayoutProps={{
-        maxWidth: 'default',
-      }}
-      mobileContent={
-        <EventDetailScreen
-          eventId={id}
-          onBack={handleBack}
-          onHostClick={handleHostClick}
-          isOwner={false}
-          onEditEvent={handleEditEvent}
-          onManageAttendees={handleManageAttendees}
-          onDeleteEvent={handleDeleteEvent}
-        />
-      }
-      webContent={
-        <EventDetailScreen
-          eventId={id}
-          onBack={handleBack}
-          onHostClick={handleHostClick}
-          isOwner={false}
-          onEditEvent={handleEditEvent}
-          onManageAttendees={handleManageAttendees}
-          onDeleteEvent={handleDeleteEvent}
-        />
-      }
+    <EventDetailScreen
+      eventId={id}
+      onBack={handleBack}
+      onHostClick={handleHostClick}
+      isOwner={false}
+      onEditEvent={handleEditEvent}
+      onManageAttendees={handleManageAttendees}
+      onDeleteEvent={handleDeleteEvent}
     />
   );
 }

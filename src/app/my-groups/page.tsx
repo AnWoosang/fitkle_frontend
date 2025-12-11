@@ -3,7 +3,6 @@
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MyGroupsListScreen } from '@/domains/group/components/MyGroupsListScreen';
-import { ResponsiveLayout } from '@/shared/layout';
 
 function MyGroupsContent() {
   const router = useRouter();
@@ -21,27 +20,10 @@ function MyGroupsContent() {
   };
 
   return (
-    <ResponsiveLayout
-      mobileLayoutProps={{
-        showBottomNav: true,
-      }}
-      webLayoutProps={{
-        maxWidth: 'wide',
-      }}
-      mobileContent={
-        <MyGroupsListScreen
-          onBack={handleBack}
-          onGroupClick={handleGroupClick}
-          initialFilter={initialFilter}
-        />
-      }
-      webContent={
-        <MyGroupsListScreen
-          onBack={handleBack}
-          onGroupClick={handleGroupClick}
-          initialFilter={initialFilter}
-        />
-      }
+    <MyGroupsListScreen
+      onBack={handleBack}
+      onGroupClick={handleGroupClick}
+      initialFilter={initialFilter}
     />
   );
 }
