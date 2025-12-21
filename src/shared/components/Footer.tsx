@@ -28,9 +28,9 @@ export function Footer() {
       { label: t('contact'), href: '#' },
     ],
     legal: [
-      { label: t('terms'), href: '#' },
-      { label: t('privacy'), href: '#' },
-      { label: t('cookies'), href: '#' },
+      { label: t('terms'), href: '/legal/terms-of-service' },
+      { label: t('privacy'), href: '/legal/privacy-policy' },
+      { label: t('locationTerms'), href: '/legal/location-terms' },
     ],
   };
 
