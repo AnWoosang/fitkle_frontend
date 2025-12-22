@@ -80,19 +80,19 @@ export function getCurrentVersion(docType: string): LegalDocVersion {
     terms: {
       version: '1.0',
       date: '2025-12-17',
-      filename: 'public/legal/terms_of_service.md',
+      filename: 'terms_of_service.md',
       isCurrent: true,
     },
     privacy: {
       version: '1.0',
       date: '2025-12-17',
-      filename: 'public/legal/privacy_policy.md',
+      filename: 'privacy_policy.md',
       isCurrent: true,
     },
     location: {
       version: '1.0',
       date: '2025-12-17',
-      filename: 'public/legal/location_terms.md',
+      filename: 'location_terms.md',
       isCurrent: true,
     },
   };
@@ -119,7 +119,7 @@ export function getVersionFilePath(docType: string, version: string): string {
 
   // 현재 버전이면 루트의 파일 반환
   if (version === currentVersion.version) {
-    return path.join(process.cwd(), currentVersion.filename);
+    return path.join(process.cwd(), 'public', 'legal', currentVersion.filename);
   }
 
   // 아카이브 버전이면 archive 폴더에서 찾기
@@ -128,8 +128,8 @@ export function getVersionFilePath(docType: string, version: string): string {
 
   if (!targetVersion) {
     // 버전을 찾을 수 없으면 현재 버전 반환
-    return path.join(process.cwd(), currentVersion.filename);
+    return path.join(process.cwd(), 'public', 'legal', currentVersion.filename);
   }
 
-  return path.join(process.cwd(), 'public/legal/archive', targetVersion.filename);
+  return path.join(process.cwd(), 'public', 'legal', 'archive', targetVersion.filename);
 }
