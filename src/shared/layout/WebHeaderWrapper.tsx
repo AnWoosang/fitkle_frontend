@@ -18,17 +18,33 @@ export function WebHeaderWrapper() {
     setMounted(true);
   }, []);
 
-  // WebHeader를 숨겨야 하는 페이지들
-  const hideHeaderPaths = ['/signup', '/signup-success', '/complete-profile', '/auth/callback'];
+  // WebHeader를 완전히 숨겨야 하는 페이지들
+  const hideHeaderPaths = [
+    '/signup',
+    '/signup-success',
+    '/complete-profile',
+    '/auth/callback',
+  ];
+
+  // 법률 페이지들 (모바일에서만 숨김)
+  const legalPaths = [
+    '/legal/terms-of-service',
+    '/legal/privacy-policy',
+    '/legal/location-terms',
+  ];
 
   if (!mounted) {
     return null;
   }
 
-  // 현재 경로가 헤더를 숨겨야 하는 경로인지 확인
+  // 현재 경로가 완전히 헤더를 숨겨야 하는 경로인지 확인
   if (hideHeaderPaths.some((path) => pathname.startsWith(path))) {
     return null;
   }
+
+  // 법률 페이지에서는 모바일에서만 숨김
+  const isLegalPage = legalPaths.some((path) => pathname.startsWith(path));
+  const headerClassName = isLegalPage ? 'hidden md:block' : '';
 
   const handleLogoClick = () => {
     router.push('/');
@@ -108,26 +124,28 @@ export function WebHeaderWrapper() {
   };
 
   return (
-    <WebHeader
-      onLogoClick={handleLogoClick}
-      onMessagesClick={handleMessagesClick}
-      onProfileClick={handleProfileClick}
-      onLoginClick={handleLoginClick}
-      onSearch={handleSearch}
-      onMyEventsClick={handleMyEventsClick}
-      onMyGroupsClick={handleMyGroupsClick}
-      onMyCreatedEventsClick={handleMyCreatedEventsClick}
-      onMyJoinedEventsClick={handleMyJoinedEventsClick}
-      onMySavedEventsClick={handleMySavedEventsClick}
-      onMyCreatedGroupsClick={handleMyCreatedGroupsClick}
-      onMyJoinedGroupsClick={handleMyJoinedGroupsClick}
-      onCreateGroupClick={handleCreateGroupClick}
-      onCreateEventClick={handleCreateEventClick}
-      onSettingsClick={handleSettingsClick}
-      onReportClick={handleReportClick}
-      onLogoutClick={handleLogoutClick}
-      isLoggedIn={isAuthenticated}
-      user={user}
-    />
+    <div className={headerClassName}>
+      <WebHeader
+        onLogoClick={handleLogoClick}
+        onMessagesClick={handleMessagesClick}
+        onProfileClick={handleProfileClick}
+        onLoginClick={handleLoginClick}
+        onSearch={handleSearch}
+        onMyEventsClick={handleMyEventsClick}
+        onMyGroupsClick={handleMyGroupsClick}
+        onMyCreatedEventsClick={handleMyCreatedEventsClick}
+        onMyJoinedEventsClick={handleMyJoinedEventsClick}
+        onMySavedEventsClick={handleMySavedEventsClick}
+        onMyCreatedGroupsClick={handleMyCreatedGroupsClick}
+        onMyJoinedGroupsClick={handleMyJoinedGroupsClick}
+        onCreateGroupClick={handleCreateGroupClick}
+        onCreateEventClick={handleCreateEventClick}
+        onSettingsClick={handleSettingsClick}
+        onReportClick={handleReportClick}
+        onLogoutClick={handleLogoutClick}
+        isLoggedIn={isAuthenticated}
+        user={user}
+      />
+    </div>
   );
 }

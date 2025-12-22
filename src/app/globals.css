@@ -119,4 +119,18 @@
   .pr-safe {
     padding-right: env(safe-area-inset-right);
   }
+
+  /* Legal pages - remove min-width */
+  .legal-responsive {
+    min-width: 0 !important;
+  }
+
+  /* Legal pages - remove body min-width */
+  body:has(.legal-responsive) {
+    min-width: 0 !important;
+  }
+
+  html:has(.legal-responsive) {
+    min-width: 0 !important;
+  }
 }

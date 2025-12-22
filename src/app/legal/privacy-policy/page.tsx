@@ -2,7 +2,7 @@ import fs from 'fs';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import { VersionSelector } from '@/domains/legal/components';
+import { VersionSelector, LegalMobileHeader } from '@/domains/legal/components';
 import { getAllVersions, getVersionFilePath, getCurrentVersion } from '@/domains/legal/utils';
 import { Footer } from '@/shared/components';
 
@@ -27,11 +27,19 @@ export default async function PrivacyPolicyPage({ searchParams }: PageProps) {
   const displayVersion = allVersions.find((v) => v.version === version) || currentVersion;
 
   return (
-    <div className="min-h-screen bg-background pb-8">
+    <div className="min-h-screen bg-background pb-8 overflow-x-hidden legal-responsive">
+      {/* 모바일 헤더 */}
+      <LegalMobileHeader
+        title="개인정보 처리방침"
+        versions={allVersions}
+        currentPath="/legal/privacy-policy"
+        currentVersion={version}
+      />
+
       {/* Main Content */}
-      <div className="max-w-5xl mx-auto px-4 md:px-6 pt-12 pb-6">
-        {/* Header with Title */}
-        <div className="mb-8">
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-6 pt-4 md:pt-12 pb-6">
+        {/* 데스크톱 헤더 */}
+        <div className="mb-8 hidden md:block">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center">개인정보 처리방침</h1>
           <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
@@ -124,10 +132,12 @@ export default async function PrivacyPolicyPage({ searchParams }: PageProps) {
               ),
               br: () => <br />,
               table: ({ children }) => (
-                <div className="overflow-x-auto my-6">
-                  <table className="border-collapse w-full">
-                    {children}
-                  </table>
+                <div className="my-6 w-full">
+                  <div className="w-full overflow-x-auto">
+                    <table className="border-collapse w-full text-[10px] md:text-base">
+                      {children}
+                    </table>
+                  </div>
                 </div>
               ),
               thead: ({ children }) => (
@@ -146,12 +156,12 @@ export default async function PrivacyPolicyPage({ searchParams }: PageProps) {
                 </tr>
               ),
               th: ({ children }) => (
-                <th className="border border-border px-4 py-3 text-left font-semibold text-foreground">
+                <th className="border border-border px-1 md:px-4 py-1 md:py-3 text-left font-semibold text-foreground break-words">
                   {children}
                 </th>
               ),
               td: ({ children }) => (
-                <td className="border border-border px-4 py-3 text-foreground/85">
+                <td className="border border-border px-1 md:px-4 py-1 md:py-3 text-foreground/85 break-words">
                   {children}
                 </td>
               ),
