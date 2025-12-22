@@ -80,19 +80,19 @@ export function getCurrentVersion(docType: string): LegalDocVersion {
     terms: {
       version: '1.0',
       date: '2025-12-17',
-      filename: 'TERMS_OF_SERVICE.md',
+      filename: 'public/legal/terms_of_service.md',
       isCurrent: true,
     },
     privacy: {
       version: '1.0',
       date: '2025-12-17',
-      filename: 'PRIVACY_POLICY.md',
+      filename: 'public/legal/privacy_policy.md',
       isCurrent: true,
     },
     location: {
       version: '1.0',
       date: '2025-12-17',
-      filename: 'LOCATION_BASED_SERVICES_TERMS.md',
+      filename: 'public/legal/location_terms.md',
       isCurrent: true,
     },
   };

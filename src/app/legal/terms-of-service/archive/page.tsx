@@ -60,7 +60,7 @@ export default function TermsOfServiceArchivePage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {versions.map(({ version, filename, effectiveDate }) => (
+            {versions.map(({ version, effectiveDate }) => (
               <div
                 key={version}
                 className="border border-border rounded-lg p-4 hover:bg-card/50 transition-colors"

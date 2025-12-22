@@ -7,11 +7,12 @@ import { getAllVersions, getVersionFilePath, getCurrentVersion } from '@/domains
 import { Footer } from '@/shared/components';
 
 interface PageProps {
-  searchParams: { version?: string };
+  searchParams: Promise<{ version?: string }>;
 }
 
-export default function LocationTermsPage({ searchParams }: PageProps) {
-  const requestedVersion = searchParams.version;
+export default async function LocationTermsPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const requestedVersion = params.version;
 
   // 모든 버전 목록 가져오기
   const allVersions = getAllVersions('location');
