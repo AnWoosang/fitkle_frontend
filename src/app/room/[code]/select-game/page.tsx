@@ -7,6 +7,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/i18n/translations';
 import { GameType, GAME_REGISTRY } from '@/types/game';
 
+console.log('🔍 [select-game/page.tsx] 파일 로드됨');
+
 interface GameCard {
   id: GameType;
   icon: string;
@@ -14,16 +16,25 @@ interface GameCard {
 }
 
 export default function SelectGamePage() {
+  console.log('🔍 [SelectGamePage] 컴포넌트 렌더링 시작');
+
   const params = useParams();
   const router = useRouter();
   const { language } = useLanguage();
   const t = useTranslation(language);
 
   const code = params?.code as string;
+  console.log('🔍 [SelectGamePage] code:', code);
+
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [isHost, setIsHost] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log('🔍 [SelectGamePage] 마운트됨');
+    return () => console.log('🔍 [SelectGamePage] 언마운트됨');
+  }, []);
 
   // 게임 레지스트리에서 자동으로 게임 목록 생성
   const getDescriptionKey = (gameType: GameType): keyof ReturnType<typeof useTranslation> => {

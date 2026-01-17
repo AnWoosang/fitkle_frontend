@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,6 +9,9 @@ import type { Language } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/i18n/translations';
 import { GameType } from '@/types/game';
 import type { Database } from '@/types/database';
+
+// 디버깅
+console.log('🔍 [page.tsx] 파일 로드됨');
 
 function generateRoomCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -28,6 +31,8 @@ const languageOptions: { value: Language; label: string; flag: string }[] = [
 ];
 
 export default function Home() {
+  console.log('🔍 [Home] 컴포넌트 렌더링 시작');
+
   const router = useRouter();
   const { language, setLanguage } = useLanguage();
   const t = useTranslation(language);
@@ -37,7 +42,14 @@ export default function Home() {
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    console.log('🔍 [Home] 마운트됨');
+    return () => console.log('🔍 [Home] 언마운트됨');
+  }, []);
+
   const createRoom = async () => {
+    console.log('🔍 [createRoom] 시작, nickname:', nickname);
+
     if (!nickname.trim()) {
       setError(t.enterNickname);
       return;
@@ -47,6 +59,7 @@ export default function Home() {
     setError(null);
 
     try {
+      console.log('🔍 [createRoom] playerId 생성 중...');
       const playerId = uuidv4();
       const code = generateRoomCode();
 
@@ -87,7 +100,10 @@ export default function Home() {
       sessionStorage.setItem('playerId', playerId);
       sessionStorage.setItem('playerName', nickname.trim());
 
+      console.log('🔍 [createRoom] 방 생성 성공! 이동:', `/room/${code}/select-game`);
+      console.log('🔍 [createRoom] router.push 호출 직전');
       router.push(`/room/${code}/select-game`);
+      console.log('🔍 [createRoom] router.push 호출 완료');
     } catch (err) {
       console.error('방 생성 실패:', err);
       console.error('Error details:', JSON.stringify(err, null, 2));

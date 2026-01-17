@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
+console.log('🔍 [LanguageContext] 파일 로드됨');
+
 export type Language = 'ko' | 'en' | 'ja' | 'zh' | 'es';
 
 interface LanguageContextType {
@@ -12,12 +14,16 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
+  console.log('🔍 [LanguageProvider] 렌더링');
+
   const [language, setLanguageState] = useState<Language>('ko');
 
   // Client-side only
   useEffect(() => {
+    console.log('🔍 [LanguageProvider] 마운트됨');
     const saved = localStorage.getItem('nunchi_language');
     if (saved) {
+      console.log('🔍 [LanguageProvider] localStorage에서 언어 복원:', saved);
       setLanguageState(saved as Language);
     }
   }, []);
