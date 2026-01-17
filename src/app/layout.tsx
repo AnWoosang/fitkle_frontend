@@ -1,19 +1,20 @@
-import type { Metadata } from 'next';
-import localFont from 'next/font/local';
-import Script from 'next/script';
+import type { Metadata, Viewport } from 'next';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 import './globals.css';
-import { ClientLayout } from '@/shared/layout';
-import { WebHeaderWrapper } from '@/shared/layout';
-
-const pretendard = localFont({
-  src: '../fonts/PretendardVariable.woff2',
-  variable: '--font-pretendard',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
-  title: 'Fitkle - Meetup App for Expats',
-  description: 'Connect with people and join exciting events',
+  title: 'FITKLE',
+  description: '친구들과 함께 즐기는 파티 게임 - 눈치게임, 369게임, 베스킨라빈스31 등',
+  icons: {
+    icon: '/logo.png',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#0f172a',
 };
 
 export default function RootLayout({
@@ -22,18 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={pretendard.variable} suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <ClientLayout>
-          <WebHeaderWrapper />
+        <LanguageProvider>
           {children}
-        </ClientLayout>
-
-        {/* Daum 우편번호 서비스 */}
-        <Script
-          src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
-          strategy="afterInteractive"
-        />
+        </LanguageProvider>
       </body>
     </html>
   );

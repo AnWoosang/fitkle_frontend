@@ -1,17 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Type definitions for pre-registration data
-export interface PreRegistration {
-  id?: string;
-  contact_type: 'email' | 'instagram' | 'kakao' | 'phone';
-  contact_value: string;
-  country: string;
-  age_range: '18-24' | '25-34' | '35-44' | '45-54' | '55+';
-  created_at?: string;
-  updated_at?: string;
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Supabase URL and Anon Key must be provided');
 }
+
+// Supabase 클라이언트
+export const supabase: SupabaseClient<Database> = createClient<Database>(
+  supabaseUrl,
+  supabaseAnonKey
+);

@@ -1,1 +1,0 @@
-export { newsKeys } from './queryKeys';

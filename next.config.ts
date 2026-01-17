@@ -1,25 +1,15 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  reactStrictMode: false,
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
+  reactStrictMode: true,
+  // Vercel 최적화
+  compress: true,
+  poweredByHeader: false,
+  // 환경변수 노출
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
-  experimental: {
-    optimizePackageImports: ['@supabase/supabase-js'],
-  },
-  outputFileTracingIncludes: {
-    '/legal/terms-of-service': ['./public/legal/**/*'],
-    '/legal/privacy-policy': ['./public/legal/**/*'],
-    '/legal/location-terms': ['./public/legal/**/*'],
-  },
-  // 정적 에러 페이지 생성 스킵
-  skipTrailingSlashRedirect: true,
 };
 
 export default nextConfig;
