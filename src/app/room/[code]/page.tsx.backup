@@ -1,0 +1,337 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useGameEngine } from '@/games/common/useGameEngine';
+import { getGame } from '@/games/registry';
+import { PlayerList } from '@/components/PlayerList';
+import { GameRulesModal } from '@/components/GameRulesModal';
+import { GameResultModal } from '@/components/GameResultModal';
+import { NicknameModal } from '@/components/NicknameModal';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/i18n/translations';
+import { supabase } from '@/lib/supabase';
+
+export default function RoomPage() {
+  const params = useParams();
+  const router = useRouter();
+  const { language } = useLanguage();
+  const t = useTranslation(language);
+
+  const code = params?.code as string;
+
+  // playerId를 동기적으로 초기화
+  const [playerId] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'loading';
+
+    let id = sessionStorage.getItem('playerId');
+    if (!id) {
+      id = crypto.randomUUID();
+      sessionStorage.setItem('playerId', id);
+    }
+    return id;
+  });
+
+  const [playerName, setPlayerName] = useState<string>(() => {
+    if (typeof window === 'undefined') return '';
+    return sessionStorage.getItem('playerName') || '';
+  });
+
+  const [showNicknameModal, setShowNicknameModal] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !sessionStorage.getItem('playerName');
+  });
+
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
+
+  // 눈치게임 훅 사용
+  const {
+    room,
+    players,
+    currentNumber,
+    isMyTurn,
+    gameStatus,
+    lastEvent,
+    error,
+    isLoading,
+    hostLeft,
+    callNumber,
+    startGame,
+    resetGame,
+    toggleReady,
+  } = useNunchiGame({
+    roomCode: code || '',
+    playerId: playerId,
+    playerName: playerName,
+  });
+
+  // 방에 입장하면 게임 규칙 모달 표시
+  useEffect(() => {
+    if (room && gameStatus === 'waiting' && !isLoading && playerName && !showNicknameModal) {
+      setShowRulesModal(true);
+    }
+  }, [room, gameStatus, isLoading, playerName, showNicknameModal]);
+
+  // 게임 상태에 따라 모달 표시/숨김
+  useEffect(() => {
+    if (gameStatus === 'playing') {
+      setShowRulesModal(false);
+      setShowResultModal(false);
+    } else if (gameStatus === 'finished') {
+      setShowResultModal(true);
+      setShowRulesModal(false);
+    }
+  }, [gameStatus]);
+
+  // 호스트가 방을 나갔을 때 자동 리다이렉트
+  useEffect(() => {
+    if (hostLeft) {
+      const timer = setTimeout(() => {
+        sessionStorage.removeItem('playerId');
+        sessionStorage.removeItem('playerName');
+        router.push('/');
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [hostLeft, router]);
+
+  // 닉네임 제출 핸들러
+  const handleNicknameSubmit = async (nickname: string) => {
+    if (!room || !playerId) return;
+
+    setPlayerName(nickname);
+    sessionStorage.setItem('playerName', nickname);
+
+    try {
+      await supabase.from('players').insert({
+        id: playerId,
+        room_id: room.id,
+        nickname: nickname,
+        is_alive: true,
+        is_ready: false,
+        score: 0,
+      });
+
+      setShowNicknameModal(false);
+    } catch (err) {
+      console.error('플레이어 생성 실패:', err);
+    }
+  };
+
+  const handleLeaveRoom = async () => {
+    if (!room) return;
+
+    const isHost = room.host_id === playerId;
+
+    if (isHost) {
+      await supabase
+        .from('rooms')
+        .update({ is_deleted: true })
+        .eq('id', room.id);
+    }
+
+    await supabase
+      .from('players')
+      .delete()
+      .eq('id', playerId);
+
+    sessionStorage.removeItem('playerId');
+    sessionStorage.removeItem('playerName');
+    router.push('/');
+  };
+
+  const isHost = room?.host_id === playerId;
+  const myPlayer = players.find((p) => p.id === playerId);
+  const alivePlayers = players.filter((p) => p.is_alive);
+  const nonHostPlayers = players.filter((p) => p.id !== room?.host_id);
+  const allPlayersReady = nonHostPlayers.length > 0 && nonHostPlayers.every((p) => p.is_ready);
+  const canStart = isHost && gameStatus === 'waiting' && players.length >= 3 && allPlayersReady;
+
+  if (isLoading) {
+    return (
+      <div className="game-room loading">
+        <div className="spinner"></div>
+        <p>{t.connectingToRoom}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="game-room error">
+        <h2>⚠️ {t.error}</h2>
+        <p>{error}</p>
+        <button className="btn btn-primary" onClick={() => router.push('/')}>
+          {t.backToLobby}
+        </button>
+      </div>
+    );
+  }
+
+  if (hostLeft) {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>👋 {t.hostLeftTitle}</h2>
+          </div>
+          <div className="modal-body">
+            <p>{t.hostLeftMessage}</p>
+            <p className="hint">{t.redirectingToLobby}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="game-room">
+      <header className="room-header">
+        <div className="room-info">
+          <h2>{t.lobbyTitle}</h2>
+          <div className="room-code" onClick={() => {
+            if (room?.code) {
+              navigator.clipboard.writeText(room.code);
+              alert(t.codeCopied);
+            }
+          }} title={t.clickToCopy}>
+            {t.roomCode}: <span>{room?.code}</span> 📋
+          </div>
+        </div>
+        <button className="btn btn-small btn-ghost" onClick={handleLeaveRoom}>
+          {t.leaveRoom}
+        </button>
+      </header>
+
+      <main className="game-content">
+        {/* WAITING 상태 */}
+        {gameStatus === 'waiting' && (
+          <div className="status-waiting">
+            <h3>⏳ {t.waitingStatus}</h3>
+            <p>{t.waitingForHost}</p>
+            {isHost && players.length < 3 && (
+              <p className="hint">
+                {t.minimumPlayers} ({t.currentPlayers}: {players.length})
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* PLAYING 상태 */}
+        {gameStatus === 'playing' && (
+          <div className="nunchi-game-area">
+            <div className="game-status">
+              <div className="status-playing">
+                <div className="current-number">
+                  <span className="number-label">{t.currentNumber}</span>
+                  <span className="number-value">{currentNumber}</span>
+                </div>
+
+                {myPlayer?.is_alive ? (
+                  <div className="next-number">
+                    <p>{t.nextNumber}: <strong>{currentNumber + 1}</strong></p>
+                  </div>
+                ) : (
+                  <div className="eliminated-notice">
+                    <p>💀 {t.youAreEliminated}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {lastEvent?.type === 'player_eliminated' && (
+              <div className="event-notification elimination">
+                💥 <strong>{lastEvent.player_name}</strong>{t.playerEliminated}
+                {lastEvent.reason === 'collision' && ` (${t.collision})`}
+              </div>
+            )}
+
+            {myPlayer?.is_alive && (
+              <button
+                className="call-button"
+                onClick={callNumber}
+                disabled={!isMyTurn}
+              >
+                <span className="call-number">{currentNumber + 1}</span>
+                <span className="call-text">{t.callOut}</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* FINISHED 상태 */}
+        {gameStatus === 'finished' && (
+          <div className="status-finished">
+            <h3>🎉 {t.gameOver}</h3>
+            <p>{t.allEliminated}</p>
+            <p className="hint">{t.noWinners}</p>
+          </div>
+        )}
+
+        {/* Start game button */}
+        {gameStatus === 'waiting' && isHost && (
+          <button
+            className="btn btn-large btn-primary"
+            onClick={startGame}
+            disabled={!canStart}
+          >
+            {players.length < 3 ? t.waitingForPlayers : t.startGame}
+          </button>
+        )}
+      </main>
+
+      {/* Player list */}
+      <aside className="players-sidebar">
+        <PlayerList
+          players={players}
+          currentPlayerId={playerId}
+          hostId={room?.host_id || ''}
+          gameStatus={gameStatus}
+        />
+        <div className="player-count">
+          {gameStatus === 'playing' && (
+            <span>{t.alive}: {alivePlayers.length} / {players.length}</span>
+          )}
+          {gameStatus === 'waiting' && (
+            <span>{t.participants}: {players.length}</span>
+          )}
+        </div>
+      </aside>
+
+      {/* 닉네임 입력 모달 */}
+      {showNicknameModal && (
+        <NicknameModal onSubmit={handleNicknameSubmit} />
+      )}
+
+      {/* 게임 규칙 모달 */}
+      {showRulesModal && (
+        <GameRulesModal
+          isHost={isHost}
+          onReady={toggleReady}
+          onStart={startGame}
+          canStart={canStart}
+          isReady={myPlayer?.is_ready || false}
+          roomCode={room?.code}
+          onLeave={handleLeaveRoom}
+        />
+      )}
+
+      {/* 게임 결과 모달 */}
+      {showResultModal && (
+        <GameResultModal
+          players={players}
+          currentPlayerId={playerId}
+          onRestart={async () => {
+            setShowResultModal(false);
+            await resetGame();
+            setShowRulesModal(true);
+          }}
+          onLeave={handleLeaveRoom}
+          isHost={isHost}
+        />
+      )}
+    </div>
+  );
+}
