@@ -15,7 +15,7 @@ interface UseGameEngineReturn<TState = any> {
   room: Room | null;
   players: Player[];
   gameState: TState | null;
-  gameStatus: 'waiting' | 'playing' | 'finished';
+  gameStatus: 'waiting' | 'playing' | 'finished' | 'game_selection';
   error: string | null;
   isLoading: boolean;
   hostLeft: boolean;
@@ -39,12 +39,13 @@ export function useGameEngine<TState = any>({
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [gameState, setGameState] = useState<TState | null>(null);
-  const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished' | 'game_selection'>('waiting');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hostLeft, setHostLeft] = useState(false);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const loadPlayersTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 방 정보 로드
   const loadRoom = useCallback(async () => {
@@ -85,6 +86,19 @@ export function useGameEngine<TState = any>({
 
     setPlayers(data || []);
   }, []);
+
+  // Debounced loadPlayers - 중복 호출 방지
+  const debouncedLoadPlayers = useCallback((roomId: string) => {
+    // Clear existing timeout
+    if (loadPlayersTimeoutRef.current) {
+      clearTimeout(loadPlayersTimeoutRef.current);
+    }
+
+    // Set new timeout
+    loadPlayersTimeoutRef.current = setTimeout(() => {
+      loadPlayers(roomId);
+    }, 50); // 50ms debounce
+  }, [loadPlayers]);
 
   // 게임 상태 로드
   const loadGameState = useCallback(async (roomId: string) => {
@@ -188,26 +202,33 @@ export function useGameEngine<TState = any>({
 
     const newReadyState = !myPlayer.is_ready;
 
-    // Optimistic Update
+    // Optimistic Update for immediate UI feedback
     setPlayers(prevPlayers =>
       prevPlayers.map(p =>
         p.id === playerId ? { ...p, is_ready: newReadyState } : p
       )
     );
 
-    await supabase.from('players').update({ is_ready: newReadyState }).eq('id', playerId);
+    // Update database
+    const { error } = await supabase
+      .from('players')
+      .update({ is_ready: newReadyState })
+      .eq('id', playerId);
 
-    channelRef.current?.send({
-      type: 'broadcast',
-      event: 'player_ready',
-      payload: {
-        type: 'player_ready',
-        player_id: playerId,
-        player_name: playerName,
-        is_ready: newReadyState,
-      },
-    });
-  }, [room, players, playerId, playerName]);
+    if (error) {
+      console.error('❌ Ready 상태 업데이트 실패:', error);
+      // Rollback optimistic update on error
+      setPlayers(prevPlayers =>
+        prevPlayers.map(p =>
+          p.id === playerId ? { ...p, is_ready: !newReadyState } : p
+        )
+      );
+      return;
+    }
+
+    // Immediately refetch to ensure consistency (postgres_changes will also trigger)
+    await loadPlayers(room.id);
+  }, [room, players, playerId, playerName, loadPlayers]);
 
   // 게임 액션 수행
   const performAction = useCallback(async (action: GameAction) => {
@@ -331,12 +352,15 @@ export function useGameEngine<TState = any>({
           }
         );
 
-        // 플레이어 변경사항 구독
+        // 플레이어 변경사항 구독 (debounced로 중복 호출 방지)
         channel.on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'players', filter: `room_id=eq.${roomData.id}` },
           () => {
-            if (mounted) loadPlayers(roomData.id);
+            if (mounted) {
+              console.log('👥 Players 테이블 변경 감지 - debounced 리프레시');
+              debouncedLoadPlayers(roomData.id);
+            }
           }
         );
 
@@ -392,19 +416,7 @@ export function useGameEngine<TState = any>({
           }
         });
 
-        // player_ready 이벤트 구독
-        channel.on('broadcast', { event: 'player_ready' }, (payload: any) => {
-          if (mounted) {
-            console.log('👤 Player ready state changed:', payload.payload);
-            const { player_id, is_ready } = payload.payload;
-            // Optimistic update
-            setPlayers(prevPlayers =>
-              prevPlayers.map(p =>
-                p.id === player_id ? { ...p, is_ready } : p
-              )
-            );
-          }
-        });
+        // player_ready broadcast는 제거 - postgres_changes만 사용하여 레이스 컨디션 방지
 
         // player_eliminated 이벤트 구독
         channel.on('broadcast', { event: 'player_eliminated' }, (payload: any) => {
@@ -432,8 +444,12 @@ export function useGameEngine<TState = any>({
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
       }
+      // Cleanup debounce timeout
+      if (loadPlayersTimeoutRef.current) {
+        clearTimeout(loadPlayersTimeoutRef.current);
+      }
     };
-  }, [roomCode, game, loadRoom, loadPlayers, loadGameState]);
+  }, [roomCode, game, loadRoom, loadPlayers, loadGameState, debouncedLoadPlayers]);
 
   // game이 로드되면 게임 상태 다시 로드
   useEffect(() => {

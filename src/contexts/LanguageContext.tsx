@@ -4,7 +4,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 
 console.log('🔍 [LanguageContext] 파일 로드됨');
 
-export type Language = 'ko' | 'en' | 'ja' | 'zh' | 'es';
+export type Language = 'ko' | 'en' | 'ja' | 'zh' | 'es' | 'vi';
 
 interface LanguageContextType {
   language: Language;

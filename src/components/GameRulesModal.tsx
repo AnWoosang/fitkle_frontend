@@ -78,6 +78,7 @@ export function GameRulesModal({
       [GameType.THREE_SIX_NINE]: '👏',
       [GameType.TWO_TRUTHS]: '🤥',
       [GameType.BASKIN_ROBBINS_31]: '🍦',
+      [GameType.ZERO]: '🖐️',
     };
 
     const icon = gameIcons[gameType] || '🎮';

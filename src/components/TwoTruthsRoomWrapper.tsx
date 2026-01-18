@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { PlayerList } from '@/components/PlayerList';
 import { GameRulesModal } from '@/components/GameRulesModal';
 import { GameResultModal } from '@/components/GameResultModal';
+import { HostSelectingGameModal } from '@/components/HostSelectingGameModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/i18n/translations';
 import { supabase } from '@/lib/supabase';
@@ -68,14 +69,28 @@ export function TwoTruthsRoomWrapper({
 
   // 게임 상태에 따라 모달 표시/숨김
   useEffect(() => {
-    if (gameStatus === 'playing') {
+    console.log('🎮 TwoTruths 게임 상태 변경:', gameStatus);
+
+    if (gameStatus === 'game_selection') {
+      // 게임 선택 모드일 때는 모든 게임 모달 즉시 닫기
+      console.log('📋 게임 선택 모드 - 모든 모달 닫기');
+      setShowResultModal(false);
+      setShowRulesModal(false);
+    } else if (gameStatus === 'playing') {
       setShowRulesModal(false);
       setShowResultModal(false);
     } else if (gameStatus === 'finished') {
       setShowResultModal(true);
       setShowRulesModal(false);
+    } else if (gameStatus === 'waiting') {
+      // 대기 상태로 돌아오면 결과 모달 닫기
+      setShowResultModal(false);
+      // 규칙 모달은 waiting 상태일 때 표시
+      if (room && !isLoading && playerName) {
+        setShowRulesModal(true);
+      }
     }
-  }, [gameStatus]);
+  }, [gameStatus, room, isLoading, playerName]);
 
   // 호스트가 방을 나갔을 때 자동 리다이렉트
   useEffect(() => {
@@ -90,6 +105,58 @@ export function TwoTruthsRoomWrapper({
       return () => clearTimeout(timer);
     }
   }, [hostLeft, router, cleanup]);
+
+  // 게임 재시작 핸들러
+  const handleRestartGame = useCallback(async () => {
+    try {
+      if (!room) return;
+
+      console.log('🔄 게임 다시 시작 - 게임 선택 모드로 전환');
+
+      // 방 상태를 game_selection으로 변경
+      // @ts-ignore
+      await supabase
+        .from('rooms')
+        .update({
+          status: 'game_selection',
+        })
+        .eq('id', room.id);
+
+      // 모든 플레이어 초기화
+      // @ts-ignore
+      await supabase
+        .from('players')
+        .update({
+          is_alive: true,
+          is_ready: false,
+          score: 0,
+          turn_order: null,
+        })
+        .eq('room_id', room.id);
+
+      // 게임 상태 삭제
+      // @ts-ignore
+      await supabase
+        .from('game_states')
+        .delete()
+        .eq('room_id', room.id);
+
+      // 이벤트 삭제 (새 게임을 위해)
+      // @ts-ignore
+      await supabase
+        .from('events')
+        .delete()
+        .eq('room_id', room.id);
+
+      // WebSocket 정리
+      cleanup();
+
+      // 호스트는 게임 선택 페이지로 이동
+      router.push(`/room/${roomCode}/select-game`);
+    } catch (err) {
+      console.error('게임 재시작 실패:', err);
+    }
+  }, [room, roomCode, cleanup, router]);
 
   // 방 나가기 핸들러 (WebSocket 정리 포함)
   const handleLeaveWithCleanup = useCallback(() => {
@@ -179,6 +246,17 @@ export function TwoTruthsRoomWrapper({
         </div>
       </div>
     );
+  }
+
+  // 게임 선택 모드일 때
+  if (gameStatus === 'game_selection') {
+    if (isHost) {
+      // 호스트는 이미 게임 선택 페이지로 리다이렉트됨
+      return null;
+    } else {
+      // 플레이어는 호스트가 게임을 선택할 때까지 대기
+      return <HostSelectingGameModal />;
+    }
   }
 
   return (
@@ -338,6 +416,8 @@ export function TwoTruthsRoomWrapper({
         <GameResultModal
           players={players}
           currentPlayerId={playerId}
+          isHost={isHost}
+          onRestart={handleRestartGame}
           onLeave={handleLeaveWithCleanup}
         />
       )}

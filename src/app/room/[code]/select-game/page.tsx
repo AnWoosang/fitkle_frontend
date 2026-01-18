@@ -47,6 +47,8 @@ export default function SelectGamePage() {
         return 'twoTruthsGameDescription';
       case GameType.BASKIN_ROBBINS_31:
         return 'baskinRobbins31GameDescription';
+      case GameType.ZERO:
+        return 'zeroGameDescription';
       default:
         return 'nunchiGameDescription';
     }
@@ -57,6 +59,14 @@ export default function SelectGamePage() {
     icon: game.icon,
     descriptionKey: getDescriptionKey(game.id),
   }));
+
+  // PLAYABLE과 INFO_ONLY 게임 분리
+  const playableGames = games.filter(
+    (game) => GAME_REGISTRY[game.id].implementationType === 'PLAYABLE'
+  );
+  const infoGames = games.filter(
+    (game) => GAME_REGISTRY[game.id].implementationType === 'INFO_ONLY'
+  );
 
   useEffect(() => {
     const id = sessionStorage.getItem('playerId');
@@ -102,10 +112,36 @@ export default function SelectGamePage() {
     if (!isHost) return;
 
     try {
-      // DB에 게임 타입 저장
+      // INFO_ONLY 게임인 경우 규칙 페이지로 모든 플레이어 이동
+      if (GAME_REGISTRY[gameType].implementationType === 'INFO_ONLY') {
+        // DB에 게임 타입 저장하고 상태를 waiting으로 설정
+        await supabase
+          .from('rooms')
+          // @ts-ignore
+          .update({
+            game_type: gameType,
+            status: 'waiting',
+            want_change_game: [],
+          })
+          .eq('code', code);
+
+        // 규칙 페이지로 이동
+        router.push(`/room/${code}/rules`);
+        return;
+      }
+
+      // PLAYABLE 게임인 경우 기존 로직
+      // DB에 게임 타입 저장 및 상태를 waiting으로 변경
+      // @ts-ignore
       await supabase
         .from('rooms')
-        .update({ game_type: gameType })
+        .update({
+          game_type: gameType,
+          status: 'waiting',
+          current_number: 0,
+          current_turn: null,
+          current_turn_player_id: null,
+        })
         .eq('code', code);
 
       // 게임 페이지로 이동
@@ -145,19 +181,53 @@ export default function SelectGamePage() {
           <p className="subtitle">{t.selectGameSubtitle}</p>
         </header>
 
-        <div className="game-selection">
-          {games.map((game) => (
-            <button
-              key={game.id}
-              className="game-card"
-              onClick={() => handleGameSelect(game.id)}
-            >
-              <div className="game-icon">{game.icon}</div>
-              <h3 className="game-title">{t[game.id]}</h3>
-              <p className="game-description">{t[game.descriptionKey]}</p>
-            </button>
-          ))}
-        </div>
+        {/* PLAYABLE 게임 섹션 */}
+        {playableGames.length > 0 && (
+          <section style={{ marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '1.2rem', marginBottom: '16px', color: '#10b981' }}>
+              {t.playableGamesTitle}
+            </h2>
+            <div className="game-selection">
+              {playableGames.map((game) => (
+                <button
+                  key={game.id}
+                  className="game-card"
+                  onClick={() => handleGameSelect(game.id)}
+                >
+                  <div className="game-icon">{game.icon}</div>
+                  <h3 className="game-title">{t[game.id]}</h3>
+                  <p className="game-description">{t[game.descriptionKey]}</p>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* INFO_ONLY 게임 섹션 */}
+        {infoGames.length > 0 && (
+          <section style={{ marginBottom: '40px' }}>
+            <h2 style={{ fontSize: '1.2rem', marginBottom: '16px', color: '#94a3b8' }}>
+              {t.infoGamesTitle}
+            </h2>
+            <div className="game-selection">
+              {infoGames.map((game) => (
+                <button
+                  key={game.id}
+                  className="game-card"
+                  style={{ opacity: 0.8, border: '2px dashed #475569' }}
+                  onClick={() => handleGameSelect(game.id)}
+                >
+                  <div className="game-icon">{game.icon}</div>
+                  <h3 className="game-title">{t[game.id]}</h3>
+                  <p className="game-description">{t[game.descriptionKey]}</p>
+                  <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '8px' }}>
+                    📖 {language === 'ko' ? '규칙 보기' : 'View Rules'}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <button
           className="btn btn-ghost"

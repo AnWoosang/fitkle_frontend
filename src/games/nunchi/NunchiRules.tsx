@@ -15,10 +15,18 @@ export function NunchiRules({ minPlayers, maxPlayers, language }: RulesContentPr
         <li>{t.modalRule2}</li>
         <li>{t.modalRule3}</li>
         <li className="highlight-rule">{t.modalRule4}</li>
-        <li>{t.modalRule5}</li>
-        <li>{t.modalRule6}</li>
-        <li>{t.modalRule7}</li>
       </ul>
+
+      <div style={{ marginTop: '20px', padding: '12px', background: '#334155', borderRadius: '8px' }}>
+        <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem' }}>
+          {t.nunchiScenarioTitle}
+        </h4>
+        <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.9rem' }}>
+          <li>{t.nunchiScenario1}</li>
+          <li>{t.nunchiScenario2}</li>
+          <li>{t.nunchiScenario3}</li>
+        </ul>
+      </div>
     </div>
   );
 }

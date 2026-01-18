@@ -10,12 +10,16 @@ interface Player {
 interface GameResultModalProps {
   players: Player[];
   currentPlayerId: string;
+  isHost: boolean;
+  onRestart: () => void;
   onLeave: () => void;
 }
 
 export function GameResultModal({
   players,
   currentPlayerId,
+  isHost,
+  onRestart,
   onLeave,
 }: GameResultModalProps) {
   const { language } = useLanguage();
@@ -70,8 +74,13 @@ export function GameResultModal({
           )}
         </div>
 
-        <div className="modal-footer">
-          <button className="btn btn-primary" onClick={onLeave}>
+        <div className="modal-footer" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+          {isHost && (
+            <button className="btn btn-primary" onClick={onRestart}>
+              {t.restartGame}
+            </button>
+          )}
+          <button className="btn btn-secondary" onClick={onLeave}>
             {t.leaveRoom}
           </button>
         </div>

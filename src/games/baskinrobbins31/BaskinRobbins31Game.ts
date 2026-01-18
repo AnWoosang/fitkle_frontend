@@ -71,7 +71,7 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
     }
 
     const { numbers } = action.payload;
-    const { current_number, current_turn_player_id } = gameState;
+    const { current_number, current_turn_player_id, numbers_in_current_turn } = gameState;
 
     // 유효성 검사
     if (numbers.length < 1 || numbers.length > 3) {
@@ -95,6 +95,41 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
 
     const newCurrentNumber = numbers[numbers.length - 1];
 
+    // 이전 턴과 같은 개수를 선택했는지 확인 (게임 시작 후 첫 턴이 아닌 경우)
+    const previousCount = numbers_in_current_turn.length;
+    if (previousCount > 0 && numbers.length === previousCount) {
+      console.log('🍦💀 Player used same count as previous turn! Eliminating:', action.playerName);
+      // 규칙 위반으로 현재 플레이어 탈락
+      const updatedPlayers: Partial<Player>[] = [{
+        id: action.playerId,
+        is_alive: false,
+      }];
+
+      // 다음 플레이어 찾기 (탈락자 제외)
+      const alivePlayers = players.filter(p => p.is_alive && p.id !== action.playerId);
+      const currentPlayerIndex = players.filter(p => p.is_alive).findIndex(p => p.id === action.playerId);
+      const nextPlayerIndex = currentPlayerIndex % alivePlayers.length;
+      const nextPlayer = alivePlayers[nextPlayerIndex];
+
+      return {
+        newState: {
+          current_number: newCurrentNumber, // 현재 숫자 유지 (게임 계속)
+          current_turn_player_id: nextPlayer?.id || null,
+          numbers_in_current_turn: numbers, // 방금 말한 숫자들 저장
+        },
+        updatedPlayers,
+        broadcastEvent: {
+          type: 'player_eliminated',
+          player_id: action.playerId,
+          player_name: action.playerName,
+          numbers,
+          reason: 'same_count_as_previous',
+          previous_count: previousCount,
+          timestamp: action.timestamp,
+        },
+      };
+    }
+
     // 31을 말했는지 확인
     if (newCurrentNumber >= 31) {
       console.log('🍦💀 Player said 31! Eliminating:', action.playerName);
@@ -104,11 +139,17 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
         is_alive: false,
       }];
 
+      // 다음 플레이어 찾기 (탈락자 제외)
+      const alivePlayers = players.filter(p => p.is_alive && p.id !== action.playerId);
+      const currentPlayerIndex = players.filter(p => p.is_alive).findIndex(p => p.id === action.playerId);
+      const nextPlayerIndex = currentPlayerIndex % alivePlayers.length;
+      const nextPlayer = alivePlayers[nextPlayerIndex];
+
       return {
         newState: {
-          current_number: newCurrentNumber,
-          current_turn_player_id: null,
-          numbers_in_current_turn: numbers,
+          current_number: newCurrentNumber, // 현재 숫자 유지 (31에 도달)
+          current_turn_player_id: nextPlayer?.id || null,
+          numbers_in_current_turn: numbers, // 방금 말한 숫자들 저장
         },
         updatedPlayers,
         broadcastEvent: {
@@ -151,12 +192,10 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
 
   checkGameEnd(players: Player[], gameState: BaskinRobbins31GameState): boolean {
     const alivePlayers = players.filter(p => p.is_alive);
-    const deadPlayers = players.filter(p => !p.is_alive);
-    // 탈락자가 1명이라도 생기면 게임 종료
-    const shouldEnd = deadPlayers.length > 0;
+    // 생존자가 1명 이하면 게임 종료
+    const shouldEnd = alivePlayers.length <= 1;
     console.log('🍦🏁 Checking game end:', {
       alivePlayers: alivePlayers.length,
-      deadPlayers: deadPlayers.length,
       totalPlayers: players.length,
       shouldEnd
     });

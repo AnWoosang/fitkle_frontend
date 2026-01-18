@@ -17,6 +17,28 @@ export function BaskinRobbins31Rules({ minPlayers, maxPlayers, language }: Rules
         <li className="highlight-rule">{t.baskinRobbins31Rule4}</li>
         <li>{t.baskinRobbins31Rule5}</li>
       </ul>
+
+      <div style={{ marginTop: '20px', padding: '12px', background: '#334155', borderRadius: '8px' }}>
+        <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem' }}>
+          {t.baskinRobbins31HowToPlayTitle}
+        </h4>
+        <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.9rem' }}>
+          <li>{t.baskinRobbins31HowToPlay1}</li>
+          <li>{t.baskinRobbins31HowToPlay2}</li>
+          <li>{t.baskinRobbins31HowToPlay3}</li>
+        </ul>
+      </div>
+
+      <div style={{ marginTop: '12px', padding: '12px', background: '#334155', borderRadius: '8px' }}>
+        <h4 style={{ margin: '0 0 8px 0', fontSize: '0.95rem' }}>
+          {t.baskinRobbins31ScenarioTitle}
+        </h4>
+        <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.9rem' }}>
+          <li>{t.baskinRobbins31Scenario1}</li>
+          <li>{t.baskinRobbins31Scenario2}</li>
+          <li>{t.baskinRobbins31Scenario3}</li>
+        </ul>
+      </div>
     </div>
   );
 }
