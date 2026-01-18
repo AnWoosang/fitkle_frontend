@@ -47,6 +47,35 @@ export function GameResultModal({
             </p>
           </div>
 
+          <div style={{ padding: '20px', background: 'var(--bg-dark)', borderRadius: '12px' }}>
+            <a
+              href="https://forms.gle/ay6MD6gP7VuYWFyGA"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary"
+              style={{
+                textDecoration: 'none',
+                display: 'block',
+                width: '100%',
+                padding: '14px 24px',
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '8px'
+              }}
+            >
+              📝 {t.gameSurveyLink}
+            </a>
+            <p style={{
+              fontSize: '13px',
+              color: 'var(--text-muted)',
+              textAlign: 'center',
+              margin: 0,
+              opacity: 0.8
+            }}>
+              {t.surveyGiftMessage}
+            </p>
+          </div>
+
           <div className="survivors-list">
             <h3>🏆 {t.survivors}</h3>
             <ul>
