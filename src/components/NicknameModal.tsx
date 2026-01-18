@@ -10,8 +10,9 @@ interface NicknameModalProps {
 const languageOptions: { value: Language; label: string; flag: string }[] = [
   { value: 'ko', label: '한국어', flag: '🇰🇷' },
   { value: 'en', label: 'English', flag: '🇺🇸' },
-  { value: 'ja', label: '日本語', flag: '🇯🇵' },
   { value: 'zh', label: '中文', flag: '🇨🇳' },
+  { value: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+  { value: 'ja', label: '日本語', flag: '🇯🇵' },
   { value: 'es', label: 'Español', flag: '🇪🇸' },
 ];
 

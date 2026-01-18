@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { GameBoardProps } from '../common/types';
 import { BaskinRobbins31GameState } from './types';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -23,13 +24,33 @@ export function BaskinRobbins31GameBoard({
   const currentTurnPlayerId = state?.current_turn_player_id;
   const currentTurnPlayer = players.find(p => p.id === currentTurnPlayerId);
 
+  // 이전 턴에서 말한 숫자 개수 (1, 2, 3 중 하나)
+  const previousCount = state?.numbers_in_current_turn?.length || 0;
+
   // 현재 턴이 나인지 직접 계산
   const isMyTurn = room.status === 'playing' && currentTurnPlayerId === currentPlayerId && myPlayer?.is_alive;
 
-  const handleCallNumbers = async (count: 1 | 2 | 3) => {
-    if (!myPlayer?.is_alive || !isMyTurn) return;
+  // 현재 턴에서 클릭한 횟수 (로컬 상태)
+  const [clickCount, setClickCount] = useState(0);
+  const [tempNumber, setTempNumber] = useState(currentNumber);
 
-    const numbers = Array.from({ length: count }, (_, i) => currentNumber + i + 1);
+  // 턴이 바뀌면 클릭 카운트 초기화
+  useEffect(() => {
+    setClickCount(0);
+    setTempNumber(currentNumber);
+  }, [currentTurnPlayerId, currentNumber]);
+
+  const handleNumberClick = () => {
+    if (!isMyTurn || clickCount >= 3) return;
+
+    setClickCount(prev => prev + 1);
+    setTempNumber(prev => prev + 1);
+  };
+
+  const handleConfirm = async () => {
+    if (!myPlayer?.is_alive || !isMyTurn || clickCount === 0) return;
+
+    const numbers = Array.from({ length: clickCount }, (_, i) => currentNumber + i + 1);
 
     await onAction({
       type: 'call_numbers',
@@ -38,6 +59,9 @@ export function BaskinRobbins31GameBoard({
       playerName: myPlayer.nickname,
       timestamp: Date.now(),
     });
+
+    // 확정 후 초기화
+    setClickCount(0);
   };
 
   return (
@@ -76,37 +100,34 @@ export function BaskinRobbins31GameBoard({
       </div>
 
       {myPlayer?.is_alive && (
-        <div className="number-buttons-vertical">
-          <button
-            className="call-button-rect call-one"
-            onClick={() => handleCallNumbers(1)}
-            disabled={!isMyTurn}
-          >
-            <span className="call-number">{currentNumber + 1}</span>
-            <span className="call-text">{t.callOne}</span>
-          </button>
+        <div className="baskinrobbins31-controls">
+          <div className="temp-number-display">
+            <p className="temp-label">{t.tempNumber}</p>
+            <p className="temp-value">{tempNumber}</p>
+            <p className="click-count">
+              {t.clickedTimes}: {clickCount}/3
+            </p>
+          </div>
 
-          <button
-            className="call-button-rect call-two"
-            onClick={() => handleCallNumbers(2)}
-            disabled={!isMyTurn || currentNumber + 2 > 31}
-          >
-            <span className="call-number">
-              {currentNumber + 1}, {currentNumber + 2}
-            </span>
-            <span className="call-text">{t.callTwo}</span>
-          </button>
+          <div className="action-buttons">
+            <button
+              className="number-click-button"
+              onClick={handleNumberClick}
+              disabled={!isMyTurn || clickCount >= 3 || tempNumber >= 31}
+            >
+              <span className="button-icon">➕</span>
+              <span className="button-text">{t.addNumber}</span>
+            </button>
 
-          <button
-            className="call-button-rect call-three"
-            onClick={() => handleCallNumbers(3)}
-            disabled={!isMyTurn || currentNumber + 3 > 31}
-          >
-            <span className="call-number">
-              {currentNumber + 1}, {currentNumber + 2}, {currentNumber + 3}
-            </span>
-            <span className="call-text">{t.callThree}</span>
-          </button>
+            <button
+              className="confirm-button"
+              onClick={handleConfirm}
+              disabled={!isMyTurn || clickCount === 0}
+            >
+              <span className="button-icon">✓</span>
+              <span className="button-text">{t.confirm}</span>
+            </button>
+          </div>
         </div>
       )}
     </div>

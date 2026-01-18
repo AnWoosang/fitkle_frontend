@@ -27,8 +27,8 @@ export default function RootLayout({
   console.log('🔍 [RootLayout] 렌더링');
 
   return (
-    <html lang="ko">
-      <body>
+    <html lang="ko" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <LanguageProvider>
           {children}
         </LanguageProvider>

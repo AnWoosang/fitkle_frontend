@@ -16,7 +16,7 @@ interface UseGameRoomReturn {
   players: Player[];
   currentNumber: number;
   isMyTurn: boolean;
-  gameStatus: 'waiting' | 'playing' | 'finished';
+  gameStatus: 'waiting' | 'playing' | 'finished' | 'game_selection';
   lastEvent: GameBroadcastEvent | null;
   error: string | null;
   isLoading: boolean;
@@ -36,7 +36,7 @@ export function useGameRoom({
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [currentNumber, setCurrentNumber] = useState(0);
-  const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished' | 'game_selection'>('waiting');
   const [lastEvent, setLastEvent] = useState<GameBroadcastEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -178,19 +178,33 @@ export function useGameRoom({
 
     const newReadyState = !myPlayer.is_ready;
 
-    await supabase.from('players').update({ is_ready: newReadyState }).eq('id', playerId);
+    // Optimistic Update for immediate UI feedback
+    setPlayers(prevPlayers =>
+      prevPlayers.map(p =>
+        p.id === playerId ? { ...p, is_ready: newReadyState } : p
+      )
+    );
 
-    channelRef.current?.send({
-      type: 'broadcast',
-      event: 'player_ready',
-      payload: {
-        type: 'player_ready',
-        player_id: playerId,
-        player_name: playerName,
-        is_ready: newReadyState,
-      },
-    });
-  }, [room, players, playerId, playerName]);
+    // Update database
+    const { error } = await supabase
+      .from('players')
+      .update({ is_ready: newReadyState })
+      .eq('id', playerId);
+
+    if (error) {
+      console.error('❌ Ready 상태 업데이트 실패:', error);
+      // Rollback optimistic update on error
+      setPlayers(prevPlayers =>
+        prevPlayers.map(p =>
+          p.id === playerId ? { ...p, is_ready: !newReadyState } : p
+        )
+      );
+      return;
+    }
+
+    // Immediately refetch to ensure consistency
+    await loadPlayers(room.id);
+  }, [room, players, playerId, playerName, loadPlayers]);
 
   // 초기화 및 구독 설정
   useEffect(() => {

@@ -25,8 +25,9 @@ function generateRoomCode(): string {
 const languageOptions: { value: Language; label: string; flag: string }[] = [
   { value: 'ko', label: '한국어', flag: '🇰🇷' },
   { value: 'en', label: 'English', flag: '🇺🇸' },
-  { value: 'ja', label: '日本語', flag: '🇯🇵' },
   { value: 'zh', label: '中文', flag: '🇨🇳' },
+  { value: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
+  { value: 'ja', label: '日本語', flag: '🇯🇵' },
   { value: 'es', label: 'Español', flag: '🇪🇸' },
 ];
 
@@ -151,11 +152,10 @@ export default function Home() {
       const playerId = uuidv4();
       console.log('🎯 참가하기 - playerId 생성:', playerId);
 
+      // 레이스 컨디션 방지: 이전 세션 데이터 완전 제거 후 새 playerId 설정
+      sessionStorage.clear();
       sessionStorage.setItem('playerId', playerId);
-      console.log('🎯 참가하기 - playerId 저장 완료');
-
-      sessionStorage.removeItem('playerName'); // 닉네임 초기화
-      console.log('🎯 참가하기 - playerName 제거 완료');
+      console.log('🎯 참가하기 - sessionStorage 초기화 및 playerId 저장 완료');
 
       console.log('🎯 참가하기 - sessionStorage 상태:', {
         playerId: sessionStorage.getItem('playerId'),

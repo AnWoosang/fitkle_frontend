@@ -36,7 +36,7 @@ interface UseTwoTruthsGameProps {
 interface UseTwoTruthsGameReturn {
   room: Room | null;
   players: Player[];
-  gameStatus: 'waiting' | 'preparing' | 'playing' | 'revealing' | 'finished';
+  gameStatus: 'waiting' | 'preparing' | 'playing' | 'revealing' | 'finished' | 'game_selection';
   currentTurn: number;
   currentTurnPlayerId: string | null;
   currentTurnPlayer: Player | null;
@@ -65,7 +65,7 @@ export function useTwoTruthsGame({
 }: UseTwoTruthsGameProps): UseTwoTruthsGameReturn {
   const [room, setRoom] = useState<Room | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [gameStatus, setGameStatus] = useState<'waiting' | 'preparing' | 'playing' | 'revealing' | 'finished'>('waiting');
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'preparing' | 'playing' | 'revealing' | 'finished' | 'game_selection'>('waiting');
   const [currentTurn, setCurrentTurn] = useState(0);
   const [currentTurnPlayerId, setCurrentTurnPlayerId] = useState<string | null>(null);
   const [myStatement, setMyStatement] = useState<StatementData | null>(null);
@@ -732,29 +732,36 @@ export function useTwoTruthsGame({
       newReadyState
     });
 
-    // Optimistic Update
+    // Optimistic Update for immediate UI feedback
     setPlayers(prevPlayers =>
       prevPlayers.map(p =>
         p.id === playerId ? { ...p, is_ready: newReadyState } : p
       )
     );
 
+    // Update database
     // @ts-ignore
-    const { error } = await supabase.from('players').update({ is_ready: newReadyState }).eq('id', playerId);
+    const { error } = await supabase
+      .from('players')
+      .update({ is_ready: newReadyState })
+      .eq('id', playerId);
 
     if (error) {
-      console.error('❌ DB 업데이트 실패:', error);
-    } else {
-      console.log('✅ DB 업데이트 성공:', { playerId, is_ready: newReadyState });
+      console.error('❌ Ready 상태 업데이트 실패:', error);
+      // Rollback optimistic update on error
+      setPlayers(prevPlayers =>
+        prevPlayers.map(p =>
+          p.id === playerId ? { ...p, is_ready: !newReadyState } : p
+        )
+      );
+      return;
     }
 
-    safeBroadcast('player_ready', {
-      type: 'player_ready',
-      player_id: playerId,
-      player_name: playerName,
-      is_ready: newReadyState,
-    });
-  }, [room, players, playerId, playerName, safeBroadcast]);
+    console.log('✅ DB 업데이트 성공:', { playerId, is_ready: newReadyState });
+
+    // Immediately refetch to ensure consistency
+    await loadPlayers(room.id);
+  }, [room, players, playerId, playerName, loadPlayers]);
 
   // 채널 설정 함수 (재사용 가능)
   const setupChannel = useCallback((roomData: Room) => {
