@@ -1,6 +1,7 @@
 import { IGame } from '../common/types';
 import { Player } from '@/types/game';
 import { BaskinRobbins31GameState, BaskinRobbins31GameAction } from './types';
+import { getRandomMission } from '../common/aiHostMissionPool';
 
 /**
  * 베스킨라빈스31 게임 구현
@@ -36,6 +37,7 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
       current_number: 0,
       current_turn_player_id: null,
       numbers_in_current_turn: [],
+      turn_count: 0,
     };
   }
 
@@ -46,11 +48,14 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
   }
 
   onStart(players: Player[], gameState: BaskinRobbins31GameState): BaskinRobbins31GameState {
-    // 게임 시작 시 첫 번째 플레이어(호스트)가 시작
+    // 게임 시작 시 첫 번째 플레이어(호스트)가 시작하고 첫 턴에 미션 부여
+    const firstMission = getRandomMission();
     return {
       current_number: 0,
       current_turn_player_id: players[0].id,
       numbers_in_current_turn: [],
+      turn_count: 1,
+      current_mission_id: firstMission.id,
     };
   }
 
@@ -71,7 +76,7 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
     }
 
     const { numbers } = action.payload;
-    const { current_number, current_turn_player_id, numbers_in_current_turn } = gameState;
+    const { current_number, current_turn_player_id, numbers_in_current_turn, turn_count } = gameState;
 
     // 유효성 검사
     if (numbers.length < 1 || numbers.length > 3) {
@@ -111,11 +116,18 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
       const nextPlayerIndex = currentPlayerIndex % alivePlayers.length;
       const nextPlayer = alivePlayers[nextPlayerIndex];
 
+      // 다음 턴 카운터 증가
+      const nextTurnCount = turn_count + 1;
+      // 7턴마다 미션 할당
+      const nextMission = nextTurnCount % 7 === 0 ? getRandomMission() : null;
+
       return {
         newState: {
           current_number: newCurrentNumber, // 현재 숫자 유지 (게임 계속)
           current_turn_player_id: nextPlayer?.id || null,
           numbers_in_current_turn: numbers, // 방금 말한 숫자들 저장
+          turn_count: nextTurnCount,
+          current_mission_id: nextMission?.id,
         },
         updatedPlayers,
         broadcastEvent: {
@@ -139,17 +151,14 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
         is_alive: false,
       }];
 
-      // 다음 플레이어 찾기 (탈락자 제외)
-      const alivePlayers = players.filter(p => p.is_alive && p.id !== action.playerId);
-      const currentPlayerIndex = players.filter(p => p.is_alive).findIndex(p => p.id === action.playerId);
-      const nextPlayerIndex = currentPlayerIndex % alivePlayers.length;
-      const nextPlayer = alivePlayers[nextPlayerIndex];
-
+      // 31에 도달했으므로 다음 플레이어를 null로 설정 (게임 종료)
       return {
         newState: {
           current_number: newCurrentNumber, // 현재 숫자 유지 (31에 도달)
-          current_turn_player_id: nextPlayer?.id || null,
-          numbers_in_current_turn: numbers, // 방금 말한 숫자들 저장
+          current_turn_player_id: null, // 게임 종료이므로 null
+          numbers_in_current_turn: numbers,
+          turn_count: turn_count + 1,
+          current_mission_id: undefined,
         },
         updatedPlayers,
         broadcastEvent: {
@@ -169,10 +178,17 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
     const nextPlayerIndex = (currentPlayerIndex + 1) % alivePlayers.length;
     const nextPlayer = alivePlayers[nextPlayerIndex];
 
+    // 다음 턴 카운터 증가
+    const nextTurnCount = turn_count + 1;
+    // 7턴마다 미션 할당
+    const nextMission = nextTurnCount % 7 === 0 ? getRandomMission() : null;
+
     const newState: BaskinRobbins31GameState = {
       current_number: newCurrentNumber,
       current_turn_player_id: nextPlayer.id,
       numbers_in_current_turn: numbers,
+      turn_count: nextTurnCount,
+      current_mission_id: nextMission?.id,
     };
 
     return {
@@ -192,9 +208,12 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
 
   checkGameEnd(players: Player[], gameState: BaskinRobbins31GameState): boolean {
     const alivePlayers = players.filter(p => p.is_alive);
-    // 생존자가 1명 이하면 게임 종료
-    const shouldEnd = alivePlayers.length <= 1;
+    // 31에 도달했거나 생존자가 1명 이하면 게임 종료
+    const reachedThirtyOne = gameState.current_number >= 31;
+    const shouldEnd = reachedThirtyOne || alivePlayers.length <= 1;
     console.log('🍦🏁 Checking game end:', {
+      currentNumber: gameState.current_number,
+      reachedThirtyOne,
       alivePlayers: alivePlayers.length,
       totalPlayers: players.length,
       shouldEnd

@@ -75,14 +75,15 @@ export function GameRulesModal({
 
     const gameIcons: Record<GameType, string> = {
       [GameType.NUNCHI]: '👀',
-      [GameType.THREE_SIX_NINE]: '👏',
+      // [GameType.THREE_SIX_NINE]: '👏',
       [GameType.TWO_TRUTHS]: '🤥',
       [GameType.BASKIN_ROBBINS_31]: '🍦',
+      [GameType.APARTMENT]: '🏢',
       [GameType.ZERO]: '🖐️',
     };
 
     const icon = gameIcons[gameType] || '🎮';
-    return `${icon} ${t[gameType]}`;
+    return `${icon} ${t[gameType as keyof typeof t]}`;
   };
 
   return (
@@ -130,9 +131,8 @@ export function GameRulesModal({
                 <li>{t.modalRule2}</li>
                 <li>{t.modalRule3}</li>
                 <li className="highlight-rule">{t.modalRule4}</li>
-                <li>{t.modalRule5}</li>
-                <li>{t.modalRule6}</li>
-                <li>{t.modalRule7}</li>
+                {t.modalRule5 && <li>{t.modalRule5}</li>}
+                {t.modalRule6 && <li>{t.modalRule6}</li>}
               </ul>
             </div>
           )}

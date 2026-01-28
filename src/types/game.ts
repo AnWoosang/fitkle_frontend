@@ -1,9 +1,10 @@
 // 게임 타입 enum
 export enum GameType {
   NUNCHI = 'NUNCHI',
-  THREE_SIX_NINE = 'THREE_SIX_NINE',
+  // THREE_SIX_NINE = 'THREE_SIX_NINE',
   TWO_TRUTHS = 'TWO_TRUTHS',
   BASKIN_ROBBINS_31 = 'BASKIN_ROBBINS_31',
+  APARTMENT = 'APARTMENT',
   // 소개만 하는 게임들
   ZERO = 'ZERO',
   // 새 게임 추가 시 여기에 추가
@@ -32,13 +33,13 @@ export const GAME_REGISTRY: Record<GameType, GameMetadata> = {
     icon: '🇰🇷',
     implementationType: 'PLAYABLE',
   },
-  [GameType.THREE_SIX_NINE]: {
-    id: GameType.THREE_SIX_NINE,
-    minPlayers: 2,
-    maxPlayers: 10,
-    icon: '🇰🇷',
-    implementationType: 'PLAYABLE',
-  },
+  // [GameType.THREE_SIX_NINE]: {
+  //   id: GameType.THREE_SIX_NINE,
+  //   minPlayers: 2,
+  //   maxPlayers: 10,
+  //   icon: '🇰🇷',
+  //   implementationType: 'PLAYABLE',
+  // },
   [GameType.TWO_TRUTHS]: {
     id: GameType.TWO_TRUTHS,
     minPlayers: 3,
@@ -49,6 +50,13 @@ export const GAME_REGISTRY: Record<GameType, GameMetadata> = {
   [GameType.BASKIN_ROBBINS_31]: {
     id: GameType.BASKIN_ROBBINS_31,
     minPlayers: 2,
+    maxPlayers: 10,
+    icon: '🇰🇷',
+    implementationType: 'PLAYABLE',
+  },
+  [GameType.APARTMENT]: {
+    id: GameType.APARTMENT,
+    minPlayers: 3,
     maxPlayers: 10,
     icon: '🇰🇷',
     implementationType: 'PLAYABLE',

@@ -12,7 +12,7 @@ console.log('🔍 [select-game/page.tsx] 파일 로드됨');
 interface GameCard {
   id: GameType;
   icon: string;
-  descriptionKey: keyof ReturnType<typeof useTranslation>;
+  descriptionKey: string;
 }
 
 export default function SelectGamePage() {
@@ -37,20 +37,22 @@ export default function SelectGamePage() {
   }, []);
 
   // 게임 레지스트리에서 자동으로 게임 목록 생성
-  const getDescriptionKey = (gameType: GameType): keyof ReturnType<typeof useTranslation> => {
+  const getDescriptionKey = (gameType: GameType) => {
     switch (gameType) {
       case GameType.NUNCHI:
-        return 'nunchiGameDescription';
-      case GameType.THREE_SIX_NINE:
-        return 'threeSixNineGameDescription';
+        return 'nunchiGameDescription' as const;
+      // case GameType.THREE_SIX_NINE:
+      //   return 'threeSixNineGameDescription' as const;
       case GameType.TWO_TRUTHS:
-        return 'twoTruthsGameDescription';
+        return 'twoTruthsGameDescription' as const;
       case GameType.BASKIN_ROBBINS_31:
-        return 'baskinRobbins31GameDescription';
+        return 'baskinRobbins31GameDescription' as const;
+      case GameType.APARTMENT:
+        return 'apartmentGameDescription' as const;
       case GameType.ZERO:
-        return 'zeroGameDescription';
+        return 'zeroGameDescription' as const;
       default:
-        return 'nunchiGameDescription';
+        return 'nunchiGameDescription' as const;
     }
   };
 
@@ -195,8 +197,8 @@ export default function SelectGamePage() {
                   onClick={() => handleGameSelect(game.id)}
                 >
                   <div className="game-icon">{game.icon}</div>
-                  <h3 className="game-title">{t[game.id]}</h3>
-                  <p className="game-description">{t[game.descriptionKey]}</p>
+                  <h3 className="game-title">{t[game.id as keyof typeof t]}</h3>
+                  <p className="game-description">{t[game.descriptionKey as keyof typeof t]}</p>
                 </button>
               ))}
             </div>
@@ -218,8 +220,8 @@ export default function SelectGamePage() {
                   onClick={() => handleGameSelect(game.id)}
                 >
                   <div className="game-icon">{game.icon}</div>
-                  <h3 className="game-title">{t[game.id]}</h3>
-                  <p className="game-description">{t[game.descriptionKey]}</p>
+                  <h3 className="game-title">{t[game.id as keyof typeof t]}</h3>
+                  <p className="game-description">{t[game.descriptionKey as keyof typeof t]}</p>
                   <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '8px' }}>
                     📖 {language === 'ko' ? '규칙 보기' : 'View Rules'}
                   </p>

@@ -1,6 +1,7 @@
 import { IGame } from '../common/types';
 import { Player } from '@/types/game';
 import { NunchiGameState, NunchiGameAction } from './types';
+import { getRandomMission } from '../common/aiHostMissionPool';
 
 const COLLISION_THRESHOLD_MS = 500;
 
@@ -32,6 +33,7 @@ export class NunchiGame implements IGame<NunchiGameState, NunchiGameAction> {
       current_number: 0,
       last_call_timestamp: null,
       called_player_ids: [],
+      turn_count: 0,
     };
   }
 
@@ -42,10 +44,17 @@ export class NunchiGame implements IGame<NunchiGameState, NunchiGameAction> {
   }
 
   onStart(players: Player[], gameState: NunchiGameState): NunchiGameState {
+    // 게임 시작 시 호스트(첫 번째 플레이어)가 1을 외치도록 지정하고 미션 부여
+    const firstMission = getRandomMission();
+    const hostPlayer = players[0]; // 호스트는 항상 첫 번째 플레이어
+
     return {
       current_number: 0,
       last_call_timestamp: null,
       called_player_ids: [],
+      turn_count: 0,
+      current_mission_id: firstMission.id,
+      first_turn_player_id: hostPlayer.id,
     };
   }
 
@@ -63,7 +72,13 @@ export class NunchiGame implements IGame<NunchiGameState, NunchiGameAction> {
     }
 
     const { number } = action.payload;
-    const { current_number, last_call_timestamp, called_player_ids } = gameState;
+    const { current_number, last_call_timestamp, called_player_ids, turn_count, first_turn_player_id } = gameState;
+
+    // 첫 턴 검증: 1을 외치는 경우, 지정된 플레이어만 가능
+    if (number === 1 && first_turn_player_id && action.playerId !== first_turn_player_id) {
+      console.log('❌ Only the designated first player can call 1:', { playerId: action.playerId, firstTurnPlayerId: first_turn_player_id });
+      return { newState: gameState };
+    }
 
     // 충돌 검사
     const timeSinceLastCall = last_call_timestamp
@@ -78,12 +93,14 @@ export class NunchiGame implements IGame<NunchiGameState, NunchiGameAction> {
         .filter(p => p.is_alive && (p.id === action.playerId || timeSinceLastCall < COLLISION_THRESHOLD_MS))
         .map(p => ({ id: p.id, is_alive: false }));
 
-      // 충돌 시 라운드 리셋
+      // 충돌 시 라운드 리셋 (턴 카운터는 유지, 미션은 그대로)
       return {
         newState: {
           current_number: 0,
           last_call_timestamp: null,
           called_player_ids: [],
+          turn_count: turn_count,
+          current_mission_id: gameState.current_mission_id,
         },
         updatedPlayers,
         broadcastEvent: {
@@ -100,11 +117,18 @@ export class NunchiGame implements IGame<NunchiGameState, NunchiGameAction> {
     // 현재 플레이어를 호출 목록에 추가
     const newCalledPlayerIds = [...called_player_ids, action.playerId];
 
+    // 다음 턴 카운터 증가
+    const nextTurnCount = turn_count + 1;
+    // 3턴마다 미션 할당 (첫 턴은 이미 게임 시작 시 할당됨)
+    const nextMission = nextTurnCount % 3 === 0 ? getRandomMission() : null;
+
     // 정상 호출
     const newState: NunchiGameState = {
       current_number: number,
       last_call_timestamp: action.timestamp,
       called_player_ids: newCalledPlayerIds,
+      turn_count: nextTurnCount,
+      current_mission_id: nextMission?.id,
     };
 
     // 마지막 한 명 남았는지 확인 (n명 중 n-1명이 호출했는지)
@@ -116,11 +140,13 @@ export class NunchiGame implements IGame<NunchiGameState, NunchiGameAction> {
       const lastPlayer = alivePlayers.find(p => !newCalledPlayerIds.includes(p.id));
       const updatedPlayers: Partial<Player>[] = lastPlayer ? [{ id: lastPlayer.id, is_alive: false }] : [];
 
-      // 다음 라운드를 위해 상태 리셋
+      // 다음 라운드를 위해 상태 리셋 (턴 카운터와 미션은 유지)
       const resetState: NunchiGameState = {
         current_number: 0,
         last_call_timestamp: null,
         called_player_ids: [],
+        turn_count: nextTurnCount,
+        current_mission_id: nextMission?.id,
       };
 
       return {
