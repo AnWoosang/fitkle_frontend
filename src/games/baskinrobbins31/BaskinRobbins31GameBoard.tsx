@@ -3,6 +3,8 @@ import { GameBoardProps } from '../common/types';
 import { BaskinRobbins31GameState } from './types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/i18n/translations';
+import { AIHostMissionCard } from '../common/AIHostMissionCard';
+import { MISSION_POOL } from '../common/aiHostMissionPool';
 
 /**
  * 베스킨라빈스31 게임 보드 컴포넌트
@@ -29,6 +31,12 @@ export function BaskinRobbins31GameBoard({
 
   // 현재 턴이 나인지 직접 계산
   const isMyTurn = room.status === 'playing' && currentTurnPlayerId === currentPlayerId && myPlayer?.is_alive;
+
+  // 현재 턴의 미션 가져오기 (모든 플레이어가 볼 수 있음)
+  const currentMissionId = state?.current_mission_id
+    ? state.current_mission_id
+    : null;
+  const currentMission = currentMissionId ? MISSION_POOL.find(m => m.id === currentMissionId) : null;
 
   // 현재 턴에서 클릭한 횟수 (로컬 상태)
   const [clickCount, setClickCount] = useState(0);
@@ -66,6 +74,41 @@ export function BaskinRobbins31GameBoard({
 
   return (
     <div className="baskinrobbins31-game-area">
+      {/* AI 호스트 미션 카드 - 미션이 있을 때 모든 플레이어에게 표시 */}
+      {currentMission && currentTurnPlayer && (
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{
+            marginBottom: '10px',
+            padding: '10px',
+            backgroundColor: isMyTurn ? '#d4edda' : '#e7f3ff',
+            border: `2px solid ${isMyTurn ? '#28a745' : '#0066cc'}`,
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <p style={{ margin: 0, fontSize: '14px', fontWeight: 'bold', color: isMyTurn ? '#155724' : '#004085' }}>
+              {isMyTurn ? (
+                <>
+                  🎯 {language === 'ko' ? '당신의 AI 호스트 미션!' :
+                      language === 'en' ? 'Your AI Host Mission!' :
+                      language === 'ja' ? 'あなたのAIホストミッション！' :
+                      language === 'zh' ? '你的AI主持人任务！' :
+                      '¡Tu misión de anfitrión de IA!'}
+                </>
+              ) : (
+                <>
+                  👀 {language === 'ko' ? `${currentTurnPlayer.nickname}님의 AI 호스트 미션` :
+                      language === 'en' ? `${currentTurnPlayer.nickname}'s AI Host Mission` :
+                      language === 'ja' ? `${currentTurnPlayer.nickname}さんのAIホストミッション` :
+                      language === 'zh' ? `${currentTurnPlayer.nickname}的AI主持人任务` :
+                      `Misión de ${currentTurnPlayer.nickname}`}
+                </>
+              )}
+            </p>
+          </div>
+          <AIHostMissionCard mission={currentMission} language={language} />
+        </div>
+      )}
+
       <div className="game-status">
         <div className="status-playing">
           <div className="current-number">

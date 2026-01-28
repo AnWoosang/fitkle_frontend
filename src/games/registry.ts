@@ -3,6 +3,7 @@ import { nunchiEntry } from './nunchi';
 import { threeSixNineEntry } from './three-six-nine';
 import { twoTruthsEntry } from './two-truths';
 import { baskinRobbins31Entry } from './baskinrobbins31';
+import { apartmentEntry } from './apartment';
 
 /**
  * 게임 레지스트리
@@ -10,9 +11,10 @@ import { baskinRobbins31Entry } from './baskinrobbins31';
  */
 export const gameRegistry: Record<string, GameRegistryEntry> = {
   'NUNCHI': nunchiEntry,
-  'THREE_SIX_NINE': threeSixNineEntry,
+  // 'THREE_SIX_NINE': threeSixNineEntry,
   'TWO_TRUTHS': twoTruthsEntry,
   'BASKIN_ROBBINS_31': baskinRobbins31Entry,
+  'APARTMENT': apartmentEntry,
 };
 
 /**

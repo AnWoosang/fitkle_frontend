@@ -202,7 +202,7 @@ export default function GameRulesPage() {
     <div className="lobby">
       <div className="lobby-container">
         <header className="lobby-header">
-          <h1>{room.game_type && t[room.game_type]}</h1>
+          <h1>{room.game_type && t[room.game_type as keyof typeof t]}</h1>
           <p className="subtitle">{t.gameRulesSubtitle || '게임 규칙'}</p>
         </header>
 
