@@ -19,6 +19,7 @@ interface UseGameEngineReturn<TState = any> {
   error: string | null;
   isLoading: boolean;
   hostLeft: boolean;
+  lastEvent: any | null;
   performAction: (action: GameAction) => Promise<void>;
   startGame: () => Promise<void>;
   resetGame: () => Promise<void>;
@@ -43,6 +44,7 @@ export function useGameEngine<TState = any>({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hostLeft, setHostLeft] = useState(false);
+  const [lastEvent, setLastEvent] = useState<any | null>(null);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const loadPlayersTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -422,6 +424,7 @@ export function useGameEngine<TState = any>({
         channel.on('broadcast', { event: 'player_eliminated' }, (payload: any) => {
           if (mounted && roomData) {
             console.log('💀 Player eliminated:', payload.payload);
+            setLastEvent(payload.payload);
             loadPlayers(roomData.id);
           }
         });
@@ -478,6 +481,7 @@ export function useGameEngine<TState = any>({
     error,
     isLoading,
     hostLeft,
+    lastEvent,
     performAction,
     startGame,
     resetGame,

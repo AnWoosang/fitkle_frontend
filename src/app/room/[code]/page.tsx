@@ -50,6 +50,7 @@ export default function RoomPage() {
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
+  const [eliminationReasons, setEliminationReasons] = useState<Record<string, string>>({});
 
   // 페이지 마운트 시 playerName 상태 강제 재검증 (레이스 컨디션 방지)
   useEffect(() => {
@@ -147,6 +148,7 @@ export default function RoomPage() {
     error,
     isLoading,
     hostLeft,
+    lastEvent,
     performAction,
     startGame,
     resetGame,
@@ -190,6 +192,57 @@ export default function RoomPage() {
       }
     }
   }, [gameStatus, room, isLoading, playerName, showNicknameModal]);
+
+  // 베스킨라빈스31 탈락 이벤트 구독
+  useEffect(() => {
+    if (!room?.id || gameType !== GameType.BASKIN_ROBBINS_31) return;
+
+    const channel = supabase.channel(`baskinrobbins31-elimination-${room.id}`);
+
+    channel.on('broadcast', { event: 'player_eliminated' }, (payload: any) => {
+      const event = payload.payload;
+      const eliminatedPlayer = players.find(p => p.id === event.player_id);
+      if (!eliminatedPlayer) return;
+
+      let reason = '';
+      if (event.reason === 'same_count_as_previous') {
+        const count = event.previous_count;
+        reason = language === 'ko' ? `이전과 같은 개수(${count}개) 선택` :
+                 language === 'en' ? `Same count as previous (${count})` :
+                 language === 'ja' ? `前と同じ個数(${count}個)` :
+                 language === 'zh' ? `与前一个相同的数量(${count}个)` :
+                 language === 'es' ? `Misma cantidad que antes (${count})` :
+                 `Cùng số lượng với trước đó (${count})`;
+      } else if (event.reason === 'said_31') {
+        reason = language === 'ko' ? '31을 말함' :
+                 language === 'en' ? 'Said 31' :
+                 language === 'ja' ? '31を言った' :
+                 language === 'zh' ? '说了31' :
+                 language === 'es' ? 'Dijo 31' :
+                 'Nói 31';
+      }
+
+      if (reason) {
+        setEliminationReasons(prev => ({
+          ...prev,
+          [event.player_id]: reason
+        }));
+      }
+    });
+
+    channel.subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [room?.id, gameType, players, language]);
+
+  // 게임이 시작되거나 재시작될 때 탈락 사유 초기화
+  useEffect(() => {
+    if (gameStatus === 'playing' || gameStatus === 'waiting') {
+      setEliminationReasons({});
+    }
+  }, [gameStatus]);
 
   // 호스트가 방을 나갔을 때 자동 리다이렉트
   useEffect(() => {
@@ -531,6 +584,7 @@ export default function RoomPage() {
               currentPlayerId={playerId}
               onAction={performAction}
               isMyTurn={true}
+              lastEvent={lastEvent}
             />
           </>
         )}
@@ -601,6 +655,7 @@ export default function RoomPage() {
           isHost={isHost}
           onRestart={handleRestartGame}
           onLeave={handleLeaveRoom}
+          eliminationReasons={eliminationReasons}
         />
       )}
 
