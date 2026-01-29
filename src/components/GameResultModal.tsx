@@ -13,6 +13,7 @@ interface GameResultModalProps {
   isHost: boolean;
   onRestart: () => void;
   onLeave: () => void;
+  eliminationReasons?: Record<string, string>; // 선택적: 플레이어 ID별 탈락 사유
 }
 
 export function GameResultModal({
@@ -21,6 +22,7 @@ export function GameResultModal({
   isHost,
   onRestart,
   onLeave,
+  eliminationReasons,
 }: GameResultModalProps) {
   const { language } = useLanguage();
   const t = useTranslation(language);
@@ -96,6 +98,17 @@ export function GameResultModal({
                   <li key={player.id} className="eliminated-player">
                     <span className="player-emoji">💀</span>
                     <span className="player-name">{player.nickname}</span>
+                    {eliminationReasons && eliminationReasons[player.id] && (
+                      <span className="elimination-reason" style={{
+                        display: 'block',
+                        fontSize: '0.85rem',
+                        color: 'var(--text-muted)',
+                        marginTop: '4px',
+                        marginLeft: '28px'
+                      }}>
+                        {eliminationReasons[player.id]}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

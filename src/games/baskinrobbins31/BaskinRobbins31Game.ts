@@ -1,7 +1,7 @@
 import { IGame } from '../common/types';
 import { Player } from '@/types/game';
 import { BaskinRobbins31GameState, BaskinRobbins31GameAction } from './types';
-import { getRandomMission } from '../common/aiHostMissionPool';
+import { getRandomMission, getRandomMissionExcluding } from '../common/aiHostMissionPool';
 
 /**
  * 베스킨라빈스31 게임 구현
@@ -118,8 +118,8 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
 
       // 다음 턴 카운터 증가
       const nextTurnCount = turn_count + 1;
-      // 7턴마다 미션 할당
-      const nextMission = nextTurnCount % 7 === 0 ? getRandomMission() : null;
+      // 7턴마다 미션 할당 (이전 미션과 다른 것으로)
+      const nextMission = nextTurnCount % 7 === 0 ? getRandomMissionExcluding(gameState.current_mission_id) : null;
 
       return {
         newState: {
@@ -180,8 +180,8 @@ export class BaskinRobbins31Game implements IGame<BaskinRobbins31GameState, Bask
 
     // 다음 턴 카운터 증가
     const nextTurnCount = turn_count + 1;
-    // 7턴마다 미션 할당
-    const nextMission = nextTurnCount % 7 === 0 ? getRandomMission() : null;
+    // 7턴마다 미션 할당 (이전 미션과 다른 것으로)
+    const nextMission = nextTurnCount % 7 === 0 ? getRandomMissionExcluding(gameState.current_mission_id) : null;
 
     const newState: BaskinRobbins31GameState = {
       current_number: newCurrentNumber,

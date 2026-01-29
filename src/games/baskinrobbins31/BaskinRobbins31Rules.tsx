@@ -10,6 +10,20 @@ export function BaskinRobbins31Rules({ minPlayers, maxPlayers, language }: Rules
   return (
     <div className="rules-section">
       <h3 className="rules-title">{t.gameRulesSubtitle}</h3>
+
+      {/* AI 호스트 미션 경고 */}
+      <div style={{
+        marginBottom: '16px',
+        padding: '12px 16px',
+        background: 'linear-gradient(135deg, #ffd6a5 0%, #ffadad 100%)',
+        borderRadius: '8px',
+        border: '2px solid rgba(255, 255, 255, 0.5)'
+      }}>
+        <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 'bold', color: '#2c3e50', lineHeight: '1.5' }}>
+          {t.aiHostMissionRuleWarning}
+        </p>
+      </div>
+
       <ul className="rules-list">
         <li>{t.baskinRobbins31Rule1}</li>
         <li>{t.baskinRobbins31Rule2}</li>

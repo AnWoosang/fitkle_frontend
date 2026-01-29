@@ -259,35 +259,12 @@ export const translations = {
     aiHostSpeechStyleLabel: '말투',
     aiHostActionLabel: '행동',
 
-    // AI Host Mission - Gestures (제스처)
-    mission_gesture_wave_arms: '팔을 좌우로 신나게 흔들면서',
-    mission_gesture_gangnam_style: '강남스타일 춤을 추면서',
-    mission_gesture_salsa_dance: '살사 댄스를 추면서',
-    mission_gesture_salsa_dance_2: '살사 댄스로 손을 흔들면서',
-    mission_gesture_golf_swing: '골프 스윙 동작을 하면서',
-    mission_gesture_elegant_pose: '우아한 포즈를 취하면서',
-    mission_gesture_running_motion: '재미있게 달리는 동작을 하면서',
-    mission_gesture_hiphop_dance: '힙합 댄스를 추면서',
+    // AI Host Mission - 간단한 메시지
+    mission_gesture_simple: '이 동작을 따라하세요',
+    mission_action_simple: '이 행동을 따라하면서 게임을 진행하세요',
 
-    // AI Host Mission - Speech Styles (말투)
-    mission_speech_exaggerated: '과장되게',
-    mission_speech_whisper: '천천히 또박또박',
-    mission_speech_singing: '노래하듯이',
-    mission_speech_serious: '낮고 굵은 목소리로',
-    mission_speech_noble: '귀족처럼 우아하게',
-    mission_speech_breathless: '흥분한 목소리로',
-    mission_speech_rap: '랩하듯이',
-    mission_speech_shouting: '힘차게 크게',
-
-    // AI Host Mission - Actions (비언어적 행동)
-    mission_action_dance_while_speaking: '춤을 추면서 숫자를 말하세요!',
-    mission_action_sway_body: '몸을 좌우로 흔들면서 숫자를 말하세요!',
-    mission_action_clap_hands: '손뼉을 치면서 숫자를 외치세요!',
-    mission_action_swing_before_speak: '스윙 동작 후 숫자를 외치세요!',
-    mission_action_pose_while_speak: '포즈를 취한 상태로 숫자를 말하세요!',
-    mission_action_jump_in_place: '제자리에서 뛰면서 숫자를 외치세요!',
-    mission_action_snap_fingers: '손가락을 튕기면서 숫자를 말하세요!',
-    mission_action_eyes_closed: '눈을 감고 숫자를 외치세요!',
+    // AI Host Mission - Rules Warning
+    aiHostMissionRuleWarning: '⚠️ 중요: 게임 중 AI 호스트가 미션을 부여합니다. 미션을 완수하면서 게임을 진행해야 합니다!',
 
     // Apartment Game Rules
     apartmentRulesTitle: '🏢 아파트 게임 규칙',
@@ -564,35 +541,12 @@ export const translations = {
     aiHostSpeechStyleLabel: 'Speech Style',
     aiHostActionLabel: 'Action',
 
-    // AI Host Mission - Gestures
-    mission_gesture_wave_arms: 'While swinging your arms left and right',
-    mission_gesture_gangnam_style: 'While dancing Gangnam Style',
-    mission_gesture_salsa_dance: 'While salsa dancing',
-    mission_gesture_salsa_dance_2: 'While waving hands in salsa',
-    mission_gesture_golf_swing: 'While doing golf swing motion',
-    mission_gesture_elegant_pose: 'While striking an elegant pose',
-    mission_gesture_running_motion: 'While doing goofy running motion',
-    mission_gesture_hiphop_dance: 'While doing hip-hop dance',
+    // AI Host Mission - Simple messages
+    mission_gesture_simple: 'Follow this motion',
+    mission_action_simple: 'Copy this motion while playing',
 
-    // AI Host Mission - Speech Styles
-    mission_speech_exaggerated: 'Exaggerated tone',
-    mission_speech_whisper: 'Slowly and clearly',
-    mission_speech_singing: 'Singing',
-    mission_speech_serious: 'Deep and thick voice',
-    mission_speech_noble: 'Noble and elegant',
-    mission_speech_breathless: 'Excited voice',
-    mission_speech_rap: 'Rapping style',
-    mission_speech_shouting: 'Powerfully and loudly',
-
-    // AI Host Mission - Actions
-    mission_action_dance_while_speaking: 'Say numbers while dancing!',
-    mission_action_sway_body: 'Sway your body left and right while speaking!',
-    mission_action_clap_hands: 'Clap your hands while saying numbers!',
-    mission_action_swing_before_speak: 'Do a swing motion before saying numbers!',
-    mission_action_pose_while_speak: 'Strike a pose while saying numbers!',
-    mission_action_jump_in_place: 'Jump in place while saying numbers!',
-    mission_action_snap_fingers: 'Snap your fingers while saying numbers!',
-    mission_action_eyes_closed: 'Say numbers with your eyes closed!',
+    // AI Host Mission - Rules Warning
+    aiHostMissionRuleWarning: '⚠️ Important: The AI host will assign missions during the game. You must complete the missions while playing!',
 
     // Apartment Game Rules
     apartmentRulesTitle: '🏢 Apartment Game Rules',
@@ -869,35 +823,12 @@ export const translations = {
     aiHostSpeechStyleLabel: '話し方',
     aiHostActionLabel: 'アクション',
 
-    // AI Host Mission - Gestures
-    mission_gesture_wave_arms: '腕を左右に元気よく振りながら',
-    mission_gesture_gangnam_style: '江南スタイルを踊りながら',
-    mission_gesture_salsa_dance: 'サルサダンスを踊りながら',
-    mission_gesture_salsa_dance_2: 'サルサで手を振りながら',
-    mission_gesture_golf_swing: 'ゴルフスイングをしながら',
-    mission_gesture_elegant_pose: '優雅なポーズを取りながら',
-    mission_gesture_running_motion: '面白く走る動作をしながら',
-    mission_gesture_hiphop_dance: 'ヒップホップダンスを踊りながら',
+    // AI Host Mission - Simple messages
+    mission_gesture_simple: 'この動きを真似してください',
+    mission_action_simple: 'この動きを真似しながらゲームを進めてください',
 
-    // AI Host Mission - Speech Styles
-    mission_speech_exaggerated: '大げさに',
-    mission_speech_whisper: 'ゆっくりはっきりと',
-    mission_speech_singing: '歌うように',
-    mission_speech_serious: '低くて太い声で',
-    mission_speech_noble: '貴族のように優雅に',
-    mission_speech_breathless: '興奮した声で',
-    mission_speech_rap: 'ラップのように',
-    mission_speech_shouting: '力強く大きく',
-
-    // AI Host Mission - Actions
-    mission_action_dance_while_speaking: '踊りながら数字を言ってください！',
-    mission_action_sway_body: '体を左右に揺らしながら数字を言ってください！',
-    mission_action_clap_hands: '手を叩きながら数字を言ってください！',
-    mission_action_swing_before_speak: 'スイング動作の後に数字を言ってください！',
-    mission_action_pose_while_speak: 'ポーズを取りながら数字を言ってください！',
-    mission_action_jump_in_place: 'その場でジャンプしながら数字を言ってください！',
-    mission_action_snap_fingers: '指を鳴らしながら数字を言ってください！',
-    mission_action_eyes_closed: '目を閉じて数字を言ってください！',
+    // AI Host Mission - Rules Warning
+    aiHostMissionRuleWarning: '⚠️ 重要：ゲーム中にAIホストがミッションを与えます。ミッションを完了しながらゲームを進める必要があります！',
 
     // Apartment Game Rules
     apartmentRulesTitle: '🏢 アパートゲームのルール',
@@ -1174,35 +1105,12 @@ export const translations = {
     aiHostSpeechStyleLabel: '说话方式',
     aiHostActionLabel: '动作',
 
-    // AI Host Mission - Gestures
-    mission_gesture_wave_arms: '左右摆动手臂的同时',
-    mission_gesture_gangnam_style: '跳江南Style的同时',
-    mission_gesture_salsa_dance: '跳莎莎舞的同时',
-    mission_gesture_salsa_dance_2: '跳莎莎舞挥手的同时',
-    mission_gesture_golf_swing: '做高尔夫挥杆动作的同时',
-    mission_gesture_elegant_pose: '摆出优雅姿势的同时',
-    mission_gesture_running_motion: '做有趣的跑步动作的同时',
-    mission_gesture_hiphop_dance: '跳嘻哈舞的同时',
+    // AI Host Mission - Simple messages
+    mission_gesture_simple: '模仿这个动作',
+    mission_action_simple: '模仿这个动作进行游戏',
 
-    // AI Host Mission - Speech Styles
-    mission_speech_exaggerated: '夸张地',
-    mission_speech_whisper: '慢慢清楚地',
-    mission_speech_singing: '唱歌般地',
-    mission_speech_serious: '低沉浑厚的声音',
-    mission_speech_noble: '贵族般优雅地',
-    mission_speech_breathless: '兴奋的声音',
-    mission_speech_rap: '说唱般地',
-    mission_speech_shouting: '有力响亮地',
-
-    // AI Host Mission - Actions
-    mission_action_dance_while_speaking: '边跳舞边说数字！',
-    mission_action_sway_body: '左右摇晃身体同时说数字！',
-    mission_action_clap_hands: '边拍手边说数字！',
-    mission_action_swing_before_speak: '挥杆动作后说数字！',
-    mission_action_pose_while_speak: '摆姿势同时说数字！',
-    mission_action_jump_in_place: '原地跳跃同时说数字！',
-    mission_action_snap_fingers: '打响指同时说数字！',
-    mission_action_eyes_closed: '闭着眼睛说数字！',
+    // AI Host Mission - Rules Warning
+    aiHostMissionRuleWarning: '⚠️ 重要：游戏中AI主持人会分配任务。你必须在完成任务的同时进行游戏！',
 
     // Apartment Game Rules
     apartmentRulesTitle: '🏢 公寓游戏规则',
@@ -1479,35 +1387,12 @@ export const translations = {
     aiHostSpeechStyleLabel: 'Estilo de Habla',
     aiHostActionLabel: 'Acción',
 
-    // AI Host Mission - Gestures
-    mission_gesture_wave_arms: 'Mientras mueves los brazos de izquierda a derecha',
-    mission_gesture_gangnam_style: 'Mientras bailas Gangnam Style',
-    mission_gesture_salsa_dance: 'Mientras bailas salsa',
-    mission_gesture_salsa_dance_2: 'Mientras mueves las manos en salsa',
-    mission_gesture_golf_swing: 'Mientras haces el swing de golf',
-    mission_gesture_elegant_pose: 'Mientras adoptas una pose elegante',
-    mission_gesture_running_motion: 'Mientras haces un movimiento de carrera divertido',
-    mission_gesture_hiphop_dance: 'Mientras bailas hip-hop',
+    // AI Host Mission - Simple messages
+    mission_gesture_simple: 'Sigue este movimiento',
+    mission_action_simple: 'Copia este movimiento mientras juegas',
 
-    // AI Host Mission - Speech Styles
-    mission_speech_exaggerated: 'Tono exagerado',
-    mission_speech_whisper: 'Despacio y claro',
-    mission_speech_singing: 'Cantando',
-    mission_speech_serious: 'Voz profunda y gruesa',
-    mission_speech_noble: 'Noble y elegante',
-    mission_speech_breathless: 'Voz emocionada',
-    mission_speech_rap: 'Estilo rap',
-    mission_speech_shouting: 'Fuerte y potente',
-
-    // AI Host Mission - Actions
-    mission_action_dance_while_speaking: '¡Di los números mientras bailas!',
-    mission_action_sway_body: '¡Balancea tu cuerpo de lado a lado mientras hablas!',
-    mission_action_clap_hands: '¡Aplaude mientras dices los números!',
-    mission_action_swing_before_speak: '¡Haz un movimiento de swing antes de decir los números!',
-    mission_action_pose_while_speak: '¡Adopta una pose mientras dices los números!',
-    mission_action_jump_in_place: '¡Salta en tu lugar mientras dices los números!',
-    mission_action_snap_fingers: '¡Chasquea los dedos mientras dices los números!',
-    mission_action_eyes_closed: '¡Di los números con los ojos cerrados!',
+    // AI Host Mission - Rules Warning
+    aiHostMissionRuleWarning: '⚠️ Importante: El host IA asignará misiones durante el juego. ¡Debes completar las misiones mientras juegas!',
 
     // Apartment Game Rules
     apartmentRulesTitle: '🏢 Reglas del Juego de Apartamento',
@@ -1783,35 +1668,12 @@ export const translations = {
     aiHostSpeechStyleLabel: 'Phong Cách Nói',
     aiHostActionLabel: 'Hành Động',
 
-    // AI Host Mission - Gestures
-    mission_gesture_wave_arms: 'Vung tay trái phải',
-    mission_gesture_gangnam_style: 'Nhảy Gangnam Style',
-    mission_gesture_salsa_dance: 'Nhảy salsa',
-    mission_gesture_salsa_dance_2: 'Vẫy tay nhảy salsa',
-    mission_gesture_golf_swing: 'Làm động tác swing golf',
-    mission_gesture_elegant_pose: 'Tạo dáng thanh lịch',
-    mission_gesture_running_motion: 'Làm động tác chạy hài hước',
-    mission_gesture_hiphop_dance: 'Nhảy hip-hop',
+    // AI Host Mission - Simple messages
+    mission_gesture_simple: 'Làm theo động tác này',
+    mission_action_simple: 'Bắt chước động tác này khi chơi',
 
-    // AI Host Mission - Speech Styles
-    mission_speech_exaggerated: 'Giọng phóng đại',
-    mission_speech_whisper: 'Chậm rãi và rõ ràng',
-    mission_speech_singing: 'Hát',
-    mission_speech_serious: 'Giọng trầm và dày',
-    mission_speech_noble: 'Thanh lịch như quý tộc',
-    mission_speech_breathless: 'Giọng phấn khích',
-    mission_speech_rap: 'Phong cách rap',
-    mission_speech_shouting: 'Mạnh mẽ và to',
-
-    // AI Host Mission - Actions
-    mission_action_dance_while_speaking: 'Nói số trong khi nhảy!',
-    mission_action_sway_body: 'Lắc người trái phải trong khi nói!',
-    mission_action_clap_hands: 'Vỗ tay trong khi nói số!',
-    mission_action_swing_before_speak: 'Làm động tác swing trước khi nói số!',
-    mission_action_pose_while_speak: 'Tạo dáng trong khi nói số!',
-    mission_action_jump_in_place: 'Nhảy tại chỗ trong khi nói số!',
-    mission_action_snap_fingers: 'Búng tay trong khi nói số!',
-    mission_action_eyes_closed: 'Nói số với mắt nhắm!',
+    // AI Host Mission - Rules Warning
+    aiHostMissionRuleWarning: '⚠️ Quan trọng: AI sẽ giao nhiệm vụ trong trò chơi. Bạn phải hoàn thành nhiệm vụ trong khi chơi!',
 
     // Apartment Game Rules
     apartmentRulesTitle: '🏢 Luật Chơi Apartment',

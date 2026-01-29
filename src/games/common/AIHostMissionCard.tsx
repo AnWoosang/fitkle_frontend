@@ -1,5 +1,6 @@
 import { useTranslation } from '@/i18n/translations';
 import type { Language } from '@/contexts/LanguageContext';
+import { useState } from 'react';
 
 export interface AIHostMission {
   id: string;
@@ -12,6 +13,9 @@ export interface AIHostMission {
 interface AIHostMissionCardProps {
   mission: AIHostMission | null;
   language: Language;
+  playerName?: string; // 현재 미션을 수행하는 플레이어 이름
+  isMyMission?: boolean; // 내 미션인지 여부
+  onClose?: () => void; // 닫기 콜백
 }
 
 /**
@@ -20,165 +24,154 @@ interface AIHostMissionCardProps {
  * 참가자별로 랜덤하게 부여되는 비언어적 행동 미션을 표시합니다.
  * 웃음과 행동을 통해 자연스럽게 아이스 브레이킹을 유도합니다.
  */
-export function AIHostMissionCard({ mission, language }: AIHostMissionCardProps) {
+export function AIHostMissionCard({ mission, language, playerName, isMyMission = true, onClose }: AIHostMissionCardProps) {
   const t = useTranslation(language);
+  const [isVisible, setIsVisible] = useState(true);
 
-  if (!mission) {
+  if (!mission || !isVisible) {
     return null;
   }
 
+  const handleClose = () => {
+    setIsVisible(false);
+    onClose?.();
+  };
+
+  // 제목 텍스트 결정
+  const getTitleText = () => {
+    if (isMyMission) {
+      return t.aiHostMissionTitle;
+    }
+    if (playerName) {
+      return language === 'ko' ? `${playerName}님의 AI 호스트 미션` :
+             language === 'en' ? `${playerName}'s AI Host Mission` :
+             language === 'ja' ? `${playerName}さんのAIホストミッション` :
+             language === 'zh' ? `${playerName}的AI主持人任务` :
+             language === 'es' ? `Misión de ${playerName}` :
+             `Nhiệm vụ của ${playerName}`;
+    }
+    return t.aiHostMissionTitle;
+  };
+
   return (
     <div
-      className="ai-host-mission-card"
+      className="ai-host-mission-overlay"
       style={{
-        marginBottom: '20px',
-        padding: '16px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-        border: '2px solid rgba(255, 255, 255, 0.1)',
-        width: '100%',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '20px',
       }}
     >
-      {/* 제목 (로봇 이모지 제거됨) */}
-      <div
+      {/* 닫기 버튼 */}
+      <button
+        onClick={handleClose}
         style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          background: 'rgba(255, 255, 255, 0.2)',
+          border: '2px solid rgba(255, 255, 255, 0.5)',
+          borderRadius: '50%',
+          width: '48px',
+          height: '48px',
           display: 'flex',
           alignItems: 'center',
-          marginBottom: '12px',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          fontSize: '24px',
+          color: '#fff',
+          fontWeight: 'bold',
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
+          e.currentTarget.style.transform = 'scale(1.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+          e.currentTarget.style.transform = 'scale(1)';
         }}
       >
-        <h4
-          style={{
-            margin: 0,
-            fontSize: '0.9rem',
-            fontWeight: 'bold',
-            color: '#fff',
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-          }}
-        >
-          {t.aiHostMissionTitle}
-        </h4>
-      </div>
+        ✕
+      </button>
 
-      {/* 미션 내용 */}
+      {/* 제목 */}
       <div
         style={{
-          display: 'flex',
-          gap: '12px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: '8px',
-          padding: '12px',
+          marginBottom: '24px',
+          textAlign: 'center',
         }}
       >
-        {/* 왼쪽: GIF */}
-        <div
+        <h2
           style={{
-            flex: '0 0 100px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            margin: 0,
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: '#fff',
+            textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
           }}
         >
-          <img
-            src={mission.gifUrl}
-            alt="미션 동작"
-            style={{
-              width: '100%',
-              height: 'auto',
-              maxHeight: '100px',
-              objectFit: 'contain',
-              borderRadius: '6px',
-              border: '2px solid #e0e0e0',
-            }}
-          />
-        </div>
-
-        {/* 오른쪽: 미션 설명 */}
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}
-        >
-          {/* 제스처 설명 */}
-          <div>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-                color: '#667eea',
-                textTransform: 'uppercase',
-              }}
-            >
-              {t.aiHostGestureLabel}
-            </span>
-            <p
-              style={{
-                margin: '4px 0 0 0',
-                fontSize: '0.85rem',
-                color: '#333',
-                lineHeight: '1.4',
-              }}
-            >
-              {t[mission.gesture as keyof typeof t] as string}
-            </p>
-          </div>
-
-          {/* 말투 (선택적) */}
-          {mission.speechStyle && (
-            <div>
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  color: '#f59e0b',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {t.aiHostSpeechStyleLabel}
-              </span>
-              <p
-                style={{
-                  margin: '4px 0 0 0',
-                  fontSize: '0.85rem',
-                  color: '#333',
-                  lineHeight: '1.4',
-                }}
-              >
-                {t[mission.speechStyle as keyof typeof t] as string}
-              </p>
-            </div>
-          )}
-
-          {/* 행동 */}
-          <div>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-                color: '#10b981',
-                textTransform: 'uppercase',
-              }}
-            >
-              {t.aiHostActionLabel}
-            </span>
-            <p
-              style={{
-                margin: '4px 0 0 0',
-                fontSize: '0.85rem',
-                color: '#333',
-                lineHeight: '1.4',
-                fontWeight: '600',
-              }}
-            >
-              {t[mission.action as keyof typeof t] as string}
-            </p>
-          </div>
-        </div>
+          {getTitleText()}
+        </h2>
       </div>
+
+      {/* 큰 GIF 이미지 */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '400px',
+          marginBottom: '32px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <img
+          src={mission.gifUrl}
+          alt="미션 동작"
+          style={{
+            width: '100%',
+            height: 'auto',
+            maxHeight: '400px',
+            objectFit: 'contain',
+            borderRadius: '16px',
+            border: '4px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+          }}
+        />
+      </div>
+
+      {/* 메시지 - 내 미션일 때만 표시 */}
+      {isMyMission && (
+        <div
+          style={{
+            textAlign: 'center',
+            maxWidth: '500px',
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: '1.25rem',
+              fontWeight: 'bold',
+              color: '#fff',
+              lineHeight: '1.6',
+              textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            {t[mission.action as keyof typeof t] as string}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

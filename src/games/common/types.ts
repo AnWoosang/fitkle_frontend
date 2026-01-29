@@ -84,6 +84,7 @@ export interface GameBoardProps {
   currentPlayerId: string;
   onAction: (action: any) => Promise<void>;
   isMyTurn?: boolean;
+  lastEvent?: any; // 마지막 브로드캐스트 이벤트
 }
 
 /**
